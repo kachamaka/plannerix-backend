@@ -1,8 +1,7 @@
 .PHONY: build clean deploy
 
 build:
-	env GOOS=linux go build -ldflags="-s -w" -o bin/hello ./handlers/hello
-	env GOOS=linux go build -ldflags="-s -w" -o bin/world ./handlers/world
+	env GOOS=linux go build -ldflags="-s -w" -o bin/register ./handlers/register
 
 clean:
 	rm -rf ./bin
