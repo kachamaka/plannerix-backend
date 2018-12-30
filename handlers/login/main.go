@@ -4,15 +4,13 @@ import (
 	"context"
 	"log"
 
-	"github.com/kinghunter58/jwe"
-
-	"gitlab.com/zapochvam-ei-sq/my-go-service/models/database"
-
 	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"gitlab.com/zapochvam-ei-sq/my-go-service/models/profile"
+	"github.com/kinghunter58/jwe"
 
 	"github.com/aws/aws-lambda-go/lambda"
 	qs "gitlab.com/zapochvam-ei-sq/my-go-service/models/QS"
+	"gitlab.com/zapochvam-ei-sq/my-go-service/models/database"
+	"gitlab.com/zapochvam-ei-sq/my-go-service/models/profile"
 )
 
 var conn *dynamodb.DynamoDB
@@ -33,14 +31,19 @@ type Response struct {
 	Token   string `json:"token"`
 }
 
-func handler(ctx context.Context, body Request) (qs.Response, error) {
+func handler(ctx context.Context, req interface{}) (qs.Response, error) {
+	body := Request{}
+	err := qs.GetBody(req, &body)
+	if err != nil {
+		return qs.NewError("Internal Server Error", -1)
+	}
 	if err := body.validate(); err != nil {
 		return qs.NewError(err.Error(), 1)
 	}
 	database.SetConn(&conn)
 	p, err := profile.GetProfile(body.Username, conn)
 	if err != nil {
-		log.Println("Error with getting user from data base")
+		log.Println("Error with getting user from data base:", err)
 		return qs.NewError("Could not find user profile", 3)
 	}
 	if p.Username == "" {
@@ -52,12 +55,10 @@ func handler(ctx context.Context, body Request) (qs.Response, error) {
 
 	key, err := jwe.GetPrivateKeyFromEnv("RSAPRIVATEKEY")
 	if err != nil {
-		log.Println(err)
 		return qs.NewError("Internal Server Error", 6)
 	}
 	token, err := p.GetToken(&key.PublicKey)
 	if err != nil {
-		log.Println(err)
 		return qs.NewError("Internal Server Error", 7)
 	}
 	res := Response{

@@ -35,7 +35,12 @@ func (r Request) validate() error {
 	return nil
 }
 
-func handler(ctx context.Context, body Request) (qs.Response, error) {
+func handler(ctx context.Context, req interface{}) (qs.Response, error) {
+	body := Request{}
+	err := qs.GetBody(req, &body)
+	if err != nil {
+		return qs.NewError("Internal Server Error", -1)
+	}
 	if err := body.validate(); err != nil {
 		return qs.NewError(err.Error(), 1)
 	}

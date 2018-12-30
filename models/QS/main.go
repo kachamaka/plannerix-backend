@@ -2,10 +2,33 @@ package qs
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
+
+	"github.com/mitchellh/mapstructure"
 
 	"github.com/aws/aws-lambda-go/events"
 )
+
+var Unsupported = errors.New("Unsupported body structure")
+
+func GetBody(req interface{}, data interface{}) error {
+	switch v := req.(type) {
+	case Request:
+		err := v.ReadTo(data)
+		if err != nil {
+			return err
+		}
+	case map[string]interface{}:
+		err := mapstructure.Decode(v, data)
+		if err != nil {
+			return err
+		}
+	default:
+		return Unsupported
+	}
+	return nil
+}
 
 type Response events.APIGatewayProxyResponse
 
