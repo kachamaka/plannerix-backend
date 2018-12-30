@@ -33,13 +33,7 @@ type Response struct {
 	Token   string `json:"token"`
 }
 
-func handler(ctx context.Context, req qs.Request) (qs.Response, error) {
-	var body = Request{}
-	err := req.ReadTo(&body)
-	if err != nil {
-		log.Println("Error by decoding request to struct:", err)
-		return qs.NewError("Couldn't decode body from request", 0)
-	}
+func handler(ctx context.Context, body Request) (qs.Response, error) {
 	if err := body.validate(); err != nil {
 		return qs.NewError(err.Error(), 1)
 	}
@@ -57,7 +51,6 @@ func handler(ctx context.Context, req qs.Request) (qs.Response, error) {
 	}
 
 	key, err := jwe.GetPrivateKeyFromEnv("RSAPRIVATEKEY")
-	log.Println(key)
 	if err != nil {
 		log.Println(err)
 		return qs.NewError("Internal Server Error", 6)
@@ -71,7 +64,7 @@ func handler(ctx context.Context, req qs.Request) (qs.Response, error) {
 		Token:   token,
 		Success: true,
 	}
-	return qs.NewResponse(200, map[string]string{"Content-Type": "application/json"}, res)
+	return qs.NewResponse(200, res)
 }
 
 func main() {

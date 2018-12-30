@@ -24,7 +24,7 @@ func ReadBody(body interface{}) (events.APIGatewayProxyRequest, error) {
 	return req, nil
 }
 
-func InvokeHandler(handler interface{}, request events.APIGatewayProxyRequest) (string, error) {
+func InvokeHandler(handler interface{}, request interface{}) (string, error) {
 	os.Setenv("_LAMBDA_SERVER_PORT", "9000")
 	go lambda.Start(handler)
 	for {

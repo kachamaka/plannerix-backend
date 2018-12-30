@@ -33,6 +33,13 @@ functions:
       - http:
           path: register
           method: post
+  login:
+    handler: bin/login
+    memorySize: 1024
+    events:
+      - http:
+          path: login
+          method: post
 resources:
   - ${file(resources/dynamodb.yml)}
 

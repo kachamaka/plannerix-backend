@@ -8,10 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kinghunter58/jwe"
-
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/kinghunter58/jwe"
 	qs "gitlab.com/zapochvam-ei-sq/my-go-service/models/QS"
 	"gitlab.com/zapochvam-ei-sq/my-go-service/models/database"
 	"gitlab.com/zapochvam-ei-sq/my-go-service/models/profile"
@@ -36,13 +35,7 @@ func (r Request) validate() error {
 	return nil
 }
 
-func handler(ctx context.Context, req qs.Request) (qs.Response, error) {
-	var body = Request{}
-	err := req.ReadTo(&body)
-	if err != nil {
-		log.Println(err)
-		return qs.NewError("Couldn't decode body from request", 0)
-	}
+func handler(ctx context.Context, body Request) (qs.Response, error) {
 	if err := body.validate(); err != nil {
 		return qs.NewError(err.Error(), 1)
 	}
@@ -72,7 +65,7 @@ func handler(ctx context.Context, req qs.Request) (qs.Response, error) {
 		Success: true,
 		Token:   token,
 	}
-	return qs.NewResponse(200, map[string]string{"Content-Type": "application/json"}, res)
+	return qs.NewResponse(200, res)
 }
 func createID(username string) string {
 	h := fnv.New64a()

@@ -19,12 +19,7 @@ func TestHandler(t *testing.T) {
 		"username": "user",
 		"password": "secret",
 	}
-
-	req, err := lambdat.ReadBody(body)
-	if err != nil {
-		t.Error(err)
-	}
-	res, err := lambdat.InvokeHandler(handler, req)
+	res, err := lambdat.InvokeHandler(handler, body)
 	if err != nil {
 		t.Error(err)
 	}

@@ -86,6 +86,6 @@ func (p Profile) newPayload() Payload {
 //GetToken creates a jwe token from the profile data
 func (p Profile) GetToken(pk *rsa.PublicKey) (string, error) {
 	payl := p.newPayload()
-	fmt.Println(payl)
+	// fmt.Println(payl)
 	return jwe.GetEncryptedToken(payl, pk)
 }

@@ -9,16 +9,13 @@ import (
 
 type Response events.APIGatewayProxyResponse
 
-func NewResponse(status int, headers map[string]string, body interface{}) (Response, error) {
+func NewResponse(status int, body interface{}) (Response, error) {
 	j, err := json.MarshalIndent(body, "", "\t")
 	if err != nil {
 		return Response{}, err
 	}
-	if headers == nil {
-		headers = map[string]string{
-			"content-type": "application/json",
-		}
-	}
+	headers := map[string]string{"Content-Type": "application/json"}
+
 	return Response{
 		Body:            string(j),
 		Headers:         headers,

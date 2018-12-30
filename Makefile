@@ -2,6 +2,7 @@
 
 build:
 	env GOOS=linux go build -ldflags="-s -w" -o bin/register ./handlers/register
+	env GOOS=linux go build -ldflags="-s -w" -o bin/login ./handlers/login
 
 clean:
 	rm -rf ./bin
