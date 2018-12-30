@@ -34,6 +34,7 @@ type Response struct {
 func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	body := Request{}
 	err := qs.GetBody(req, &body)
+	// log.Println(req, body)
 	if err != nil {
 		return qs.NewError("Internal Server Error", -1)
 	}
@@ -42,6 +43,7 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	}
 	database.SetConn(&conn)
 	p, err := profile.GetProfile(body.Username, conn)
+	// log.Printf("Profile %+v:  %+v\n", p, body, req)
 	if err != nil {
 		log.Println("Error with getting user from data base:", err)
 		return qs.NewError("Could not find user profile", 3)

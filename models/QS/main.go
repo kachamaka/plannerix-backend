@@ -3,7 +3,9 @@ package qs
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
+	"reflect"
 
 	"github.com/mitchellh/mapstructure"
 
@@ -13,21 +15,35 @@ import (
 var Unsupported = errors.New("Unsupported body structure")
 
 func GetBody(req interface{}, data interface{}) error {
-	switch v := req.(type) {
-	case Request:
-		err := v.ReadTo(data)
-		if err != nil {
-			return err
-		}
-	case map[string]interface{}:
-		err := mapstructure.Decode(v, data)
-		if err != nil {
-			return err
-		}
-	default:
-		return Unsupported
+	r := Request{}
+	err := mapstructure.Decode(req, &r)
+	if err != nil {
+		fmt.Println(err)
+	}
+	if !reflect.DeepEqual(r, Request{}) {
+		err := r.ReadTo(data)
+		return err
+	}
+	err = mapstructure.Decode(req, data)
+	if err != nil {
+		return err
 	}
 	return nil
+}
+
+func equal(v interface{}, p interface{}) bool {
+	vt := reflect.TypeOf(v)
+	pt := reflect.TypeOf(p)
+	if reflect.ValueOf(v).Kind() == reflect.Ptr {
+		vt = vt.Elem()
+	}
+	if reflect.ValueOf(p).Kind() == reflect.Ptr {
+		pt = pt.Elem()
+	}
+	nv := reflect.New(vt)
+	np := reflect.New(pt)
+	fmt.Println(nv, np)
+	return true
 }
 
 type Response events.APIGatewayProxyResponse

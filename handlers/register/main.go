@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/hex"
+	"fmt"
 	"hash/fnv"
 	"log"
 	"strings"
@@ -38,7 +39,9 @@ func (r Request) validate() error {
 func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	body := Request{}
 	err := qs.GetBody(req, &body)
+	fmt.Println(body)
 	if err != nil {
+		log.Println(err)
 		return qs.NewError("Internal Server Error", -1)
 	}
 	if err := body.validate(); err != nil {
