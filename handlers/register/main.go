@@ -12,9 +12,9 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/kinghunter58/jwe"
-	qs "gitlab.com/zapochvam-ei-sq/my-go-service/models/QS"
-	"gitlab.com/zapochvam-ei-sq/my-go-service/models/database"
-	"gitlab.com/zapochvam-ei-sq/my-go-service/models/profile"
+	qs "gitlab.com/s-org-backend/models/QS"
+	"gitlab.com/s-org-backend/models/database"
+	"gitlab.com/s-org-backend/models/profile"
 	"golang.org/x/crypto/bcrypt"
 )
 

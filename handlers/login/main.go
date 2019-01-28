@@ -8,9 +8,9 @@ import (
 	"github.com/kinghunter58/jwe"
 
 	"github.com/aws/aws-lambda-go/lambda"
-	qs "gitlab.com/zapochvam-ei-sq/my-go-service/models/QS"
-	"gitlab.com/zapochvam-ei-sq/my-go-service/models/database"
-	"gitlab.com/zapochvam-ei-sq/my-go-service/models/profile"
+	qs "gitlab.com/s-org-backend/models/QS"
+	"gitlab.com/s-org-backend/models/database"
+	"gitlab.com/s-org-backend/models/profile"
 )
 
 var conn *dynamodb.DynamoDB
@@ -63,6 +63,7 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	if err != nil {
 		return qs.NewError("Internal Server Error", 7)
 	}
+	log.Println(token, "token")
 	res := Response{
 		Token:   token,
 		Success: true,

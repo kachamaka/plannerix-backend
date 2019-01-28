@@ -4,8 +4,13 @@ import (
 	"os"
 	"testing"
 
-	"gitlab.com/zapochvam-ei-sq/my-go-service/models/lambda-testing"
+	lambdat "gitlab.com/s-org-backend/models/lambda-testing"
 )
+
+func TestUser(t *testing.T) {
+	user := os.Getenv("USER")
+	t.Log(user)
+}
 
 func TestHandler(t *testing.T) {
 	//this line is for the token encryption/decription should be present when function is used to authentiacate

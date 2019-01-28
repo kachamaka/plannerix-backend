@@ -34,7 +34,7 @@ func SetConn(conn **dynamodb.DynamoDB) {
 		Region: aws.String("eu-central-1"),
 	}
 	user := os.Getenv("USER")
-	if user == "trayan" || user == "Lion" || user == "kachamaka-PC" {
+	if user == "trayan" || user == "Lion" || user == "kachamaka" {
 		config.Endpoint = aws.String("http://localhost:8000")
 	}
 	if *conn == nil {

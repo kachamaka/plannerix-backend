@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"gitlab.com/zapochvam-ei-sq/my-go-service/models/database"
+	"gitlab.com/s-org-backend/models/database"
 
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 
