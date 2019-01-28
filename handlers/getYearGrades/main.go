@@ -50,7 +50,7 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	jwe.ParseEncryptedToken(body.Token, key, &p)
 	log.Println(p.ID, "id")
 
-	g, err := grades.GetAllGrades(p.ID, conn)
+	g, err := grades.GetYearGrades(p.ID, conn)
 	log.Println(g, "all grades")
 
 	if err != nil {

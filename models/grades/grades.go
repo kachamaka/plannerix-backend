@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/jinzhu/now"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 )
 
 type SingleGrade struct {
@@ -64,20 +66,81 @@ func GetAllGrades(user_id string, conn *dynamodb.DynamoDB) ([]SingleGrade, error
 }
 
 func GetWeeklyGrades(user_id string, conn *dynamodb.DynamoDB) ([]SingleGrade, error) {
-	grades, err := GetAllGrades(user_id, conn)
+	mondayTime := now.BeginningOfWeek().UnixNano()
+
+	filt := expression.Name("timestamp").GreaterThan(expression.Value(mondayTime)).
+		And(expression.Name("user_id").Equal(expression.Value(user_id)))
+
+	proj := expression.NamesList(expression.Name("timestamp"), expression.Name("value"), expression.Name("subject"))
+
+	expr, err := expression.NewBuilder().WithFilter(filt).WithProjection(proj).Build()
+
+	getItemScanInput := &dynamodb.ScanInput{
+		TableName:                 aws.String("s-org-grades"),
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		FilterExpression:          expr.Filter(),
+		ProjectionExpression:      expr.Projection(),
+	}
+
+	output, err := conn.Scan(getItemScanInput)
 	if err != nil {
 		log.Println("line 68")
 		return []SingleGrade{}, nil
 	}
+
 	weeklyGrades := []SingleGrade{}
-	mondayTime := now.BeginningOfWeek().UnixNano()
-	for _, el := range grades {
-		if el.Timestamp >= mondayTime {
-			weeklyGrades = append(weeklyGrades, el)
-		}
+	err = dynamodbattribute.UnmarshalListOfMaps(output.Items, &weeklyGrades)
+	if err != nil {
+		log.Println("line 60")
+		return []SingleGrade{}, nil
 	}
 
 	return weeklyGrades, nil
+}
+
+func GetYearGrades(user_id string, conn *dynamodb.DynamoDB) ([]SingleGrade, error) {
+	t := time.Now()
+	var startDate int64
+	var endDate int64
+	if t.Month() >= 2 && t.Month() <= 8 {
+		startDate = time.Date(t.Year(), 2, 1, 0, 0, 0, 0, time.UTC).UnixNano()
+		endDate = time.Date(t.Year(), 8, 31, 23, 59, 59, 0, time.UTC).UnixNano()
+	} else if t.Month() == 1 {
+		startDate = time.Date(t.Year()-1, 9, 1, 0, 0, 0, 0, time.UTC).UnixNano()
+		endDate = time.Date(t.Year(), 1, 31, 23, 59, 59, 0, time.UTC).UnixNano()
+	} else {
+		startDate = time.Date(t.Year(), 9, 1, 0, 0, 0, 0, time.UTC).UnixNano()
+		endDate = time.Date(t.Year()+1, 1, 31, 23, 59, 59, 0, time.UTC).UnixNano()
+	}
+
+	filt := expression.Name("timestamp").Between(expression.Value(startDate), expression.Value(endDate)).
+		And(expression.Name("user_id").Equal(expression.Value(user_id)))
+
+	proj := expression.NamesList(expression.Name("timestamp"), expression.Name("value"), expression.Name("subject"))
+
+	expr, err := expression.NewBuilder().WithFilter(filt).WithProjection(proj).Build()
+
+	getItemScanInput := &dynamodb.ScanInput{
+		TableName:                 aws.String("s-org-grades"),
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		FilterExpression:          expr.Filter(),
+		ProjectionExpression:      expr.Projection(),
+	}
+
+	output, err := conn.Scan(getItemScanInput)
+	if err != nil {
+		log.Println("line 117", err)
+		return []SingleGrade{}, err
+	}
+	yearGrades := []SingleGrade{}
+	err = dynamodbattribute.UnmarshalListOfMaps(output.Items, &yearGrades)
+	if err != nil {
+		log.Println("line 123")
+		return []SingleGrade{}, nil
+	}
+	return yearGrades, nil
 }
 
 func DeleteGrade(user_id string, timestamp int64, conn *dynamodb.DynamoDB) error {
@@ -94,7 +157,7 @@ func DeleteGrade(user_id string, timestamp int64, conn *dynamodb.DynamoDB) error
 	}
 	_, err := conn.DeleteItem(deleteItemInput)
 	if err != nil {
-		log.Println("line 97", err)
+		log.Println("line 143", err)
 		return err
 	}
 	return nil

@@ -20,9 +20,9 @@ func TestHandler(t *testing.T) {
 	//345600000000000 - 4 days
 	// log.Printf("%T", now)
 	body := map[string]interface{}{
-		"token":   "eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkExMjhHQ00ifQ.ZfY4GfsKercuwR4v7ZSWlLCtSUTT_q5vFR76R-a96Sy-CR7ma_fioK_NH-p3c2jqwQycniX6CTaJf6IadNnFLlxL8CzVClwoo7jy79Gc_iA2WxWb9Xxp_ZhQU5FTzT8Q4353D-mcy4jWruIMFSdi5Md8Q84RT_TV24SD-hIHlY9s283XybKW4zJOUl23GpgSP9HNY80aiKF7tOswdUYFXws2EnmYCzDNvhev4IUsa0SBYgz-cAYTiXPoufCe_21FGiU-xiIhwnzHnyPAE-Cht1CYUjA0h3gzexbQxJBOQ2V0_BMLFgK6z0o55EWkadLPMqC4sVHzwr3jxfJ8R1STDg.zaH88d9lLHKiM2gG.7qM6Q-eK_V4WhiRYQvyjWK2suZG2N4S88A.9rKEhEHmhifnlUa3rDZI_w",
+		"token":   "eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkExMjhHQ00ifQ.UzmzZdHbNpFydxhP3kjp3-A1FQIId6bg7Gv2E6Pr8db_45QKPP9LR7KBZ8dGiEcp_Ag267Hj0G2aUNhubsggm_EugvW5gMCT1fh2GL527o0530rPNPnEXXANLVVH0gRxBrBuoC8lHfCzJF294gWXsxBLY-NQSSbHKenIEhQZd__FPPdB3JQbg0v1dD0hJBrxH3kbPKtZGFSyBhyBaWu1rNilO4d6Z74pSPNcBmiUzGTmlXhYnSKUBpQmgTc1hVCxSAKvaWAqYjNdaefunuNTph1b1HrCPyXoYgnPpAGUsHM5fAYL0yp777s1SRrIenszoxenS3hdBD9q_bwb3tJoag.mngZ_2puss4C_gjI.eb9SxCB_PW4GbyeAHp8icTClzX6eugx-1g.q_Oilp1yH3UsRk5g4KSnvg",
 		"subject": "Bg",
-		"value":   2,
+		"value":   99,
 		"time":    now,
 	}
 	req, err := lambdat.ReadBody(body)

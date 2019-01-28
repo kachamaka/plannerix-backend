@@ -26,6 +26,7 @@ type Request struct {
 	Timestamp int64  `json:"timestamp"`
 }
 
+//Response is the grade input request
 type Response struct {
 	Success bool   `json:"success"`
 	Message string `json:"message"`

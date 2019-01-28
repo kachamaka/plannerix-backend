@@ -19,6 +19,8 @@ func TestHandler(t *testing.T) {
 	body := map[string]interface{}{
 		"token": "eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkExMjhHQ00ifQ.ZfY4GfsKercuwR4v7ZSWlLCtSUTT_q5vFR76R-a96Sy-CR7ma_fioK_NH-p3c2jqwQycniX6CTaJf6IadNnFLlxL8CzVClwoo7jy79Gc_iA2WxWb9Xxp_ZhQU5FTzT8Q4353D-mcy4jWruIMFSdi5Md8Q84RT_TV24SD-hIHlY9s283XybKW4zJOUl23GpgSP9HNY80aiKF7tOswdUYFXws2EnmYCzDNvhev4IUsa0SBYgz-cAYTiXPoufCe_21FGiU-xiIhwnzHnyPAE-Cht1CYUjA0h3gzexbQxJBOQ2V0_BMLFgK6z0o55EWkadLPMqC4sVHzwr3jxfJ8R1STDg.zaH88d9lLHKiM2gG.7qM6Q-eK_V4WhiRYQvyjWK2suZG2N4S88A.9rKEhEHmhifnlUa3rDZI_w",
 	}
+	//user5 - eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkExMjhHQ00ifQ.ZfY4GfsKercuwR4v7ZSWlLCtSUTT_q5vFR76R-a96Sy-CR7ma_fioK_NH-p3c2jqwQycniX6CTaJf6IadNnFLlxL8CzVClwoo7jy79Gc_iA2WxWb9Xxp_ZhQU5FTzT8Q4353D-mcy4jWruIMFSdi5Md8Q84RT_TV24SD-hIHlY9s283XybKW4zJOUl23GpgSP9HNY80aiKF7tOswdUYFXws2EnmYCzDNvhev4IUsa0SBYgz-cAYTiXPoufCe_21FGiU-xiIhwnzHnyPAE-Cht1CYUjA0h3gzexbQxJBOQ2V0_BMLFgK6z0o55EWkadLPMqC4sVHzwr3jxfJ8R1STDg.zaH88d9lLHKiM2gG.7qM6Q-eK_V4WhiRYQvyjWK2suZG2N4S88A.9rKEhEHmhifnlUa3rDZI_w
+
 	req, err := lambdat.ReadBody(body)
 	if err != nil {
 		t.Error(err)
