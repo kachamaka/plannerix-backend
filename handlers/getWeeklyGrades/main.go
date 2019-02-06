@@ -24,9 +24,9 @@ type Request struct {
 }
 
 type Response struct {
-	Success      bool                 `json:"success"`
-	Message      string               `json:"message"`
-	WeeklyGrades []grades.SingleGrade `json:"weeklyGrades"`
+	Success      bool           `json:"success"`
+	Message      string         `json:"message"`
+	WeeklyGrades []grades.Grade `json:"weeklyGrades"`
 }
 
 func handler(ctx context.Context, req interface{}) (qs.Response, error) {

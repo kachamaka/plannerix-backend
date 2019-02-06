@@ -15,15 +15,18 @@ import (
 	qs "gitlab.com/s-org-backend/models/QS"
 	"gitlab.com/s-org-backend/models/database"
 	"gitlab.com/s-org-backend/models/profile"
+	"gitlab.com/s-org-backend/models/subjects"
 	"golang.org/x/crypto/bcrypt"
 )
 
 var conn *dynamodb.DynamoDB
 
 type Request struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-	Email    string `json:"email"`
+	Username string                 `json:"username"`
+	Password string                 `json:"password"`
+	Email    string                 `json:"email"`
+	Subjects []string               `json:"subjects"`
+	Schedule []subjects.ScheduleDay `json:"schedule"`
 }
 
 type Response struct {
@@ -61,6 +64,15 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 		log.Println("Error with writing user to database:", err)
 		return qs.NewError("Couldn't register user!", 3)
 	}
+
+	err = subjects.NewSchedule(body.Username, body.Schedule, conn)
+	//
+	if err != nil {
+		return qs.NewError("Error with schedule", 8)
+	}
+	log.Println(err, "ERROR")
+	return qs.Response{}, nil
+
 	key, err := jwe.GetPrivateKeyFromEnv("RSAPRIVATEKEY")
 	if err != nil {
 		return qs.NewError("Internal server error! User is registered succesfully!", 8)

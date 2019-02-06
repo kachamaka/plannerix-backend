@@ -15,7 +15,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 )
 
-type SingleGrade struct {
+type Grade struct {
 	Timestamp int64  `json:"timestamp"`
 	Value     int    `json:"value"`
 	Subject   string `json:"subject"`
@@ -41,7 +41,7 @@ func InputGrade(user_id string, timestamp int64, value int, subject string, conn
 	return nil
 }
 
-func GetAllGrades(user_id string, conn *dynamodb.DynamoDB) ([]SingleGrade, error) {
+func GetAllGrades(user_id string, conn *dynamodb.DynamoDB) ([]Grade, error) {
 	getItemInput := &dynamodb.QueryInput{
 		TableName:              aws.String("s-org-grades"),
 		KeyConditionExpression: aws.String("user_id = :user_id"),
@@ -54,18 +54,18 @@ func GetAllGrades(user_id string, conn *dynamodb.DynamoDB) ([]SingleGrade, error
 	output, err := conn.Query(getItemInput)
 	if err != nil {
 		log.Println("line 54", err)
-		return []SingleGrade{}, err
+		return []Grade{}, err
 	}
-	grades := []SingleGrade{}
+	grades := []Grade{}
 	err = dynamodbattribute.UnmarshalListOfMaps(output.Items, &grades)
 	if err != nil {
 		log.Println("line 60")
-		return []SingleGrade{}, nil
+		return []Grade{}, nil
 	}
 	return grades, nil
 }
 
-func GetWeeklyGrades(user_id string, conn *dynamodb.DynamoDB) ([]SingleGrade, error) {
+func GetWeeklyGrades(user_id string, conn *dynamodb.DynamoDB) ([]Grade, error) {
 	mondayTime := now.BeginningOfWeek().UnixNano()
 
 	filt := expression.Name("timestamp").GreaterThan(expression.Value(mondayTime)).
@@ -86,20 +86,20 @@ func GetWeeklyGrades(user_id string, conn *dynamodb.DynamoDB) ([]SingleGrade, er
 	output, err := conn.Scan(getItemScanInput)
 	if err != nil {
 		log.Println("line 68")
-		return []SingleGrade{}, nil
+		return []Grade{}, nil
 	}
 
-	weeklyGrades := []SingleGrade{}
+	weeklyGrades := []Grade{}
 	err = dynamodbattribute.UnmarshalListOfMaps(output.Items, &weeklyGrades)
 	if err != nil {
 		log.Println("line 60")
-		return []SingleGrade{}, nil
+		return []Grade{}, nil
 	}
 
 	return weeklyGrades, nil
 }
 
-func GetYearGrades(user_id string, conn *dynamodb.DynamoDB) ([]SingleGrade, error) {
+func GetYearGrades(user_id string, conn *dynamodb.DynamoDB) ([]Grade, error) {
 	t := time.Now()
 	var startDate int64
 	var endDate int64
@@ -132,13 +132,13 @@ func GetYearGrades(user_id string, conn *dynamodb.DynamoDB) ([]SingleGrade, erro
 	output, err := conn.Scan(getItemScanInput)
 	if err != nil {
 		log.Println("line 117", err)
-		return []SingleGrade{}, err
+		return []Grade{}, err
 	}
-	yearGrades := []SingleGrade{}
+	yearGrades := []Grade{}
 	err = dynamodbattribute.UnmarshalListOfMaps(output.Items, &yearGrades)
 	if err != nil {
 		log.Println("line 123")
-		return []SingleGrade{}, nil
+		return []Grade{}, nil
 	}
 	return yearGrades, nil
 }
