@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"gitlab.com/s-org-backend/models/grades"
+	"gitlab.com/s-org-backend/models/events"
 	"gitlab.com/s-org-backend/models/profile"
 
 	"github.com/kinghunter58/jwe"
@@ -22,12 +22,11 @@ var conn *dynamodb.DynamoDB
 
 //Request is the grade input request
 type Request struct {
-	Token   string `json:"token"`
-	Subject string `json:"subject"`
-	Value   int    `json:"value"`
-	Time    int64  `json:"time"`
+	Token     string `json:"token"`
+	Timestamp int64  `json:"timestamp"`
 }
 
+//Response is the grade input request
 type Response struct {
 	Success bool   `json:"success"`
 	Message string `json:"message"`
@@ -50,15 +49,17 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 
 	p := profile.Payload{}
 	jwe.ParseEncryptedToken(body.Token, key, &p)
-	err = grades.InputGrade(p.Username, body.Time, body.Value, body.Subject, conn)
+	log.Println(p.Username, "username")
+
+	err = events.DeleteEvent(p.Username, body.Timestamp, conn)
 
 	if err != nil {
-		log.Println("Error with inserting grade in the database:", err)
-		return qs.NewError("Could not insert grade", 3)
+		log.Println("Error with deleting an event from database:", err)
+		return qs.NewError("Could not delete event", 3)
 	}
 	res := Response{
 		Success: true,
-		Message: "grade inserted successfully",
+		Message: "event deleted successfully",
 	}
 	return qs.NewResponse(200, res)
 }

@@ -49,9 +49,9 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 
 	p := profile.Payload{}
 	jwe.ParseEncryptedToken(body.Token, key, &p)
-	log.Println(p.ID, "id")
+	log.Println(p.Username, "username")
 
-	err = grades.DeleteGrade(p.ID, body.Timestamp, conn)
+	err = grades.DeleteGrade(p.Username, body.Timestamp, conn)
 
 	if err != nil {
 		log.Println("Error with deleting a grade from database:", err)

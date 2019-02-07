@@ -66,11 +66,15 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	}
 
 	err = subjects.NewSchedule(body.Username, body.Schedule, conn)
-	//
 	if err != nil {
 		return qs.NewError("Error with schedule", 8)
 	}
-	log.Println(err, "ERROR")
+
+	err = subjects.NewSubjects(body.Username, body.Subjects, conn)
+	if err != nil {
+		return qs.NewError("Error with schedule", 8)
+	}
+
 	return qs.Response{}, nil
 
 	key, err := jwe.GetPrivateKeyFromEnv("RSAPRIVATEKEY")

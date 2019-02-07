@@ -4,8 +4,8 @@ import (
 	"context"
 	"log"
 
-	"gitlab.com/s-org-backend/models/grades"
 	"gitlab.com/s-org-backend/models/profile"
+	"gitlab.com/s-org-backend/models/subjects"
 
 	"github.com/kinghunter58/jwe"
 
@@ -18,19 +18,15 @@ import (
 
 var conn *dynamodb.DynamoDB
 
-//todo grade struct
-
 //Request is the grade input request
 type Request struct {
-	Token   string `json:"token"`
-	Subject string `json:"subject"`
-	Value   int    `json:"value"`
-	Time    int64  `json:"time"`
+	Token string `json:"token"`
 }
 
 type Response struct {
-	Success bool   `json:"success"`
-	Message string `json:"message"`
+	Success    bool              `json:"success"`
+	Message    string            `json:"message"`
+	NextPeriod []subjects.Period `json:"nextPeriod"`
 }
 
 func handler(ctx context.Context, req interface{}) (qs.Response, error) {
@@ -50,15 +46,20 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 
 	p := profile.Payload{}
 	jwe.ParseEncryptedToken(body.Token, key, &p)
-	err = grades.InputGrade(p.Username, body.Time, body.Value, body.Subject, conn)
+	log.Println(p.Username, "username")
+
+	nextPeriod, err := subjects.GetNextPeriod(p.Username, conn)
+	log.Println(nextPeriod, "next per")
+	return qs.Response{}, nil
 
 	if err != nil {
-		log.Println("Error with inserting grade in the database:", err)
-		return qs.NewError("Could not insert grade", 3)
+		log.Println("Error with fetching grades from database:", err)
+		return qs.NewError("Could not get grades", 3)
 	}
 	res := Response{
 		Success: true,
-		Message: "grade inserted successfully",
+		Message: "grades fetched successfully",
+		// NextPeriod: nextPeriod,
 	}
 	return qs.NewResponse(200, res)
 }

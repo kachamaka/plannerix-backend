@@ -21,8 +21,8 @@ type Grade struct {
 	Subject   string `json:"subject"`
 }
 
-func InputGrade(user_id string, timestamp int64, value int, subject string, conn *dynamodb.DynamoDB) error {
-	j := fmt.Sprintf(`{"user_id": "%v","timestamp": %v, "value":%v, "subject":"%v"}`, user_id, timestamp, value, subject)
+func InputGrade(username string, timestamp int64, value int, subject string, conn *dynamodb.DynamoDB) error {
+	j := fmt.Sprintf(`{"username": "%v","timestamp": %v, "value":%v, "subject":"%v"}`, username, timestamp, value, subject)
 	body, err := database.MarshalJSONToDynamoMap(j)
 	if err != nil {
 		log.Println("line 26")
@@ -30,7 +30,7 @@ func InputGrade(user_id string, timestamp int64, value int, subject string, conn
 	}
 	input := &dynamodb.PutItemInput{
 		TableName:           aws.String("s-org-grades"),
-		ConditionExpression: aws.String("attribute_not_exists(user_id)"),
+		ConditionExpression: aws.String("attribute_not_exists(username)"),
 		Item:                body,
 	}
 	_, err = conn.PutItem(input)
@@ -41,13 +41,13 @@ func InputGrade(user_id string, timestamp int64, value int, subject string, conn
 	return nil
 }
 
-func GetAllGrades(user_id string, conn *dynamodb.DynamoDB) ([]Grade, error) {
+func GetAllGrades(username string, conn *dynamodb.DynamoDB) ([]Grade, error) {
 	getItemInput := &dynamodb.QueryInput{
 		TableName:              aws.String("s-org-grades"),
-		KeyConditionExpression: aws.String("user_id = :user_id"),
+		KeyConditionExpression: aws.String("username = :username"),
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
-			":user_id": {
-				S: aws.String(user_id),
+			":username": {
+				S: aws.String(username),
 			},
 		},
 	}
@@ -65,11 +65,11 @@ func GetAllGrades(user_id string, conn *dynamodb.DynamoDB) ([]Grade, error) {
 	return grades, nil
 }
 
-func GetWeeklyGrades(user_id string, conn *dynamodb.DynamoDB) ([]Grade, error) {
+func GetWeeklyGrades(username string, conn *dynamodb.DynamoDB) ([]Grade, error) {
 	mondayTime := now.BeginningOfWeek().UnixNano()
 
 	filt := expression.Name("timestamp").GreaterThan(expression.Value(mondayTime)).
-		And(expression.Name("user_id").Equal(expression.Value(user_id)))
+		And(expression.Name("username").Equal(expression.Value(username)))
 
 	proj := expression.NamesList(expression.Name("timestamp"), expression.Name("value"), expression.Name("subject"))
 
@@ -85,21 +85,21 @@ func GetWeeklyGrades(user_id string, conn *dynamodb.DynamoDB) ([]Grade, error) {
 
 	output, err := conn.Scan(getItemScanInput)
 	if err != nil {
-		log.Println("line 68")
+		log.Println("line 88")
 		return []Grade{}, nil
 	}
 
 	weeklyGrades := []Grade{}
 	err = dynamodbattribute.UnmarshalListOfMaps(output.Items, &weeklyGrades)
 	if err != nil {
-		log.Println("line 60")
+		log.Println("line 95")
 		return []Grade{}, nil
 	}
 
 	return weeklyGrades, nil
 }
 
-func GetYearGrades(user_id string, conn *dynamodb.DynamoDB) ([]Grade, error) {
+func GetYearGrades(username string, conn *dynamodb.DynamoDB) ([]Grade, error) {
 	t := time.Now()
 	var startDate int64
 	var endDate int64
@@ -115,7 +115,7 @@ func GetYearGrades(user_id string, conn *dynamodb.DynamoDB) ([]Grade, error) {
 	}
 
 	filt := expression.Name("timestamp").Between(expression.Value(startDate), expression.Value(endDate)).
-		And(expression.Name("user_id").Equal(expression.Value(user_id)))
+		And(expression.Name("username").Equal(expression.Value(username)))
 
 	proj := expression.NamesList(expression.Name("timestamp"), expression.Name("value"), expression.Name("subject"))
 
@@ -143,12 +143,12 @@ func GetYearGrades(user_id string, conn *dynamodb.DynamoDB) ([]Grade, error) {
 	return yearGrades, nil
 }
 
-func DeleteGrade(user_id string, timestamp int64, conn *dynamodb.DynamoDB) error {
+func DeleteGrade(username string, timestamp int64, conn *dynamodb.DynamoDB) error {
 	deleteItemInput := &dynamodb.DeleteItemInput{
 		TableName: aws.String("s-org-grades"),
 		Key: map[string]*dynamodb.AttributeValue{
-			"user_id": {
-				S: aws.String(user_id),
+			"username": {
+				S: aws.String(username),
 			},
 			"timestamp": {
 				N: aws.String(strconv.FormatInt(timestamp, 10)),

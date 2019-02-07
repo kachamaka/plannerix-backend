@@ -48,9 +48,9 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 
 	p := profile.Payload{}
 	jwe.ParseEncryptedToken(body.Token, key, &p)
-	log.Println(p.ID, "id")
+	log.Println(p.Username, "username")
 
-	g, err := grades.GetYearGrades(p.ID, conn)
+	g, err := grades.GetYearGrades(p.Username, conn)
 	log.Println(g, "all grades")
 
 	if err != nil {

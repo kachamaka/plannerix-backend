@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"gitlab.com/s-org-backend/models/grades"
+	"gitlab.com/s-org-backend/models/events"
 	"gitlab.com/s-org-backend/models/profile"
 
 	"github.com/kinghunter58/jwe"
@@ -22,15 +22,13 @@ var conn *dynamodb.DynamoDB
 
 //Request is the grade input request
 type Request struct {
-	Token   string `json:"token"`
-	Subject string `json:"subject"`
-	Value   int    `json:"value"`
-	Time    int64  `json:"time"`
+	Token string `json:"token"`
 }
 
 type Response struct {
-	Success bool   `json:"success"`
-	Message string `json:"message"`
+	Success bool           `json:"success"`
+	Message string         `json:"message"`
+	Events  []events.Event `json:"events"`
 }
 
 func handler(ctx context.Context, req interface{}) (qs.Response, error) {
@@ -50,15 +48,19 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 
 	p := profile.Payload{}
 	jwe.ParseEncryptedToken(body.Token, key, &p)
-	err = grades.InputGrade(p.Username, body.Time, body.Value, body.Subject, conn)
+	log.Println(p.Username, "username")
+
+	e, err := events.GetAllEvents(p.Username, conn)
+	log.Println(e, "all events")
 
 	if err != nil {
-		log.Println("Error with inserting grade in the database:", err)
-		return qs.NewError("Could not insert grade", 3)
+		log.Println("Error with fetching events from database:", err)
+		return qs.NewError("Could not get events", 3)
 	}
 	res := Response{
 		Success: true,
-		Message: "grade inserted successfully",
+		Message: "events fetched successfully",
+		Events:  e,
 	}
 	return qs.NewResponse(200, res)
 }

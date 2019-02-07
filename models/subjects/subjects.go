@@ -1,9 +1,14 @@
 package subjects
 
 import (
+	"log"
+	"strconv"
+	"strings"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 )
 
 type Period struct {
@@ -15,15 +20,21 @@ type Period struct {
 type ScheduleDay struct {
 	Periods []Period `json:"periods"`
 }
-type Schedule struct {
+
+type ScheduleData struct {
 	Username string   `json:"username"`
 	Day      int      `json:"day"`
 	Periods  []Period `json:"periods"`
 }
 
+type SubjectData struct {
+	Username string   `json:"username"`
+	Subjects []string `json:"subjects"`
+}
+
 func NewSchedule(un string, schedule []ScheduleDay, conn *dynamodb.DynamoDB) error {
 	for i := 0; i < len(schedule); i++ {
-		periodDay := Schedule{
+		periodDay := ScheduleData{
 			Day:      i + 1,
 			Username: un,
 			Periods:  schedule[i].Periods,
@@ -39,4 +50,142 @@ func NewSchedule(un string, schedule []ScheduleDay, conn *dynamodb.DynamoDB) err
 		}
 	}
 	return nil
+}
+
+func NewSubjects(un string, subjects []string, conn *dynamodb.DynamoDB) error {
+	userSubjects := SubjectData{
+		Username: un,
+		Subjects: subjects,
+	}
+	userSubjectsMap, err := dynamodbattribute.MarshalMap(userSubjects)
+	input := &dynamodb.PutItemInput{
+		TableName: aws.String("s-org-subjects"),
+		Item:      userSubjectsMap,
+	}
+	_, err = conn.PutItem(input)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetSchedule(username string, conn *dynamodb.DynamoDB) ([]ScheduleData, error) {
+	getItemInput := &dynamodb.QueryInput{
+		TableName:              aws.String("s-org-schedules"),
+		KeyConditionExpression: aws.String("username = :username"),
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":username": {
+				S: aws.String(username),
+			},
+		},
+	}
+	output, err := conn.Query(getItemInput)
+	if err != nil {
+		log.Println("line 82", err)
+		return []ScheduleData{}, err
+	}
+	schedule := []ScheduleData{}
+	err = dynamodbattribute.UnmarshalListOfMaps(output.Items, &schedule)
+	if err != nil {
+		log.Println("line 88")
+		return []ScheduleData{}, nil
+	}
+	return schedule, nil
+}
+
+func UpdateSchedule(username string, schedule []ScheduleData, conn *dynamodb.DynamoDB) error {
+	for i := 0; i < len(schedule); i++ {
+		periodsMarshal, err := dynamodbattribute.MarshalList(schedule[i].Periods)
+		updateItemInput := &dynamodb.UpdateItemInput{
+			TableName: aws.String("s-org-schedules"),
+			Key: map[string]*dynamodb.AttributeValue{
+				"username": {
+					S: aws.String(username),
+				},
+				"day": {
+					N: aws.String(strconv.Itoa(i + 1)),
+				},
+			},
+			UpdateExpression: aws.String("set periods = :periods"),
+			ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+				":periods": {
+					L: periodsMarshal,
+				},
+			},
+			ReturnValues: aws.String(dynamodb.ReturnValueUpdatedNew),
+		}
+
+		_, err = conn.UpdateItem(updateItemInput)
+		if err != nil {
+			log.Println("line 118", err)
+			return err
+		}
+	}
+	return nil
+}
+
+func GetNextPeriod(username string, conn *dynamodb.DynamoDB) (Period, error) {
+	// t := time.Now()
+	// nowHour := t.Hour()
+	// nowMinutes := t.Minute()
+	// nowDay := int(t.Weekday())
+	//^^^^ correct
+
+	//down - test
+	nowHour := 7
+	nowMinutes := 30
+	nowDay := 4
+	//end test
+
+	filt := expression.Name("day").Equal(expression.Value(nowDay)).
+		And(expression.Name("username").Equal(expression.Value(username)))
+	proj := expression.NamesList(expression.Name("periods"))
+
+	expr, err := expression.NewBuilder().WithFilter(filt).WithProjection(proj).Build()
+
+	getItemScanInput := &dynamodb.ScanInput{
+		TableName:                 aws.String("s-org-schedules"),
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		FilterExpression:          expr.Filter(),
+		ProjectionExpression:      expr.Projection(),
+	}
+
+	output, err := conn.Scan(getItemScanInput)
+	if err != nil {
+		log.Println("line 152", err)
+		return Period{}, nil
+	}
+
+	todaySchedule := []ScheduleData{}
+	err = dynamodbattribute.UnmarshalListOfMaps(output.Items, &todaySchedule)
+	if err != nil {
+		log.Println("line 159", err)
+		return Period{}, nil
+	}
+	todayPeriods := todaySchedule[0].Periods
+	// log.Println(todayPeriods, "periods")
+	nextPeriod := Period{}
+	for i, period := range todayPeriods {
+		periodTime := strings.Split(period.StartTime, ":")
+		periodStartHour, _ := strconv.Atoi(periodTime[0])
+		periodStartMinute, _ := strconv.Atoi(periodTime[1])
+		log.Println(periodStartHour, periodStartMinute)
+		if nowHour == periodStartHour {
+			if nowMinutes < periodStartMinute {
+				nextPeriod = period
+				break
+			}
+		} else if nowHour+1 == periodStartHour {
+			nextPeriod = period
+			break
+		} else if nowHour < periodStartHour {
+			if i == 0 {
+				nextPeriod = period
+				break
+			}
+		}
+	}
+
+	return nextPeriod, nil
 }

@@ -76,11 +76,11 @@ func (p Profile) CheckPassword(password string) bool {
 
 //Payload is the data that gets encrypted in the token
 type Payload struct {
-	ID string `json:"id"`
+	Username string `json:"username"`
 }
 
 func (p Profile) newPayload() Payload {
-	return Payload{ID: p.ID}
+	return Payload{Username: p.Username}
 }
 
 //GetToken creates a jwe token from the profile data

@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 
-	"gitlab.com/s-org-backend/models/grades"
 	"gitlab.com/s-org-backend/models/profile"
 
 	"github.com/kinghunter58/jwe"
@@ -14,6 +13,7 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	qs "gitlab.com/s-org-backend/models/QS"
 	"gitlab.com/s-org-backend/models/database"
+	"gitlab.com/s-org-backend/models/events"
 )
 
 var conn *dynamodb.DynamoDB
@@ -22,10 +22,11 @@ var conn *dynamodb.DynamoDB
 
 //Request is the grade input request
 type Request struct {
-	Token   string `json:"token"`
-	Subject string `json:"subject"`
-	Value   int    `json:"value"`
-	Time    int64  `json:"time"`
+	Token       string `json:"token"`
+	Subject     string `json:"subject"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Timestamp   int64  `json:"timestamp"`
 }
 
 type Response struct {
@@ -50,15 +51,16 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 
 	p := profile.Payload{}
 	jwe.ParseEncryptedToken(body.Token, key, &p)
-	err = grades.InputGrade(p.Username, body.Time, body.Value, body.Subject, conn)
+
+	err = events.CreateEvent(p.Username, body.Subject, body.Title, body.Description, body.Timestamp, conn)
 
 	if err != nil {
-		log.Println("Error with inserting grade in the database:", err)
-		return qs.NewError("Could not insert grade", 3)
+		log.Println("Error with creating an event in the database:", err)
+		return qs.NewError("Could not create event", 3)
 	}
 	res := Response{
 		Success: true,
-		Message: "grade inserted successfully",
+		Message: "event created successfully",
 	}
 	return qs.NewResponse(200, res)
 }
