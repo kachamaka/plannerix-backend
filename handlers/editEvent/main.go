@@ -60,11 +60,9 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 		return qs.NewError("Could not edit event", 3)
 	}
 
-	return qs.Response{}, nil
-
 	res := Response{
 		Success: true,
-		Message: "schedule updated successfully",
+		Message: "event updated successfully",
 	}
 	return qs.NewResponse(200, res)
 }
