@@ -14,7 +14,6 @@ import (
 )
 
 type Event struct {
-	Username    string `json:"username"`
 	Subject     string `json:"subject"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
@@ -25,7 +24,7 @@ func CreateEvent(username string, subject string, title string, description stri
 	j := fmt.Sprintf(`{"username": "%v","timestamp": %v, "subject":"%v", "title":"%v", "description":"%v"}`, username, timestamp, subject, title, description)
 	body, err := database.MarshalJSONToDynamoMap(j)
 	if err != nil {
-		log.Println("line 26")
+		log.Println("line 27 error with marshal json to map")
 		return err
 	}
 	input := &dynamodb.PutItemInput{
@@ -34,7 +33,7 @@ func CreateEvent(username string, subject string, title string, description stri
 	}
 	_, err = conn.PutItem(input)
 	if err != nil {
-		log.Println(err, "34")
+		log.Println("line 36 error with put item")
 		return err
 	}
 	return nil
@@ -48,6 +47,11 @@ func GetAllEvents(username string, conn *dynamodb.DynamoDB) ([]Event, error) {
 
 	expr, err := expression.NewBuilder().WithFilter(filt).WithProjection(proj).Build()
 
+	if err != nil {
+		log.Println("line 51 error with building expression")
+		return nil, err
+	}
+
 	getItemScanInput := &dynamodb.ScanInput{
 		TableName:                 aws.String("s-org-events"),
 		ExpressionAttributeNames:  expr.Names(),
@@ -58,14 +62,14 @@ func GetAllEvents(username string, conn *dynamodb.DynamoDB) ([]Event, error) {
 
 	output, err := conn.Scan(getItemScanInput)
 	if err != nil {
-		log.Println("line 88")
+		log.Println("line 65 error with output")
 		return []Event{}, nil
 	}
 
 	events := []Event{}
 	err = dynamodbattribute.UnmarshalListOfMaps(output.Items, &events)
 	if err != nil {
-		log.Println("line 95")
+		log.Println("line 72 error with unmarshal")
 		return []Event{}, nil
 	}
 
@@ -100,7 +104,7 @@ func EditEvent(username string, subject string, title string, description string
 
 	_, err := conn.UpdateItem(updateItemInput)
 	if err != nil {
-		log.Println("line 118", err)
+		log.Println("line 107 error with update item")
 		return err
 	}
 	return nil
@@ -120,7 +124,7 @@ func DeleteEvent(username string, timestamp int64, conn *dynamodb.DynamoDB) erro
 	}
 	_, err := conn.DeleteItem(deleteItemInput)
 	if err != nil {
-		log.Println("line 80", err)
+		log.Println("line 127 error with delete item", err)
 		return err
 	}
 	return nil

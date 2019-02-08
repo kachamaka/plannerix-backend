@@ -69,6 +69,30 @@ func NewSubjects(un string, subjects []string, conn *dynamodb.DynamoDB) error {
 	return nil
 }
 
+func GetSubjects(username string, conn *dynamodb.DynamoDB) ([]string, error) {
+	getItemInput := &dynamodb.QueryInput{
+		TableName:              aws.String("s-org-subjects"),
+		KeyConditionExpression: aws.String("username = :username"),
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":username": {
+				S: aws.String(username),
+			},
+		},
+	}
+	output, err := conn.Query(getItemInput)
+	if err != nil {
+		log.Println("line 84", err)
+		return []string{}, err
+	}
+	subjectsData := []SubjectData{}
+	err = dynamodbattribute.UnmarshalListOfMaps(output.Items, &subjectsData)
+	if err != nil {
+		log.Println("line 90")
+		return []string{}, nil
+	}
+	return subjectsData[0].Subjects, nil
+}
+
 func GetSchedule(username string, conn *dynamodb.DynamoDB) ([]ScheduleData, error) {
 	getItemInput := &dynamodb.QueryInput{
 		TableName:              aws.String("s-org-schedules"),

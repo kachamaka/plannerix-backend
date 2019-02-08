@@ -3,6 +3,8 @@ package profile
 import (
 	"crypto/rsa"
 	"fmt"
+	"log"
+	"regexp"
 
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 
@@ -28,6 +30,7 @@ func NewProfile(un, email, password, id string, conn *dynamodb.DynamoDB) (Profil
 	j := fmt.Sprintf(`{"username": "%v", "email": "%v","password": "%v", "id":"%v"}`, un, email, password, id)
 	body, err := database.MarshalJSONToDynamoMap(j)
 	if err != nil {
+		log.Println("line 31 error with marshal json to map")
 		return Profile{}, err
 	}
 	input := &dynamodb.PutItemInput{
@@ -37,6 +40,7 @@ func NewProfile(un, email, password, id string, conn *dynamodb.DynamoDB) (Profil
 	}
 	_, err = conn.PutItem(input)
 	if err != nil {
+		log.Println("line 42 error with put item")
 		return Profile{}, err
 	}
 	return Profile{Username: un, Password: password, Email: email, ID: id}, nil
@@ -54,11 +58,13 @@ func GetProfile(username string, conn *dynamodb.DynamoDB) (Profile, error) {
 	}
 	output, err := conn.GetItem(getItemInput)
 	if err != nil {
+		log.Println("line 60 error with output")
 		return Profile{}, err
 	}
 	p := Profile{}
 	err = dynamodbattribute.UnmarshalMap(output.Item, &p)
 	if err != nil {
+		log.Println("line 66 error with unmarshal")
 		return Profile{}, nil
 	}
 	return p, nil
@@ -89,3 +95,6 @@ func (p Profile) GetToken(pk *rsa.PublicKey) (string, error) {
 	// fmt.Println(payl)
 	return jwe.GetEncryptedToken(payl, pk)
 }
+
+var UsernameReg = regexp.MustCompile("^\\w.{3,16}$")
+var PasswordReg = regexp.MustCompile("^[a-z0-9]{8,35}$")

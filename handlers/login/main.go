@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log"
 
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -22,7 +23,13 @@ type Request struct {
 }
 
 func (r Request) validate() error {
-	//validate request body
+	if !profile.UsernameReg.Match([]byte(r.Username)) {
+		return errors.New("Invalid Username")
+	}
+	// if !profile.PasswordReg.Match([]byte(r.Password)) {
+	// 	return errors.New("Invalid Password")
+	// }
+	//^^^ correct
 	return nil
 }
 
@@ -64,6 +71,7 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 		return qs.NewError("Internal Server Error", 7)
 	}
 	log.Println(token, "token")
+	log.Println("???")
 	res := Response{
 		Token:   token,
 		Success: true,

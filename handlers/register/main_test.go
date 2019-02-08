@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"os"
 	"testing"
 
@@ -47,12 +48,17 @@ func TestMain(t *testing.T) {
 		},
 	}
 	body := map[string]interface{}{
-		"username": "user1",
-		"password": "secret",
-		"email":    "asdasda",
+		"username": "user3",
+		"password": "secret12",
+		"email":    "asdasda@abv.bg",
 		"subjects": subjects,
 		"schedule": schedule,
 	}
+	// log.Println(reflect.TypeOf(body["username"]).String() == "string")
+	// err := emailx.Validate("test@abv.bg")
+	err := sendEmail("martilevski1@abv.bg")
+	log.Println(err, "err")
+	return
 	res, err := lambdat.InvokeHandler(handler, body)
 	if err != nil {
 		t.Error(err)

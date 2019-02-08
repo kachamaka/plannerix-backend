@@ -3,14 +3,16 @@ package main
 import (
 	"context"
 	"encoding/hex"
-	"fmt"
+	"errors"
 	"hash/fnv"
 	"log"
+	"net/smtp"
 	"strings"
 	"time"
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/goware/emailx"
 	"github.com/kinghunter58/jwe"
 	qs "gitlab.com/s-org-backend/models/QS"
 	"gitlab.com/s-org-backend/models/database"
@@ -36,13 +38,57 @@ type Response struct {
 
 func (r Request) validate() error {
 	//Validate request and give some feedback
+	if !profile.UsernameReg.Match([]byte(r.Username)) {
+		return errors.New("Invalid Username")
+	}
+	if !profile.PasswordReg.Match([]byte(r.Password)) {
+		return errors.New("Invalid Password")
+	}
+	if len(r.Subjects) == 0 {
+		return errors.New("Please select subjects")
+	}
+	if len(r.Schedule) != 5 {
+		return errors.New("Please input schedule for every day")
+	}
+	err := emailx.Validate(r.Email)
+	if err != nil {
+		return errors.New("Invalid email")
+	}
+	err = sendEmail(r.Email)
+	if err != nil {
+		return errors.New("Email does not exist")
+	}
+
+	return nil
+}
+
+func sendEmail(email string) error {
+	from := "s.org.noreply@gmail.com"
+	pass := "kowalskiAnal"
+	to := email
+
+	msg := "From: " + from + "\n" +
+		"To: " + to + "\n" +
+		"Subject: Account activation\n\n" +
+		"Account created successfully \n kowalski anal"
+
+	err := smtp.SendMail("smtp.gmail.com:587",
+		smtp.PlainAuth("", from, pass, "smtp.gmail.com"),
+		from, []string{to}, []byte(msg))
+
+	if err != nil {
+		log.Printf("smtp error: %s", err)
+		return err
+	}
+
+	log.Print("sent, visit http://foobarbazz.mailinator.com")
 	return nil
 }
 
 func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	body := Request{}
 	err := qs.GetBody(req, &body)
-	fmt.Println(body)
+	// fmt.Println(body)
 	if err != nil {
 		log.Println(err)
 		return qs.NewError("Internal Server Error", -1)

@@ -25,17 +25,16 @@ func InputGrade(username string, timestamp int64, value int, subject string, con
 	j := fmt.Sprintf(`{"username": "%v","timestamp": %v, "value":%v, "subject":"%v"}`, username, timestamp, value, subject)
 	body, err := database.MarshalJSONToDynamoMap(j)
 	if err != nil {
-		log.Println("line 26")
+		log.Println("line 28 error with marshal json to map")
 		return err
 	}
 	input := &dynamodb.PutItemInput{
-		TableName:           aws.String("s-org-grades"),
-		ConditionExpression: aws.String("attribute_not_exists(username)"),
-		Item:                body,
+		TableName: aws.String("s-org-grades"),
+		Item:      body,
 	}
 	_, err = conn.PutItem(input)
 	if err != nil {
-		log.Println("line 36")
+		log.Println("line 37 error with put item")
 		return err
 	}
 	return nil
@@ -53,13 +52,13 @@ func GetAllGrades(username string, conn *dynamodb.DynamoDB) ([]Grade, error) {
 	}
 	output, err := conn.Query(getItemInput)
 	if err != nil {
-		log.Println("line 54", err)
+		log.Println("line 55 error with output")
 		return []Grade{}, err
 	}
 	grades := []Grade{}
 	err = dynamodbattribute.UnmarshalListOfMaps(output.Items, &grades)
 	if err != nil {
-		log.Println("line 60")
+		log.Println("line 61 error with output")
 		return []Grade{}, nil
 	}
 	return grades, nil
@@ -75,6 +74,11 @@ func GetWeeklyGrades(username string, conn *dynamodb.DynamoDB) ([]Grade, error) 
 
 	expr, err := expression.NewBuilder().WithFilter(filt).WithProjection(proj).Build()
 
+	if err != nil {
+		log.Println("line 78 couldn't build expression")
+		return nil, err
+	}
+
 	getItemScanInput := &dynamodb.ScanInput{
 		TableName:                 aws.String("s-org-grades"),
 		ExpressionAttributeNames:  expr.Names(),
@@ -85,14 +89,14 @@ func GetWeeklyGrades(username string, conn *dynamodb.DynamoDB) ([]Grade, error) 
 
 	output, err := conn.Scan(getItemScanInput)
 	if err != nil {
-		log.Println("line 88")
+		log.Println("line 92 error with output")
 		return []Grade{}, nil
 	}
 
 	weeklyGrades := []Grade{}
 	err = dynamodbattribute.UnmarshalListOfMaps(output.Items, &weeklyGrades)
 	if err != nil {
-		log.Println("line 95")
+		log.Println("line 99 error with unmarshal")
 		return []Grade{}, nil
 	}
 
@@ -121,6 +125,11 @@ func GetYearGrades(username string, conn *dynamodb.DynamoDB) ([]Grade, error) {
 
 	expr, err := expression.NewBuilder().WithFilter(filt).WithProjection(proj).Build()
 
+	if err != nil {
+		log.Println("line 128 couldn't build expression")
+		return nil, err
+	}
+
 	getItemScanInput := &dynamodb.ScanInput{
 		TableName:                 aws.String("s-org-grades"),
 		ExpressionAttributeNames:  expr.Names(),
@@ -131,13 +140,13 @@ func GetYearGrades(username string, conn *dynamodb.DynamoDB) ([]Grade, error) {
 
 	output, err := conn.Scan(getItemScanInput)
 	if err != nil {
-		log.Println("line 117", err)
+		log.Println("line 143 error with output")
 		return []Grade{}, err
 	}
 	yearGrades := []Grade{}
 	err = dynamodbattribute.UnmarshalListOfMaps(output.Items, &yearGrades)
 	if err != nil {
-		log.Println("line 123")
+		log.Println("line 149 error with unmarshal")
 		return []Grade{}, nil
 	}
 	return yearGrades, nil
@@ -157,7 +166,7 @@ func DeleteGrade(username string, timestamp int64, conn *dynamodb.DynamoDB) erro
 	}
 	_, err := conn.DeleteItem(deleteItemInput)
 	if err != nil {
-		log.Println("line 143", err)
+		log.Println("line 169 error with unmarshal")
 		return err
 	}
 	return nil
