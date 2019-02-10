@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"gitlab.com/s-org-backend/models/errors"
 	"gitlab.com/s-org-backend/models/profile"
 	"gitlab.com/s-org-backend/models/subjects"
 
@@ -36,7 +37,7 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	err := qs.GetBody(req, &body)
 
 	if err != nil {
-		return qs.NewError("Internal Server Error", -1)
+		return qs.NewError(errors.LambdaError.Error(), -1)
 	}
 
 	database.SetConn(&conn)
@@ -51,10 +52,11 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	log.Println(p.Username, "username")
 
 	err = subjects.UpdateSchedule(p.Username, body.Schedule, conn)
-
-	if err != nil {
-		log.Println("Error with updating table from database:", err)
-		return qs.NewError("Could not update table", 3)
+	switch err {
+	case errors.MarshalJsonToMapError:
+		return qs.NewError(err.Error(), 201)
+	case errors.UpdateItemError:
+		return qs.NewError(err.Error(), 308)
 	}
 
 	res := Response{

@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	"log"
 
+	"gitlab.com/s-org-backend/models/errors"
 	"gitlab.com/s-org-backend/models/profile"
 
 	"github.com/kinghunter58/jwe"
@@ -39,14 +39,14 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	err := qs.GetBody(req, &body)
 
 	if err != nil {
-		return qs.NewError("Internal Server Error", -1)
+		return qs.NewError(errors.LambdaError.Error(), -1)
 	}
 
 	database.SetConn(&conn)
 	key, err := jwe.GetPrivateKeyFromEnv("RSAPRIVATEKEY")
 
 	if err != nil {
-		return qs.NewError("Internal Server Error", 6)
+		return qs.NewError(errors.KeyError.Error(), 109)
 	}
 
 	p := profile.Payload{}
@@ -54,10 +54,14 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 
 	err = events.CreateEvent(p.Username, body.Subject, body.Title, body.Description, body.Timestamp, conn)
 
-	if err != nil {
-		log.Println("Error with creating an event in the database:", err)
-		return qs.NewError("Could not create event", 3)
+	switch err {
+	case errors.MarshalJsonToMapError:
+		return qs.NewError(err.Error(), 201)
+	case errors.PutItemError:
+		return qs.NewError(err.Error(), 304)
+	default:
 	}
+
 	res := Response{
 		Success: true,
 		Message: "event created successfully",

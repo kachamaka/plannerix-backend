@@ -2,11 +2,11 @@ package main
 
 import (
 	"context"
-	"log"
 
 	"gitlab.com/s-org-backend/models/errors"
+	"gitlab.com/s-org-backend/models/events"
+
 	"gitlab.com/s-org-backend/models/profile"
-	"gitlab.com/s-org-backend/models/subjects"
 
 	"github.com/kinghunter58/jwe"
 
@@ -19,17 +19,15 @@ import (
 
 var conn *dynamodb.DynamoDB
 
-//todo grade struct
-
 //Request is the grade input request
 type Request struct {
 	Token string `json:"token"`
 }
 
 type Response struct {
-	Success  bool     `json:"success"`
-	Message  string   `json:"message"`
-	Subjects []string `json:"subjects"`
+	Success      bool           `json:"success"`
+	Message      string         `json:"message"`
+	WeeklyEvents []events.Event `json:"weeklyEvents"`
 }
 
 func handler(ctx context.Context, req interface{}) (qs.Response, error) {
@@ -49,12 +47,14 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 
 	p := profile.Payload{}
 	jwe.ParseEncryptedToken(body.Token, key, &p)
-	log.Println(p.Username, "username")
+	// log.Println(p.Username, "username")
 
-	subjects, err := subjects.GetSubjects(p.Username, conn)
-	log.Println(subjects, "all subjects")
+	weeklyevents, err := events.GetWeeklyEvents(p.Username, conn)
+	// log.Println(weeklyevents, "weekly events")
 
 	switch err {
+	case errors.ExpressionBuilderError:
+		return qs.NewError(err.Error(), 206)
 	case errors.OutputError:
 		return qs.NewError(err.Error(), 205)
 	case errors.UnmarshalListOfMapsError:
@@ -63,9 +63,9 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	}
 
 	res := Response{
-		Success:  true,
-		Message:  "subjects fetched successfully",
-		Subjects: subjects,
+		Success:      true,
+		Message:      "events fetched successfully",
+		WeeklyEvents: weeklyevents,
 	}
 	return qs.NewResponse(200, res)
 }

@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"log"
 
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -11,6 +10,7 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	qs "gitlab.com/s-org-backend/models/QS"
 	"gitlab.com/s-org-backend/models/database"
+	"gitlab.com/s-org-backend/models/errors"
 	"gitlab.com/s-org-backend/models/profile"
 )
 
@@ -24,7 +24,7 @@ type Request struct {
 
 func (r Request) validate() error {
 	if !profile.UsernameReg.Match([]byte(r.Username)) {
-		return errors.New("Invalid Username")
+		return errors.Invalid("Username")
 	}
 	// if !profile.PasswordReg.Match([]byte(r.Password)) {
 	// 	return errors.New("Invalid Password")
@@ -43,32 +43,35 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	err := qs.GetBody(req, &body)
 	// log.Println(req, body)
 	if err != nil {
-		return qs.NewError("Internal Server Error", -1)
+		return qs.NewError(errors.LambdaError.Error(), -1)
 	}
 	if err := body.validate(); err != nil {
-		return qs.NewError(err.Error(), 1)
+		return qs.NewError(err.Error(), 100)
 	}
 	database.SetConn(&conn)
 	p, err := profile.GetProfile(body.Username, conn)
 	// log.Printf("Profile %+v:  %+v\n", p, body, req)
-	if err != nil {
-		log.Println("Error with getting user from data base:", err)
-		return qs.NewError("Could not find user profile", 3)
+	switch err {
+	case errors.OutputError:
+		return qs.NewError(err.Error(), 205)
+	case errors.UnmarshalMapError:
+		return qs.NewError(err.Error(), 203)
+	default:
 	}
 	if p.Username == "" {
-		return qs.NewError("Could not find user", 4)
+		return qs.NewError(errors.NotFound("User").Error(), 404)
 	}
 	if ok := p.CheckPassword(body.Password); !ok {
-		return qs.NewError("Password not correct", 5)
+		return qs.NewError("Password not correct", 102)
 	}
 
 	key, err := jwe.GetPrivateKeyFromEnv("RSAPRIVATEKEY")
 	if err != nil {
-		return qs.NewError("Internal Server Error", 6)
+		return qs.NewError(errors.KeyError.Error(), 109)
 	}
 	token, err := p.GetToken(&key.PublicKey)
 	if err != nil {
-		return qs.NewError("Internal Server Error", 7)
+		return qs.NewError(errors.TokenError.Error(), 110)
 	}
 	log.Println(token, "token")
 	log.Println("???")

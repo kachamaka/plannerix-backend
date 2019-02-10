@@ -3,12 +3,13 @@ package main
 import (
 	"context"
 	"encoding/hex"
-	"errors"
 	"hash/fnv"
 	"log"
 	"net/smtp"
 	"strings"
 	"time"
+
+	"gitlab.com/s-org-backend/models/errors"
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -36,30 +37,30 @@ type Response struct {
 	Token   string `json:"token"`
 }
 
-func (r Request) validate() error {
+func (r Request) validate() (error, int) {
 	//Validate request and give some feedback
 	if !profile.UsernameReg.Match([]byte(r.Username)) {
-		return errors.New("Invalid Username")
+		return errors.Invalid("Username"), 101
 	}
 	if !profile.PasswordReg.Match([]byte(r.Password)) {
-		return errors.New("Invalid Password")
+		return errors.Invalid("Password"), 102
 	}
 	if len(r.Subjects) == 0 {
-		return errors.New("Please select subjects")
+		return errors.Invalid("Subjects"), 103
 	}
 	if len(r.Schedule) != 5 {
-		return errors.New("Please input schedule for every day")
+		return errors.Invalid("Schedule"), 104
 	}
 	err := emailx.Validate(r.Email)
 	if err != nil {
-		return errors.New("Invalid email")
+		return errors.Invalid("Email"), 105
 	}
 	err = sendEmail(r.Email)
 	if err != nil {
-		return errors.New("Email does not exist")
+		return errors.DoesNotExist("email"), 106
 	}
 
-	return nil
+	return nil, 42
 }
 
 func sendEmail(email string) error {
@@ -91,45 +92,54 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	// fmt.Println(body)
 	if err != nil {
 		log.Println(err)
-		return qs.NewError("Internal Server Error", -1)
+		return qs.NewError(errors.LambdaError.Error(), -1)
 	}
-	if err := body.validate(); err != nil {
-		return qs.NewError(err.Error(), 1)
+	if err, code := body.validate(); err != nil {
+		return qs.NewError(err.Error(), code)
 	}
 	hashed, err := bcrypt.GenerateFromPassword([]byte(body.Password), 12)
 	if err != nil {
 		log.Println("Error with hashing password:", err)
-		return qs.NewError("Couldn't register!", 2)
+		return qs.NewError(errors.ErrorWith("hashing password").Error(), 107)
 	}
 	database.SetConn(&conn)
 	id := createID(body.Username)
 	p, err := profile.NewProfile(body.Username, body.Email, string(hashed), id, conn)
 	if err != nil && strings.Contains(err.Error(), dynamodb.ErrCodeConditionalCheckFailedException) {
-		return qs.NewError("Username taken!", 3)
-	} else if err != nil {
-		log.Println("Error with writing user to database:", err)
-		return qs.NewError("Couldn't register user!", 3)
+		return qs.NewError("Username taken!", 108)
+	} else if err == errors.MarshalJsonToMapError {
+		log.Println("Error with marshaling json to map", err)
+		return qs.NewError(err.Error(), 201)
+	} else if err == errors.PutItemError {
+		return qs.NewError(err.Error(), 300)
 	}
 
 	err = subjects.NewSchedule(body.Username, body.Schedule, conn)
-	if err != nil {
-		return qs.NewError("Error with schedule", 8)
+
+	switch err {
+	case errors.MarshalMapError:
+		return qs.NewError(err.Error(), 200)
+	case errors.PutItemError:
+		return qs.NewError(err.Error(), 301)
+	default:
 	}
 
 	err = subjects.NewSubjects(body.Username, body.Subjects, conn)
-	if err != nil {
-		return qs.NewError("Error with schedule", 8)
+	switch err {
+	case errors.MarshalMapError:
+		return qs.NewError(err.Error(), 200)
+	case errors.PutItemError:
+		return qs.NewError(err.Error(), 303)
+	default:
 	}
-
-	return qs.Response{}, nil
 
 	key, err := jwe.GetPrivateKeyFromEnv("RSAPRIVATEKEY")
 	if err != nil {
-		return qs.NewError("Internal server error! User is registered succesfully!", 8)
+		return qs.NewError("Internal server error! User is registered succesfully!", 109)
 	}
 	token, err := p.GetToken(&key.PublicKey)
 	if err != nil {
-		return qs.NewError("Internal server error! User is registered succesfuly!", 9)
+		return qs.NewError("Internal server error! User is registered succesfuly!", 110)
 	}
 	res := Response{
 		Success: true,

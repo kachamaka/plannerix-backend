@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"gitlab.com/s-org-backend/models/errors"
 	"gitlab.com/s-org-backend/models/events"
 	"gitlab.com/s-org-backend/models/profile"
 
@@ -39,14 +40,14 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	err := qs.GetBody(req, &body)
 
 	if err != nil {
-		return qs.NewError("Internal Server Error", -1)
+		return qs.NewError(errors.LambdaError.Error(), -1)
 	}
 
 	database.SetConn(&conn)
 	key, err := jwe.GetPrivateKeyFromEnv("RSAPRIVATEKEY")
 
 	if err != nil {
-		return qs.NewError("Internal Server Error", 6)
+		return qs.NewError(errors.KeyError.Error(), 109)
 	}
 
 	p := profile.Payload{}
@@ -55,9 +56,10 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 
 	err = events.EditEvent(p.Username, body.Subject, body.Title, body.Description, body.Timestamp, conn)
 
-	if err != nil {
-		log.Println("Error with editing event from database:", err)
-		return qs.NewError("Could not edit event", 3)
+	switch err {
+	case errors.UpdateItemError:
+		return qs.NewError(err.Error(), 307)
+	default:
 	}
 
 	res := Response{

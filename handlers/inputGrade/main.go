@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	"log"
 
+	"gitlab.com/s-org-backend/models/errors"
 	"gitlab.com/s-org-backend/models/grades"
 	"gitlab.com/s-org-backend/models/profile"
 
@@ -33,29 +33,44 @@ type Response struct {
 	Message string `json:"message"`
 }
 
+func (r Request) validate() error {
+	if r.Value < 2 || r.Value > 6 {
+		return errors.Invalid("grade value")
+	}
+	return nil
+}
+
 func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	body := Request{}
 	err := qs.GetBody(req, &body)
 
 	if err != nil {
-		return qs.NewError("Internal Server Error", -1)
+		return qs.NewError(errors.LambdaError.Error(), -1)
+	}
+
+	if err := body.validate(); err != nil {
+		return qs.NewError(err.Error(), 100)
 	}
 
 	database.SetConn(&conn)
 	key, err := jwe.GetPrivateKeyFromEnv("RSAPRIVATEKEY")
 
 	if err != nil {
-		return qs.NewError("Internal Server Error", 6)
+		return qs.NewError(errors.KeyError.Error(), 109)
 	}
 
 	p := profile.Payload{}
 	jwe.ParseEncryptedToken(body.Token, key, &p)
 	err = grades.InputGrade(p.Username, body.Time, body.Value, body.Subject, conn)
 
-	if err != nil {
-		log.Println("Error with inserting grade in the database:", err)
-		return qs.NewError("Could not insert grade", 3)
+	switch err {
+	case errors.MarshalJsonToMapError:
+		return qs.NewError(err.Error(), 201)
+	case errors.PutItemError:
+		return qs.NewError(err.Error(), 302)
+	default:
 	}
+
 	res := Response{
 		Success: true,
 		Message: "grade inserted successfully",

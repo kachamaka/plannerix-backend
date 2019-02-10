@@ -18,12 +18,35 @@ Makefile has some script for making development easier.
 
 |Code|Message|
 |----|-------|
-|1|Invalid body|
-|2|Bcrypt error|
-|3|DynamoDBError| <!--- Not sure but meybe sub errors can be 30,31 , 32, 33 .... --->
-|4|Could not find user|
-|5|Password incorect|
-|6|Error by getting key|
-|7|Error by encrypting token|
-|8|Error by getting key but previous action succesfull|
-|9|Error by encrypting token but previous action successfull|
+|100|Invalid Body|
+|101|Invalid Username|
+|102|Invalid Pass| <!--- Not sure but meybe sub errors can be 30,31 , 32, 33 .... --->
+|103|Invalid Subjects|
+|104|Invalid Schedule|
+|105|Invalid Email|
+|106|Email does not exist|
+|107|Hash Error|
+|108|Username taken|
+|200|MarshalMapError|
+|201|MarshalJSONToMap|
+|202|MarshalListError|
+|203|UnmarshalMapError|
+|204|UnmarshalListOfMapsError|
+|205|OutputError|
+|206|ExpressionBuilderError|
+|300|PutItemError - Users|
+|301|PutItemError - Schedules|
+|302|PutItemError - Grades|
+|303|PutItemError - Subjects|
+|304|PutItemError - Events|
+|305|DeleteItemError - Grades|
+|306|DeleteItemError - Events|
+|307|UpdateItemError - Events|
+|308|UpdateItemError - Schedules|
+|400|Invalid|
+|401|DoesNotExist|
+|402|ErrorWith|
+|403|Internal Server Error|
+|404|NotFound|
+
+|42|NO ERRORS|

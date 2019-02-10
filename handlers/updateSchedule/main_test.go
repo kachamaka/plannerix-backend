@@ -29,7 +29,7 @@ func TestHandler(t *testing.T) {
 	schedule := [...]ScheduleDay{
 		ScheduleDay{
 			Periods: []Period{
-				Period{StartTime: "07:30", EndTime: "8:10", Subject: "FK"},
+				Period{StartTime: "7:30", EndTime: "8:10", Subject: "FK"},
 				Period{StartTime: "8:20", EndTime: "9:00", Subject: "FK"},
 				Period{StartTime: "9:10", EndTime: "9:50", Subject: "FK"},
 				Period{StartTime: "10:10", EndTime: "10:50", Subject: "FK"},
@@ -37,7 +37,7 @@ func TestHandler(t *testing.T) {
 		},
 		ScheduleDay{
 			Periods: []Period{
-				Period{StartTime: "07:30", EndTime: "8:10", Subject: "FK"},
+				Period{StartTime: "7:30", EndTime: "8:10", Subject: "FK"},
 				Period{StartTime: "8:20", EndTime: "9:00", Subject: "FK"},
 				Period{StartTime: "9:10", EndTime: "9:50", Subject: "FK"},
 				Period{StartTime: "10:10", EndTime: "10:50", Subject: "FK"},

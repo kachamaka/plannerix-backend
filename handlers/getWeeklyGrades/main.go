@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"gitlab.com/s-org-backend/models/errors"
 	"gitlab.com/s-org-backend/models/grades"
 	"gitlab.com/s-org-backend/models/profile"
 
@@ -34,14 +35,14 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	err := qs.GetBody(req, &body)
 
 	if err != nil {
-		return qs.NewError("Internal Server Error", -1)
+		return qs.NewError(errors.LambdaError.Error(), -1)
 	}
 
 	database.SetConn(&conn)
 	key, err := jwe.GetPrivateKeyFromEnv("RSAPRIVATEKEY")
 
 	if err != nil {
-		return qs.NewError("Internal Server Error", 6)
+		return qs.NewError(errors.KeyError.Error(), 109)
 	}
 
 	p := profile.Payload{}
@@ -51,10 +52,16 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	weeklyGrades, err := grades.GetWeeklyGrades(p.Username, conn)
 	log.Println(weeklyGrades, "weekly grades")
 
-	if err != nil {
-		log.Println("Error with fetching grades from database:", err)
-		return qs.NewError("Could not get grades", 3)
+	switch err {
+	case errors.ExpressionBuilderError:
+		return qs.NewError(err.Error(), 206)
+	case errors.OutputError:
+		return qs.NewError(err.Error(), 205)
+	case errors.UnmarshalListOfMapsError:
+		return qs.NewError(err.Error(), 204)
+	default:
 	}
+
 	res := Response{
 		Success:      true,
 		Message:      "grades fetched successfully",

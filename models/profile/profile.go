@@ -6,6 +6,8 @@ import (
 	"log"
 	"regexp"
 
+	"gitlab.com/s-org-backend/models/errors"
+
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -31,7 +33,7 @@ func NewProfile(un, email, password, id string, conn *dynamodb.DynamoDB) (Profil
 	body, err := database.MarshalJSONToDynamoMap(j)
 	if err != nil {
 		log.Println("line 31 error with marshal json to map")
-		return Profile{}, err
+		return Profile{}, errors.MarshalJsonToMapError
 	}
 	input := &dynamodb.PutItemInput{
 		TableName:           aws.String("s-org-users"),
@@ -59,13 +61,13 @@ func GetProfile(username string, conn *dynamodb.DynamoDB) (Profile, error) {
 	output, err := conn.GetItem(getItemInput)
 	if err != nil {
 		log.Println("line 60 error with output")
-		return Profile{}, err
+		return Profile{}, errors.OutputError
 	}
 	p := Profile{}
 	err = dynamodbattribute.UnmarshalMap(output.Item, &p)
 	if err != nil {
 		log.Println("line 66 error with unmarshal")
-		return Profile{}, nil
+		return Profile{}, errors.UnmarshalMapError
 	}
 	return p, nil
 }

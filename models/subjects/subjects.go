@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"strings"
 
+	"gitlab.com/s-org-backend/models/errors"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
@@ -40,13 +42,17 @@ func NewSchedule(un string, schedule []ScheduleDay, conn *dynamodb.DynamoDB) err
 			Periods:  schedule[i].Periods,
 		}
 		periodDayMap, err := dynamodbattribute.MarshalMap(periodDay)
+		if err != nil {
+			return errors.MarshalMapError
+		}
 		input := &dynamodb.PutItemInput{
 			TableName: aws.String("s-org-schedules"),
 			Item:      periodDayMap,
 		}
 		_, err = conn.PutItem(input)
 		if err != nil {
-			return err
+			log.Println(err)
+			return errors.PutItemError
 		}
 	}
 	return nil
@@ -58,13 +64,16 @@ func NewSubjects(un string, subjects []string, conn *dynamodb.DynamoDB) error {
 		Subjects: subjects,
 	}
 	userSubjectsMap, err := dynamodbattribute.MarshalMap(userSubjects)
+	if err != nil {
+		return errors.MarshalMapError
+	}
 	input := &dynamodb.PutItemInput{
 		TableName: aws.String("s-org-subjects"),
 		Item:      userSubjectsMap,
 	}
 	_, err = conn.PutItem(input)
 	if err != nil {
-		return err
+		return errors.PutItemError
 	}
 	return nil
 }
@@ -82,13 +91,13 @@ func GetSubjects(username string, conn *dynamodb.DynamoDB) ([]string, error) {
 	output, err := conn.Query(getItemInput)
 	if err != nil {
 		log.Println("line 84", err)
-		return []string{}, err
+		return nil, errors.OutputError
 	}
 	subjectsData := []SubjectData{}
 	err = dynamodbattribute.UnmarshalListOfMaps(output.Items, &subjectsData)
 	if err != nil {
 		log.Println("line 90")
-		return []string{}, nil
+		return nil, errors.UnmarshalListOfMapsError
 	}
 	return subjectsData[0].Subjects, nil
 }
@@ -106,13 +115,13 @@ func GetSchedule(username string, conn *dynamodb.DynamoDB) ([]ScheduleData, erro
 	output, err := conn.Query(getItemInput)
 	if err != nil {
 		log.Println("line 82", err)
-		return []ScheduleData{}, err
+		return nil, errors.OutputError
 	}
 	schedule := []ScheduleData{}
 	err = dynamodbattribute.UnmarshalListOfMaps(output.Items, &schedule)
 	if err != nil {
 		log.Println("line 88")
-		return []ScheduleData{}, nil
+		return nil, errors.UnmarshalListOfMapsError
 	}
 	return schedule, nil
 }
@@ -120,6 +129,10 @@ func GetSchedule(username string, conn *dynamodb.DynamoDB) ([]ScheduleData, erro
 func UpdateSchedule(username string, schedule []ScheduleData, conn *dynamodb.DynamoDB) error {
 	for i := 0; i < len(schedule); i++ {
 		periodsMarshal, err := dynamodbattribute.MarshalList(schedule[i].Periods)
+		if err != nil {
+			log.Println("line 124 err with marshal list", err)
+			return errors.MarshalListError
+		}
 		updateItemInput := &dynamodb.UpdateItemInput{
 			TableName: aws.String("s-org-schedules"),
 			Key: map[string]*dynamodb.AttributeValue{
@@ -141,8 +154,8 @@ func UpdateSchedule(username string, schedule []ScheduleData, conn *dynamodb.Dyn
 
 		_, err = conn.UpdateItem(updateItemInput)
 		if err != nil {
-			log.Println("line 118", err)
-			return err
+			log.Println("line 148 err with update item", err)
+			return errors.UpdateItemError
 		}
 	}
 	return nil
@@ -167,6 +180,10 @@ func GetNextPeriod(username string, conn *dynamodb.DynamoDB) (Period, error) {
 
 	expr, err := expression.NewBuilder().WithFilter(filt).WithProjection(proj).Build()
 
+	if err != nil {
+		return Period{}, errors.ExpressionBuilderError
+	}
+
 	getItemScanInput := &dynamodb.ScanInput{
 		TableName:                 aws.String("s-org-schedules"),
 		ExpressionAttributeNames:  expr.Names(),
@@ -178,14 +195,14 @@ func GetNextPeriod(username string, conn *dynamodb.DynamoDB) (Period, error) {
 	output, err := conn.Scan(getItemScanInput)
 	if err != nil {
 		log.Println("line 152", err)
-		return Period{}, nil
+		return Period{}, errors.OutputError
 	}
 
 	todaySchedule := []ScheduleData{}
 	err = dynamodbattribute.UnmarshalListOfMaps(output.Items, &todaySchedule)
 	if err != nil {
 		log.Println("line 159", err)
-		return Period{}, nil
+		return Period{}, errors.UnmarshalListOfMapsError
 	}
 	todayPeriods := todaySchedule[0].Periods
 	// log.Println(todayPeriods, "periods")

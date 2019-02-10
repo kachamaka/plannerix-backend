@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/jinzhu/now"
 	"gitlab.com/s-org-backend/models/database"
+	"gitlab.com/s-org-backend/models/errors"
 
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
@@ -26,7 +27,7 @@ func InputGrade(username string, timestamp int64, value int, subject string, con
 	body, err := database.MarshalJSONToDynamoMap(j)
 	if err != nil {
 		log.Println("line 28 error with marshal json to map")
-		return err
+		return errors.MarshalJsonToMapError
 	}
 	input := &dynamodb.PutItemInput{
 		TableName: aws.String("s-org-grades"),
@@ -35,7 +36,7 @@ func InputGrade(username string, timestamp int64, value int, subject string, con
 	_, err = conn.PutItem(input)
 	if err != nil {
 		log.Println("line 37 error with put item")
-		return err
+		return errors.PutItemError
 	}
 	return nil
 }
@@ -53,13 +54,13 @@ func GetAllGrades(username string, conn *dynamodb.DynamoDB) ([]Grade, error) {
 	output, err := conn.Query(getItemInput)
 	if err != nil {
 		log.Println("line 55 error with output")
-		return []Grade{}, err
+		return nil, errors.OutputError
 	}
 	grades := []Grade{}
 	err = dynamodbattribute.UnmarshalListOfMaps(output.Items, &grades)
 	if err != nil {
 		log.Println("line 61 error with output")
-		return []Grade{}, nil
+		return nil, errors.UnmarshalListOfMapsError
 	}
 	return grades, nil
 }
@@ -76,7 +77,7 @@ func GetWeeklyGrades(username string, conn *dynamodb.DynamoDB) ([]Grade, error) 
 
 	if err != nil {
 		log.Println("line 78 couldn't build expression")
-		return nil, err
+		return nil, errors.ExpressionBuilderError
 	}
 
 	getItemScanInput := &dynamodb.ScanInput{
@@ -90,14 +91,14 @@ func GetWeeklyGrades(username string, conn *dynamodb.DynamoDB) ([]Grade, error) 
 	output, err := conn.Scan(getItemScanInput)
 	if err != nil {
 		log.Println("line 92 error with output")
-		return []Grade{}, nil
+		return nil, errors.OutputError
 	}
 
 	weeklyGrades := []Grade{}
 	err = dynamodbattribute.UnmarshalListOfMaps(output.Items, &weeklyGrades)
 	if err != nil {
 		log.Println("line 99 error with unmarshal")
-		return []Grade{}, nil
+		return nil, errors.UnmarshalListOfMapsError
 	}
 
 	return weeklyGrades, nil
@@ -127,7 +128,7 @@ func GetYearGrades(username string, conn *dynamodb.DynamoDB) ([]Grade, error) {
 
 	if err != nil {
 		log.Println("line 128 couldn't build expression")
-		return nil, err
+		return nil, errors.ExpressionBuilderError
 	}
 
 	getItemScanInput := &dynamodb.ScanInput{
@@ -141,13 +142,13 @@ func GetYearGrades(username string, conn *dynamodb.DynamoDB) ([]Grade, error) {
 	output, err := conn.Scan(getItemScanInput)
 	if err != nil {
 		log.Println("line 143 error with output")
-		return []Grade{}, err
+		return nil, errors.OutputError
 	}
 	yearGrades := []Grade{}
 	err = dynamodbattribute.UnmarshalListOfMaps(output.Items, &yearGrades)
 	if err != nil {
 		log.Println("line 149 error with unmarshal")
-		return []Grade{}, nil
+		return nil, errors.UnmarshalListOfMapsError
 	}
 	return yearGrades, nil
 }
@@ -167,7 +168,7 @@ func DeleteGrade(username string, timestamp int64, conn *dynamodb.DynamoDB) erro
 	_, err := conn.DeleteItem(deleteItemInput)
 	if err != nil {
 		log.Println("line 169 error with unmarshal")
-		return err
+		return errors.DeleteItemError
 	}
 	return nil
 }
