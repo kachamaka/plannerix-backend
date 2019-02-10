@@ -27,12 +27,12 @@ Makefile has some script for making development easier.
 |106|Email does not exist|206|ExpressionBuilderError|306|DeleteItemError - Events|---|---|
 |107|Hash Error|---|---|307|UpdateItemError - Events|---|---|
 |108|Username taken|---|---|308|UpdateItemError - Schedules|---|---|
-
+<!-- 
 |Code|Message|
 |----|-------|
 |100|Invalid Body|
 |101|Invalid Username|
-|102|Invalid Pass| <!--- Not sure but meybe sub errors can be 30,31 , 32, 33 .... --->
+|102|Invalid Pass|
 |103|Invalid Subjects|
 |104|Invalid Schedule|
 |105|Invalid Email|
@@ -60,4 +60,4 @@ Makefile has some script for making development easier.
 |402|ErrorWith|
 |403|Internal Server Error|
 |404|NotFound|
-|42|NO ERRORS|
+|42|NO ERRORS| -->
