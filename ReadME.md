@@ -18,15 +18,15 @@ Makefile has some script for making development easier.
 
 |   |   |   |   |   |   |   |   |
 |---|---|---|---|---|---|---|---|
-|100|Invalid Body|200|MarshalMapError|300|PutItemError - Users||400|Invalid|
-|101|Invalid Username|201|MarshalJSONToMap|301|PutItemError - Schedules||401|DoesNotExist|
-|102|Invalid Pass|202|MarshalListError|302|PutItemError - Grades||402|ErrorWith|
-|103|Invalid Subjects|203|UnmarshalMapError|303|PutItemError - Subjects||403|Internal Server Error|
-|104|Invalid Schedule|204|UnmarshalListOfMapsError|304|PutItemError - Events||404|NotFound|
-|105|Invalid Email|205|OutputError|305|DeleteItemError - Grades||42|NO ERROR|
-|106|Email does not exist|206|ExpressionBuilderError|306|DeleteItemError - Events||---|---|
-|107|Hash Error|---|---|307|UpdateItemError - Events||---|---|
-|108|Username taken|---|---|308|UpdateItemError - Schedules||---|---|
+|100|Invalid Body|200|MarshalMapError|300|PutItemError - Users|400|Invalid|
+|101|Invalid Username|201|MarshalJSONToMap|301|PutItemError - Schedules|401|DoesNotExist|
+|102|Invalid Pass|202|MarshalListError|302|PutItemError - Grades|402|ErrorWith|
+|103|Invalid Subjects|203|UnmarshalMapError|303|PutItemError - Subjects|403|Internal Server Error|
+|104|Invalid Schedule|204|UnmarshalListOfMapsError|304|PutItemError - Events|404|NotFound|
+|105|Invalid Email|205|OutputError|305|DeleteItemError - Grades|42|NO ERROR|
+|106|Email does not exist|206|ExpressionBuilderError|306|DeleteItemError - Events|---|---|
+|107|Hash Error|---|---|307|UpdateItemError - Events|---|---|
+|108|Username taken|---|---|308|UpdateItemError - Schedules|---|---|
 
 |Code|Message|
 |----|-------|
