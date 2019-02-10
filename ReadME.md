@@ -16,8 +16,8 @@ Makefile has some script for making development easier.
 
 ### Status Codes ###
 
-|Code|Message| |Code|Message|
-|----|-------| |----|-------|
+|Code|Message|
+|----|-------|
 |100|Invalid Body|
 |101|Invalid Username|
 |102|Invalid Pass| <!--- Not sure but meybe sub errors can be 30,31 , 32, 33 .... --->
