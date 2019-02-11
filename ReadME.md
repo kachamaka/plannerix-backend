@@ -27,6 +27,7 @@ Makefile has some script for making development easier.
 |106|Email does not exist|206|ExpressionBuilderError|306|DeleteItemError - Events|---|---|
 |107|Hash Error|---|---|307|UpdateItemError - Events|---|---|
 |108|Username taken|---|---|308|UpdateItemError - Schedules|---|---|
+|---|---|---|---|309|UpdateItemError - Users|---|---|
 <!-- 
 |Code|Message|
 |----|-------|
