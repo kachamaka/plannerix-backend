@@ -16,7 +16,7 @@ Makefile has some script for making development easier.
 
 ### Status Codes ###
 
-|   |   |   |   |   |   |   |   |
+|Code|Message|Code|Message|Code|Message|Code|Message|
 |---|---|---|---|---|---|---|---|
 |100|Invalid Body|200|MarshalMapError|300|PutItemError - Users|42|NO ERROR|
 |101|Invalid Username|201|MarshalJSONToMap|301|PutItemError - Schedules|400|Invalid|
