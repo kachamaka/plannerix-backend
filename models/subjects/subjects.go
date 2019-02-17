@@ -9,7 +9,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
-
 	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/errors"
 )
 

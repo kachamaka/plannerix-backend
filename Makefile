@@ -1,4 +1,4 @@
-.PHONY: build clean deploy
+.PHONY: clean build deploy
 
 build:
 	env GOOS=linux go build -ldflags="-s -w" -o bin/register ./handlers/register

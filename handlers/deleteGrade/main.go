@@ -4,12 +4,14 @@ import (
 	"context"
 	"log"
 
+	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/errors"
+
+	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/grades"
+	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/profile"
+
 	"github.com/kinghunter58/jwe"
 	qs "gitlab.com/zapochvam-ei-sq/s-org-backend/models/QS"
 	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/database"
-	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/errors"
-	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/grades"
-	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/profile"
 
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 
