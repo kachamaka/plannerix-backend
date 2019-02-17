@@ -6,8 +6,8 @@ import (
 
 	"gitlab.com/s-org-backend/models/errors"
 	"gitlab.com/s-org-backend/models/profile"
-	"gitlab.com/s-org-backend/models/subjects"
 
+	"github.com/goware/emailx"
 	"github.com/kinghunter58/jwe"
 
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -24,12 +24,25 @@ var conn *dynamodb.DynamoDB
 //Request is the grade input request
 type Request struct {
 	Token string `json:"token"`
+	Email string `json:"email"`
 }
 
 type Response struct {
-	Success  bool     `json:"success"`
-	Message  string   `json:"message"`
-	Subjects []string `json:"subjects"`
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+}
+
+func (r Request) validate() (error, int) {
+	//Validate request and give some feedback
+	err := emailx.Validate(r.Email)
+	if err != nil {
+		return errors.Invalid("Email"), 105
+	}
+	// err = sendEmail(r.Email)
+	// if err != nil {
+	// 	return errors.DoesNotExist("email"), 106
+	// }
+	return nil, 42
 }
 
 func handler(ctx context.Context, req interface{}) (qs.Response, error) {
@@ -38,6 +51,10 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 
 	if err != nil {
 		return qs.NewError(errors.LambdaError.Error(), -1)
+	}
+
+	if err, code := body.validate(); err != nil {
+		return qs.NewError(err.Error(), code)
 	}
 
 	database.SetConn(&conn)
@@ -51,21 +68,19 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	jwe.ParseEncryptedToken(body.Token, key, &p)
 	log.Println(p.Username, "username")
 
-	subjects, err := subjects.GetSubjects(p.Username, conn)
-	log.Println(subjects, "all subjects")
+	err = profile.ChangeEmail(p.Username, body.Email, conn)
 
 	switch err {
-	case errors.OutputError:
-		return qs.NewError(err.Error(), 205)
-	case errors.UnmarshalListOfMapsError:
-		return qs.NewError(err.Error(), 204)
+	case errors.UpdateItemError:
+		return qs.NewError(err.Error(), 309)
 	default:
 	}
 
+	//MAYBE SEND EMAIL
+
 	res := Response{
-		Success:  true,
-		Message:  "subjects fetched successfully",
-		Subjects: subjects,
+		Success: true,
+		Message: "email changed successfully",
 	}
 	return qs.NewResponse(200, res)
 }

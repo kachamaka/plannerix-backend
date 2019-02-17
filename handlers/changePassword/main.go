@@ -6,7 +6,7 @@ import (
 
 	"gitlab.com/s-org-backend/models/errors"
 	"gitlab.com/s-org-backend/models/profile"
-	"gitlab.com/s-org-backend/models/subjects"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/kinghunter58/jwe"
 
@@ -23,13 +23,13 @@ var conn *dynamodb.DynamoDB
 
 //Request is the grade input request
 type Request struct {
-	Token string `json:"token"`
+	Token    string `json:"token"`
+	Password string `json:"password"`
 }
 
 type Response struct {
-	Success  bool     `json:"success"`
-	Message  string   `json:"message"`
-	Subjects []string `json:"subjects"`
+	Success bool   `json:"success"`
+	Message string `json:"message"`
 }
 
 func handler(ctx context.Context, req interface{}) (qs.Response, error) {
@@ -51,21 +51,27 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	jwe.ParseEncryptedToken(body.Token, key, &p)
 	log.Println(p.Username, "username")
 
-	subjects, err := subjects.GetSubjects(p.Username, conn)
-	log.Println(subjects, "all subjects")
+	hashed, err := bcrypt.GenerateFromPassword([]byte(body.Password), 12)
+	if err != nil {
+		log.Println("Error with hashing password:", err)
+		return qs.NewError(errors.ErrorWith("hashing password").Error(), 107)
+	}
+	log.Println(hashed, "hash")
+
+	err = profile.ChangePassword(p.Username, string(hashed), conn)
 
 	switch err {
-	case errors.OutputError:
-		return qs.NewError(err.Error(), 205)
-	case errors.UnmarshalListOfMapsError:
-		return qs.NewError(err.Error(), 204)
+	case errors.UpdateItemError:
+		return qs.NewError(err.Error(), 309)
 	default:
 	}
 
+	//TODO
+	//SEND EMAIL
+
 	res := Response{
-		Success:  true,
-		Message:  "subjects fetched successfully",
-		Subjects: subjects,
+		Success: true,
+		Message: "password changed successfully",
 	}
 	return qs.NewResponse(200, res)
 }

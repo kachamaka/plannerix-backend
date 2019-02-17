@@ -40,6 +40,118 @@ functions:
       - http:
           path: login
           method: post
+  updateSchedule:
+    handler: bin/updateSchedule
+    memorySize: 1024
+    events:
+      - http:
+          path: updateSchedule
+          method: post
+  inputGrade:
+    handler: bin/inputGrade
+    memorySize: 1024
+    events:
+      - http:
+          path: inputGrade
+          method: post
+  getYearGrades:
+    handler: bin/getYearGrades
+    memorySize: 1024
+    events:
+      - http:
+          path: getYearGrades
+          method: get
+  getWeeklyGrades:
+    handler: bin/getWeeklyGrades
+    memorySize: 1024
+    events:
+      - http:
+          path: getWeeklyGrades
+          method: get
+  getWeeklyEvents:
+    handler: bin/getWeeklyEvents
+    memorySize: 1024
+    events:
+      - http:
+          path: getWeeklyEvents
+          method: get
+  getSubjects:
+    handler: bin/getSubjects
+    memorySize: 1024
+    events:
+      - http:
+          path: getSubjects
+          method: get
+  getSchedule:
+    handler: bin/getSchedule
+    memorySize: 1024
+    events:
+      - http:
+          path: getSchedule
+          method: get
+  getNextPeriod:
+    handler: bin/getNextPeriod
+    memorySize: 1024
+    events:
+      - http:
+          path: getNextPeriod
+          method: get
+  getAllGrades:
+    handler: bin/getAllGrades
+    memorySize: 1024
+    events:
+      - http:
+          path: getAllGrades
+          method: get
+  getAllEvents:
+    handler: bin/getAllEvents
+    memorySize: 1024
+    events:
+      - http:
+          path: getAllEvents
+          method: get
+  editEvent:
+    handler: bin/editEvent
+    memorySize: 1024
+    events:
+      - http:
+          path: editEvent
+          method: post
+  deleteGrade:
+    handler: bin/deleteGrade
+    memorySize: 1024
+    events:
+      - http:
+          path: deleteGrade
+          method: post
+  deleteEvent:
+    handler: bin/deleteEvent
+    memorySize: 1024
+    events:
+      - http:
+          path: deleteEvent
+          method: post
+  createEvent:
+    handler: bin/createEvent
+    memorySize: 1024
+    events:
+      - http:
+          path: createEvent
+          method: post
+  changePassword:
+    handler: bin/changePassword
+    memorySize: 1024
+    events:
+      - http:
+          path: changePassword
+          method: post
+  changeEmail:
+    handler: bin/changeEmail
+    memorySize: 1024
+    events:
+      - http:
+          path: changeEmail
+          method: post
 resources:
   - ${file(resources/dynamodb.yml)}
 

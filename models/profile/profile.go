@@ -72,6 +72,56 @@ func GetProfile(username string, conn *dynamodb.DynamoDB) (Profile, error) {
 	return p, nil
 }
 
+func ChangePassword(username string, newPassword string, conn *dynamodb.DynamoDB) error {
+	updateItemInput := &dynamodb.UpdateItemInput{
+		TableName: aws.String("s-org-users"),
+		Key: map[string]*dynamodb.AttributeValue{
+			"username": {
+				S: aws.String(username),
+			},
+		},
+		UpdateExpression: aws.String("set password = :password"),
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":password": {
+				S: aws.String(newPassword),
+			},
+		},
+		ReturnValues: aws.String(dynamodb.ReturnValueUpdatedNew),
+	}
+
+	_, err := conn.UpdateItem(updateItemInput)
+	if err != nil {
+		log.Println("line 107 error with update item")
+		return errors.UpdateItemError
+	}
+	return nil
+}
+
+func ChangeEmail(username string, newEmail string, conn *dynamodb.DynamoDB) error {
+	updateItemInput := &dynamodb.UpdateItemInput{
+		TableName: aws.String("s-org-users"),
+		Key: map[string]*dynamodb.AttributeValue{
+			"username": {
+				S: aws.String(username),
+			},
+		},
+		UpdateExpression: aws.String("set email = :email"),
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":email": {
+				S: aws.String(newEmail),
+			},
+		},
+		ReturnValues: aws.String(dynamodb.ReturnValueUpdatedNew),
+	}
+
+	_, err := conn.UpdateItem(updateItemInput)
+	if err != nil {
+		log.Println("line 107 error with update item")
+		return errors.UpdateItemError
+	}
+	return nil
+}
+
 //CheckPassword is self-explanatory returns true if success
 func (p Profile) CheckPassword(password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(p.Password), []byte(password))
