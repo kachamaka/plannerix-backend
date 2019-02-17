@@ -9,16 +9,15 @@ import (
 	"strings"
 	"time"
 
-	"gitlab.com/s-org-backend/models/errors"
-
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/goware/emailx"
 	"github.com/kinghunter58/jwe"
-	qs "gitlab.com/s-org-backend/models/QS"
-	"gitlab.com/s-org-backend/models/database"
-	"gitlab.com/s-org-backend/models/profile"
-	"gitlab.com/s-org-backend/models/subjects"
+	qs "gitlab.com/zapochvam-ei-sq/s-org-backend/models/QS"
+	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/database"
+	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/errors"
+	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/profile"
+	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/subjects"
 	"golang.org/x/crypto/bcrypt"
 )
 

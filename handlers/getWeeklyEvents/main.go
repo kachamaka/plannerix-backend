@@ -3,18 +3,16 @@ package main
 import (
 	"context"
 
-	"gitlab.com/s-org-backend/models/errors"
-	"gitlab.com/s-org-backend/models/events"
-
-	"gitlab.com/s-org-backend/models/profile"
-
 	"github.com/kinghunter58/jwe"
+	qs "gitlab.com/zapochvam-ei-sq/s-org-backend/models/QS"
+	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/database"
+	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/errors"
+	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/events"
+	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/profile"
 
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 
 	"github.com/aws/aws-lambda-go/lambda"
-	qs "gitlab.com/s-org-backend/models/QS"
-	"gitlab.com/s-org-backend/models/database"
 )
 
 var conn *dynamodb.DynamoDB

@@ -6,12 +6,11 @@ import (
 	"log"
 	"regexp"
 
-	"gitlab.com/s-org-backend/models/errors"
-
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/database"
+	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/errors"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"gitlab.com/s-org-backend/models/database"
 
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 
