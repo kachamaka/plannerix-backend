@@ -16,7 +16,7 @@ Makefile has some script for making development easier.
 
 ### Status Codes ###
 
-|   |   |   |   |   |   |   |   |
+|Code|Message|Code|Message|Code|Message|Code|Message|
 |---|---|---|---|---|---|---|---|
 |100|Invalid Body|200|MarshalMapError|300|PutItemError - Users|42|NO ERROR|
 |101|Invalid Username|201|MarshalJSONToMap|301|PutItemError - Schedules|400|Invalid|
@@ -27,6 +27,7 @@ Makefile has some script for making development easier.
 |106|Email does not exist|206|ExpressionBuilderError|306|DeleteItemError - Events|---|---|
 |107|Hash Error|---|---|307|UpdateItemError - Events|---|---|
 |108|Username taken|---|---|308|UpdateItemError - Schedules|---|---|
+|---|---|---|---|309|UpdateItemError - Users|---|---|
 <!-- 
 |Code|Message|
 |----|-------|
