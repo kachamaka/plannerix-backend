@@ -6,14 +6,13 @@ import (
 	"strconv"
 	"time"
 
-	"gitlab.com/s-org-backend/models/errors"
-
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
+	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/database"
+	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/errors"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
-	"gitlab.com/s-org-backend/models/database"
 )
 
 type Event struct {
