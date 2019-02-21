@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	lambdat "gitlab.com/s-org-backend/models/lambda-testing"
+	lambdat "gitlab.com/zapochvam-ei-sq/s-org-backend/models/lambda-testing"
 )
 
 func TestUser(t *testing.T) {

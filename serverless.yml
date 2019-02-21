@@ -34,6 +34,7 @@ functions:
       - http:
           path: register
           method: post
+          cors: true
   login:
     handler: bin/login
     memorySize: 1024
@@ -41,6 +42,7 @@ functions:
       - http:
           path: login
           method: post
+          cors: true
   updateSchedule:
     handler: bin/updateSchedule
     memorySize: 1024
@@ -48,6 +50,7 @@ functions:
       - http:
           path: updateSchedule
           method: post
+          cors: true
   inputGrade:
     handler: bin/inputGrade
     memorySize: 1024
@@ -55,6 +58,7 @@ functions:
       - http:
           path: inputGrade
           method: post
+          cors: true
   getYearGrades:
     handler: bin/getYearGrades
     memorySize: 1024
@@ -62,6 +66,7 @@ functions:
       - http:
           path: getYearGrades
           method: get
+          cors: true
   getWeeklyGrades:
     handler: bin/getWeeklyGrades
     memorySize: 1024
@@ -69,6 +74,7 @@ functions:
       - http:
           path: getWeeklyGrades
           method: get
+          cors: true
   getWeeklyEvents:
     handler: bin/getWeeklyEvents
     memorySize: 1024
@@ -76,6 +82,7 @@ functions:
       - http:
           path: getWeeklyEvents
           method: get
+          cors: true
   getSubjects:
     handler: bin/getSubjects
     memorySize: 1024
@@ -83,6 +90,7 @@ functions:
       - http:
           path: getSubjects
           method: get
+          cors: true
   getSchedule:
     handler: bin/getSchedule
     memorySize: 1024
@@ -90,6 +98,7 @@ functions:
       - http:
           path: getSchedule
           method: get
+          cors: true
   getNextPeriod:
     handler: bin/getNextPeriod
     memorySize: 1024
@@ -97,6 +106,7 @@ functions:
       - http:
           path: getNextPeriod
           method: get
+          cors: true
   getAllGrades:
     handler: bin/getAllGrades
     memorySize: 1024
@@ -104,6 +114,7 @@ functions:
       - http:
           path: getAllGrades
           method: get
+          cors: true
   getAllEvents:
     handler: bin/getAllEvents
     memorySize: 1024
@@ -111,6 +122,7 @@ functions:
       - http:
           path: getAllEvents
           method: get
+          cors: true
   editEvent:
     handler: bin/editEvent
     memorySize: 1024
@@ -118,6 +130,7 @@ functions:
       - http:
           path: editEvent
           method: post
+          cors: true
   deleteGrade:
     handler: bin/deleteGrade
     memorySize: 1024
@@ -125,6 +138,7 @@ functions:
       - http:
           path: deleteGrade
           method: post
+          cors: true
   deleteEvent:
     handler: bin/deleteEvent
     memorySize: 1024
@@ -132,6 +146,7 @@ functions:
       - http:
           path: deleteEvent
           method: post
+          cors: true
   createEvent:
     handler: bin/createEvent
     memorySize: 1024
@@ -139,6 +154,7 @@ functions:
       - http:
           path: createEvent
           method: post
+          cors: true
   changePassword:
     handler: bin/changePassword
     memorySize: 1024
@@ -146,6 +162,7 @@ functions:
       - http:
           path: changePassword
           method: post
+          cors: true
   changeEmail:
     handler: bin/changeEmail
     memorySize: 1024
@@ -153,6 +170,7 @@ functions:
       - http:
           path: changeEmail
           method: post
+          cors: true
 resources:
   - ${file(resources/dynamodb.yml)}
 
