@@ -72,14 +72,25 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	if err != nil {
 		return qs.NewError(errors.TokenError.Error(), 110)
 	}
+<<<<<<< HEAD
 	// log.Println(token, "token")
 	// log.Println("???")
+=======
+
+>>>>>>> 44d95e0db972e2de39c03746a560f7de83e3c3f0
 	res := Response{
 		Token:   token,
 		Success: true,
 	}
+<<<<<<< HEAD
 	r, err := qs.NewResponse(200, res)
 	// log.Println(r)
+=======
+
+	r, err := qs.NewResponse(200, res)
+	log.Println(r)
+
+>>>>>>> 44d95e0db972e2de39c03746a560f7de83e3c3f0
 	return r, err
 }
 
