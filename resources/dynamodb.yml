@@ -6,56 +6,79 @@ Resources:
       AttributeDefinitions:
         - AttributeName: username
           AttributeType: S
-        - AttributeName: id
-          AttributeType: S
       KeySchema:
         - AttributeName: username
           KeyType: HASH
-      GlobalSecondaryIndexes:
-        - IndexName: IdIndex
-          KeySchema:
-          - AttributeName: id
-            AttributeType: HASH
-          Projection:
-            ProjectionType: ALL
-          ProvisionedThroughput:
-            ReadCapacityUnits: ${self:custom.tableThroughput}
-            WriteCapacityUnits: ${self:custom.tableThroughput}
       # Set the capacity based on the stage
       ProvisionedThroughput:
         ReadCapacityUnits: ${self:custom.tableThroughput}
         WriteCapacityUnits: ${self:custom.tableThroughput}
+
   Grades:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName: s-org-grades
       AttributeDefinitions:
-        - AttributeName: user_id
+        - AttributeName: username
           AttributeType: S
         - AttributeName: timestamp
-          AttributeName: N
+          AttributeType: N
       KeySchema:
-        - AttributeName: user_id
+        - AttributeName: username
           KeyType: HASH
         - AttributeName: timestamp
           KeyType: RANGE
       ProvisionedThroughput:
         ReadCapacityUnits: ${self:custom.tableThroughput}
         WriteCapacityUnits: ${self:custom.tableThroughput}
+
+  Events:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: s-org-evetns
+      AttributeDefinitions:
+        - AttributeName: username
+          AttributeType: S
+        - AttributeName: timestamp
+          AttributeType: N
+      KeySchema:
+        - AttributeName: username
+          KeyType: HASH
+        - AttributeName: timestamp
+          KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: ${self:custom.tableThroughput}
+        WriteCapacityUnits: ${self:custom.tableThroughput}
+
+  Subjects:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: s-org-subjects
+      AttributeDefinitions:
+        - AttributeName: username
+          AttributeType: S
+      KeySchema:
+        - AttributeName: username
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: ${self:custom.tableThroughput}
+        WriteCapacityUnits: ${self:custom.tableThroughput}
+
   Schedules:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName: s-org-schedules
       AttributeDefinitions:
-        - AttributeName: user_id
+        - AttributeName: username
           AttributeType: S
         - AttributeName: day
-          AttributeType: S
+          AttributeType: N
       KeySchema:
-        - AttributeName: user_id
+        - AttributeName: username
           KeyType: HASH
         - AttributeName: day
           KeyType: RANGE
       ProvisionedThroughput:
         ReadCapacityUnits: ${self:custom.tableThroughput}
         WriteCapacityUnits: ${self:custom.tableThroughput}
+  

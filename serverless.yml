@@ -11,6 +11,7 @@ provider:
   # stage: dev
   region: eu-central-1
   role: arn:aws:iam::890356408027:role/Lambda
+  versionFunctions: false
   vpc:
     securityGroupsIds:
       - sg-01ca57de1102b905e
