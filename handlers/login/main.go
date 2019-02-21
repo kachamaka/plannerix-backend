@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/kinghunter58/jwe"
@@ -73,13 +72,15 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	if err != nil {
 		return qs.NewError(errors.TokenError.Error(), 110)
 	}
-	log.Println(token, "token")
-	log.Println("???")
+	// log.Println(token, "token")
+	// log.Println("???")
 	res := Response{
 		Token:   token,
 		Success: true,
 	}
-	return qs.NewResponse(200, res)
+	r, err := qs.NewResponse(200, res)
+	// log.Println(r)
+	return r, err
 }
 
 func main() {

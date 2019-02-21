@@ -58,13 +58,14 @@ func NewResponse(status int, body interface{}) (Response, error) {
 		"Access-Control-Allow-Origin":      "*",
 		"Access-Control-Allow-Credentials": "true",
 	}
-
-	return Response{
+	r := Response{
 		Body:            string(j),
 		Headers:         headers,
 		IsBase64Encoded: false,
 		StatusCode:      status,
-	}, nil
+	}
+	// log.Println("response body", r, headers)
+	return r, nil
 }
 
 func NewError(errMsg string, code int) (Response, error) {
@@ -79,8 +80,12 @@ func NewError(errMsg string, code int) (Response, error) {
 		return Response{}, err
 	}
 	return Response{
-		Body:            string(j),
-		Headers:         map[string]string{"content-type": "application/json"},
+		Body: string(j),
+		Headers: map[string]string{
+			"Content-Type":                     "application/json",
+			"Access-Control-Allow-Origin":      "*",
+			"Access-Control-Allow-Credentials": "true",
+		},
 		StatusCode:      200,
 		IsBase64Encoded: false,
 	}, nil
