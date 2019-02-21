@@ -55,7 +55,7 @@ func NewResponse(status int, body interface{}) (Response, error) {
 	}
 	headers := map[string]string{
 		"Content-Type":                     "application/json",
-		"Access-Control-Allow-Origin":      "*",
+		"Access-Control-Allow-Origin":      "http://localhost:4200",
 		"Access-Control-Allow-Credentials": "true",
 	}
 
@@ -79,8 +79,12 @@ func NewError(errMsg string, code int) (Response, error) {
 		return Response{}, err
 	}
 	return Response{
-		Body:            string(j),
-		Headers:         map[string]string{"content-type": "application/json"},
+		Body: string(j),
+		Headers: map[string]string{
+			"Content-Type":                     "application/json",
+			"Access-Control-Allow-Origin":      "http://localhost:4200",
+			"Access-Control-Allow-Credentials": "true",
+		},
 		StatusCode:      200,
 		IsBase64Encoded: false,
 	}, nil

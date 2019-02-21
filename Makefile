@@ -1,8 +1,8 @@
 .PHONY: clean build deploy
 
 build:
-	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/register ./handlers/register
-	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/login ./handlers/login
+	env GOOS=linux GOARCH=amd64 go build -ldflags '-d -s -w' -a -tags netgo -installsuffix netgo -o bin/register ./handlers/register
+	env GOOS=linux GOARCH=amd64 go build -ldflags '-d -s -w' -a -tags netgo -installsuffix netgo -o bin/login ./handlers/login
 	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/updateSchedule ./handlers/updateSchedule
 	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/inputGrade ./handlers/inputGrade
 	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/getYearGrades ./handlers/getYearGrades
@@ -26,6 +26,6 @@ clean:
 deploy: clean build
 	sls deploy --noDeploy
 	./go-serverless
-	aws cloudformation deploy --template-file ./.serverless/cloudformation-template-update-stack.json --stack-name s-org --s3-bucket s-org-kinghunter58
+	aws cloudformation deploy --template-file ./.serverless/cloudformation-template-update-stack.json --stack-name s-org --s3-bucket s-org-kinghunter58 --force-upload
 db: 
 	dynamodb.sh
