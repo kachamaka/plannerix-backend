@@ -22,8 +22,9 @@ build:
 
 clean:
 	rm -rf ./bin
-
 deploy: clean build
-	sls deploy --verbose
+    sls deploy --noDeploy
+    ./go-serverless
+    aws cloudformation deploy --template-file ./.serverless/cloudformation-template-update-stack.json --stack-name s-org --s3-bucket s-org-kinghunter58
 db: 
 	dynamodb.sh

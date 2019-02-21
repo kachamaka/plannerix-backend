@@ -53,7 +53,11 @@ func NewResponse(status int, body interface{}) (Response, error) {
 	if err != nil {
 		return Response{}, err
 	}
-	headers := map[string]string{"Content-Type": "application/json"}
+	headers := map[string]string{
+		"Content-Type":                     "application/json",
+		"Access-Control-Allow-Origin":      "*",
+		"Access-Control-Allow-Credentials": "true",
+	}
 
 	return Response{
 		Body:            string(j),
