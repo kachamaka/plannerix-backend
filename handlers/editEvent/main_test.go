@@ -20,7 +20,7 @@ func TestHandler(t *testing.T) {
 	body := map[string]interface{}{
 		"token":       "eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkExMjhHQ00ifQ.TlmJ9NsnEb3MF8krzrgykkXl-bWm7JtPmZj5EGxbA-4-2NMTDEh9J0lo04s-GYsE7PZxwJ7llwzchZMRFjGFhxk5LA45XUeXJGS_gMs30X5fjYzKG_oIm5c1WW0ahf4uBDoh4vBNPkvHp-pd9eOrgMriKcPwIacPBVcjk3hT8883krB5M1HobFN_A34taCWGZPalym9LYdu4OAeBSNPKctb5hnKuPgq0PTFOpQTUoe0VdRM0zRXj3VRoNwDw6m1s87sg0VhQfiDeJDKNhYbkQmRy1jyvuDcYzwX9ioFAhW_xmO3xhWyr4YfGr9jdtOV-01-p3-c6H60TaPrjAE9sJg.X3biHvIQD5tQISE5.J8QPf019z6e1qL_NDCnmKAkaCQA.l229kUSnBy7fey_0gB9kgg",
 		"subject":     "Bio",
-		"title":       "Test",
+		"type":        1,
 		"description": "Uroci 5-55",
 		"timestamp":   1550175457825650700,
 	}

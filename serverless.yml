@@ -65,7 +65,7 @@ functions:
     events:
       - http:
           path: getYearGrades
-          method: get
+          method: post
           cors: true
   getWeeklyGrades:
     handler: bin/getWeeklyGrades
@@ -73,7 +73,7 @@ functions:
     events:
       - http:
           path: getWeeklyGrades
-          method: get
+          method: post
           cors: true
   getWeeklyEvents:
     handler: bin/getWeeklyEvents
@@ -81,7 +81,7 @@ functions:
     events:
       - http:
           path: getWeeklyEvents
-          method: get
+          method: post
           cors: true
   getSubjects:
     handler: bin/getSubjects
@@ -89,7 +89,7 @@ functions:
     events:
       - http:
           path: getSubjects
-          method: get
+          method: post
           cors: true
   getSchedule:
     handler: bin/getSchedule
@@ -97,7 +97,7 @@ functions:
     events:
       - http:
           path: getSchedule
-          method: get
+          method: post
           cors: true
   getNextPeriod:
     handler: bin/getNextPeriod
@@ -105,7 +105,7 @@ functions:
     events:
       - http:
           path: getNextPeriod
-          method: get
+          method: post
           cors: true
   getAllGrades:
     handler: bin/getAllGrades
@@ -113,7 +113,7 @@ functions:
     events:
       - http:
           path: getAllGrades
-          method: get
+          method: post
           cors: true
   getAllEvents:
     handler: bin/getAllEvents
@@ -121,7 +121,7 @@ functions:
     events:
       - http:
           path: getAllEvents
-          method: get
+          method: post
           cors: true
   editEvent:
     handler: bin/editEvent

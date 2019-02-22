@@ -73,6 +73,7 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	if err != nil {
 		return qs.NewError(errors.TokenError.Error(), 110)
 	}
+	log.Println(token)
 
 	res := Response{
 		Token:   token,

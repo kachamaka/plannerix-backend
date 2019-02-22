@@ -24,7 +24,7 @@ var conn *dynamodb.DynamoDB
 type Request struct {
 	Token       string `json:"token"`
 	Subject     string `json:"subject"`
-	Title       string `json:"title"`
+	Type        int    `json:"type"`
 	Description string `json:"description"`
 	Timestamp   int64  `json:"timestamp"`
 }
@@ -53,7 +53,7 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	jwe.ParseEncryptedToken(body.Token, key, &p)
 	log.Println(p.Username, "username")
 
-	err = events.EditEvent(p.Username, body.Subject, body.Title, body.Description, body.Timestamp, conn)
+	err = events.EditEvent(p.Username, body.Subject, body.Type, body.Description, body.Timestamp, conn)
 
 	switch err {
 	case errors.UpdateItemError:

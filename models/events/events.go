@@ -22,8 +22,8 @@ type Event struct {
 	Timestamp   int64  `json:"time"`
 }
 
-func CreateEvent(username string, subject string, title string, description string, timestamp int64, conn *dynamodb.DynamoDB) error {
-	j := fmt.Sprintf(`{"username": "%v","timestamp": %v, "subject":"%v", "title":"%v", "description":"%v"}`, username, timestamp, subject, title, description)
+func CreateEvent(username string, subject string, subjectType int, description string, timestamp int64, conn *dynamodb.DynamoDB) error {
+	j := fmt.Sprintf(`{"username": "%v","timestamp": %v, "subject":"%v", "type":"%v", "description":"%v"}`, username, timestamp, subject, subjectType, description)
 	body, err := database.MarshalJSONToDynamoMap(j)
 	if err != nil {
 		log.Println("line 27 error with marshal json to map")
@@ -45,7 +45,7 @@ func GetAllEvents(username string, conn *dynamodb.DynamoDB) ([]Event, error) {
 
 	filt := expression.Name("username").Equal(expression.Value(username))
 
-	proj := expression.NamesList(expression.Name("timestamp"), expression.Name("subject"), expression.Name("title"), expression.Name("description"))
+	proj := expression.NamesList(expression.Name("timestamp"), expression.Name("subject"), expression.Name("type"), expression.Name("description"))
 
 	expr, err := expression.NewBuilder().WithFilter(filt).WithProjection(proj).Build()
 
@@ -86,7 +86,7 @@ func GetWeeklyEvents(username string, conn *dynamodb.DynamoDB) ([]Event, error) 
 		And(expression.Name("timestamp").LessThan(expression.Value(nowAfterTwoWeeks))).
 		And(expression.Name("username").Equal(expression.Value(username)))
 
-	proj := expression.NamesList(expression.Name("timestamp"), expression.Name("subject"), expression.Name("title"), expression.Name("description"))
+	proj := expression.NamesList(expression.Name("timestamp"), expression.Name("subject"), expression.Name("type"), expression.Name("description"))
 
 	expr, err := expression.NewBuilder().WithFilter(filt).WithProjection(proj).Build()
 
@@ -119,7 +119,7 @@ func GetWeeklyEvents(username string, conn *dynamodb.DynamoDB) ([]Event, error) 
 	return weeklyEvents, nil
 }
 
-func EditEvent(username string, subject string, title string, description string, timestamp int64, conn *dynamodb.DynamoDB) error {
+func EditEvent(username string, subject string, subjectType int, description string, timestamp int64, conn *dynamodb.DynamoDB) error {
 	updateItemInput := &dynamodb.UpdateItemInput{
 		TableName: aws.String("s-org-events"),
 		Key: map[string]*dynamodb.AttributeValue{
@@ -130,13 +130,13 @@ func EditEvent(username string, subject string, title string, description string
 				N: aws.String(strconv.FormatInt(timestamp, 10)),
 			},
 		},
-		UpdateExpression: aws.String("set subject = :subject, title = :title, description = :description"),
+		UpdateExpression: aws.String("set subject = :subject, type = :type, description = :description"),
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
 			":subject": {
 				S: aws.String(subject),
 			},
-			":title": {
-				S: aws.String(title),
+			":type": {
+				S: aws.String(strconv.Itoa(subjectType)),
 			},
 			":description": {
 				S: aws.String(description),
@@ -160,7 +160,7 @@ func DeleteEvent(username string, timestamp int64, conn *dynamodb.DynamoDB) erro
 			"username": {
 				S: aws.String(username),
 			},
-			"eventTime": {
+			"timestamp": {
 				N: aws.String(strconv.FormatInt(timestamp, 10)),
 			},
 		},

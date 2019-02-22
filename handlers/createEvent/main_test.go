@@ -22,10 +22,10 @@ func TestHandler(t *testing.T) {
 	// log.Println(time.Unix(now/1000000000, 0).Date())
 	// return
 	body := map[string]interface{}{
-		"token":       "eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkExMjhHQ00ifQ.sWBTH2QgXq5Et_iBmBB0e72fTycssj-Tex-8dYQYMn51FOTt5ZmGqQ6VgvUgxumkmDW4OlBTYsMzUlNCFmqMtiWP8X5AxDkvGCK2J2ipxYX_ZbGh7inZtoK1ihpdtLbErHDP_E_LWE7yNDZd6irrx4IRFzAdDFXXdAApbQKvk5a2So6KR0vSQpjCsUinT48n1ao-BpkWKb20Ss74LutAKp_DNwa2Fbe0_DCdZ_doEsXbeL-13tFAnbABkdC4VbiTW-EDrLB-LkaBMZ6sqFzoSeiCfHaxx77bFBHFYiIO1VbKPA_cYHN4MgaQm8WWPuQREa0E0MjKJexWRrtRjVFSgw.YpKPKYzhUN-wCXni.EQCERmHxC4DrM5bQAH_F9NuFfJs.SPN4sO0wftml1SIB-QP5-g",
+		"token":       "eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkExMjhHQ00ifQ.IJOZ6Tst-kpG4V8EPPGFhwbUtBNs0idi1xK5HPN2vktgTJ59VYbvzipa1eaA_mDYQSwCQBmzQ_QIXywUIaHOQfXfPjrpYp11A1LejGARxgkzIf_qzxvj64vPYU6I5NaTmAFnZGVNdo4e3tOphXpX0UA4xe8IR1EVeDgyKbU8OCAVGxYzEIiPiivzH-Sev6Ss33cpeDB7tc_BfnVvpHtzRVr5_ASg0vgbnS6sh9mop2huzNZJW50qA-HOJJOiPiea5HhYnTYjsRB9516G9k5221wQ8ebiebQgTEg9kEXK7AaBnwoM1ZH8vWQSlcpCBz9fNeKSE1R8W14juuG9m32qOQ.OIdJoIHBl194ydfH.ST503UjLLzhzJdJQvo__2isbX6U.-hjv2j8y8USqaIF3ALcEcw",
 		"subject":     "DE",
-		"title":       "Klausur",
 		"description": "SK",
+		"type":        0,
 		"timestamp":   now,
 	}
 	req, err := lambdat.ReadBody(body)

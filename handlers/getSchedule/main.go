@@ -34,7 +34,9 @@ type Response struct {
 func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	body := Request{}
 	err := qs.GetBody(req, &body)
-
+	log.Println(req)
+	log.Println(body)
+	log.Println(err)
 	if err != nil {
 		return qs.NewError(errors.LambdaError.Error(), -1)
 	}
