@@ -88,7 +88,9 @@ func sendEmail(email string) error {
 func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	body := Request{}
 	err := qs.GetBody(req, &body)
-	// fmt.Println(body)
+	log.Println("req - ", req)
+	log.Println("body - ", body)
+	log.Println("err - ", err)
 	if err != nil {
 		log.Println(err)
 		return qs.NewError(errors.LambdaError.Error(), -1)
@@ -101,6 +103,8 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 		log.Println("Error with hashing password:", err)
 		return qs.NewError(errors.ErrorWith("hashing password").Error(), 107)
 	}
+	// log.Println("hash", string(hashed))
+	// return qs.Response{}, nil
 	database.SetConn(&conn)
 	id := createID(body.Username)
 	p, err := profile.NewProfile(body.Username, body.Email, string(hashed), id, conn)
