@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"log"
+	"time"
 
 	"github.com/kinghunter58/jwe"
 	qs "gitlab.com/zapochvam-ei-sq/s-org-backend/models/QS"
@@ -23,7 +25,7 @@ var conn *dynamodb.DynamoDB
 type Request struct {
 	Token       string `json:"token"`
 	Subject     string `json:"subject"`
-	Title       string `json:"title"`
+	Type        int    `json:"subjectType"`
 	Description string `json:"description"`
 	Timestamp   int64  `json:"timestamp"`
 }
@@ -51,7 +53,10 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	p := profile.Payload{}
 	jwe.ParseEncryptedToken(body.Token, key, &p)
 
-	err = events.CreateEvent(p.Username, body.Subject, body.Title, body.Description, body.Timestamp, conn)
+	body.Timestamp = events.AdaptTimestamp(body.Timestamp)
+	log.Println(time.Unix(body.Timestamp, 0))
+	// return qs.Response{}, nil
+	err = events.CreateEvent(p.Username, body.Subject, body.Type, body.Description, body.Timestamp, conn)
 
 	switch err {
 	case errors.MarshalJsonToMapError:

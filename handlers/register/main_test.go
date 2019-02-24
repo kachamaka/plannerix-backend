@@ -46,6 +46,22 @@ func TestMain(t *testing.T) {
 				Period{StartTime: "10:10", EndTime: "10:50", Subject: "AE"},
 			},
 		},
+		ScheduleDay{
+			Periods: []Period{
+				Period{StartTime: "07:30", EndTime: "8:10", Subject: "Bio"},
+				Period{StartTime: "8:20", EndTime: "9:00", Subject: "Istoriq"},
+				Period{StartTime: "9:10", EndTime: "9:50", Subject: "AE"},
+				Period{StartTime: "10:10", EndTime: "10:50", Subject: "AE"},
+			},
+		},
+		ScheduleDay{
+			Periods: []Period{
+				Period{StartTime: "07:30", EndTime: "8:10", Subject: "Bio"},
+				Period{StartTime: "8:20", EndTime: "9:00", Subject: "Istoriq"},
+				Period{StartTime: "9:10", EndTime: "9:50", Subject: "AE"},
+				Period{StartTime: "10:10", EndTime: "10:50", Subject: "AE"},
+			},
+		},
 	}
 	body := map[string]interface{}{
 		"username": "user3",
@@ -58,7 +74,6 @@ func TestMain(t *testing.T) {
 	// err := emailx.Validate("test@abv.bg")
 	err := sendEmail("martilevski1@abv.bg")
 	log.Println(err, "err")
-	return
 	res, err := lambdat.InvokeHandler(handler, body)
 	if err != nil {
 		t.Error(err)

@@ -35,7 +35,7 @@ Resources:
   Events:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: s-org-evetns
+      TableName: s-org-events
       AttributeDefinitions:
         - AttributeName: username
           AttributeType: S

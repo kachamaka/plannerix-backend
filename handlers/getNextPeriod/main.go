@@ -24,9 +24,9 @@ type Request struct {
 }
 
 type Response struct {
-	Success    bool              `json:"success"`
-	Message    string            `json:"message"`
-	NextPeriod []subjects.Period `json:"nextPeriod"`
+	Success    bool            `json:"success"`
+	Message    string          `json:"message"`
+	NextPeriod subjects.Period `json:"nextPeriod"`
 }
 
 func handler(ctx context.Context, req interface{}) (qs.Response, error) {
@@ -61,10 +61,18 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	default:
 	}
 
+	if nextPeriod == (subjects.Period{}) {
+		res := Response{
+			Success: true,
+			Message: "Няма повече часове за днес",
+		}
+		return qs.NewResponse(200, res)
+	}
+
 	res := Response{
-		Success: true,
-		Message: "grades fetched successfully",
-		// NextPeriod: nextPeriod,
+		Success:    true,
+		Message:    "next period fetched successfully",
+		NextPeriod: nextPeriod,
 	}
 	return qs.NewResponse(200, res)
 }
