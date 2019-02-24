@@ -55,7 +55,7 @@ func NewResponse(status int, body interface{}) (Response, error) {
 	}
 	headers := map[string]string{
 		"Content-Type":                     "application/json",
-		"Access-Control-Allow-Origin":      "http://localhost:4200",
+		"Access-Control-Allow-Origin":      "*",
 		"Access-Control-Allow-Credentials": "true",
 	}
 	r := Response{
@@ -83,11 +83,7 @@ func NewError(errMsg string, code int) (Response, error) {
 		Body: string(j),
 		Headers: map[string]string{
 			"Content-Type":                     "application/json",
-<<<<<<< HEAD
 			"Access-Control-Allow-Origin":      "*",
-=======
-			"Access-Control-Allow-Origin":      "http://localhost:4200",
->>>>>>> 44d95e0db972e2de39c03746a560f7de83e3c3f0
 			"Access-Control-Allow-Credentials": "true",
 		},
 		StatusCode:      200,
