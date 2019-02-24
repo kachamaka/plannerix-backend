@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log"
 
 	"github.com/kinghunter58/jwe"
 	qs "gitlab.com/zapochvam-ei-sq/s-org-backend/models/QS"
@@ -60,6 +61,11 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 
 	p := profile.Payload{}
 	jwe.ParseEncryptedToken(body.Token, key, &p)
+
+	body.Time = grades.AdaptTimestamp(body.Time)
+	log.Println(body.Time)
+	// return qs.Response{}, nil
+
 	err = grades.InputGrade(p.Username, body.Time, body.Value, body.Subject, conn)
 
 	switch err {

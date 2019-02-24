@@ -17,13 +17,13 @@ import (
 
 type Event struct {
 	Subject     string `json:"subject"`
-	Title       string `json:"title"`
+	Type        int    `json:"subjectType"`
 	Description string `json:"description"`
-	Timestamp   int64  `json:"time"`
+	Timestamp   int64  `json:"timestamp"`
 }
 
 func CreateEvent(username string, subject string, subjectType int, description string, timestamp int64, conn *dynamodb.DynamoDB) error {
-	j := fmt.Sprintf(`{"username": "%v","timestamp": %v, "subject":"%v", "type":"%v", "description":"%v"}`, username, timestamp, subject, subjectType, description)
+	j := fmt.Sprintf(`{"username": "%v","timestamp": %v, "subject":"%v", "subjectType":%v, "description":"%v"}`, username, timestamp, subject, subjectType, description)
 	body, err := database.MarshalJSONToDynamoMap(j)
 	if err != nil {
 		log.Println("line 27 error with marshal json to map")
@@ -45,7 +45,7 @@ func GetAllEvents(username string, conn *dynamodb.DynamoDB) ([]Event, error) {
 
 	filt := expression.Name("username").Equal(expression.Value(username))
 
-	proj := expression.NamesList(expression.Name("timestamp"), expression.Name("subject"), expression.Name("type"), expression.Name("description"))
+	proj := expression.NamesList(expression.Name("timestamp"), expression.Name("subject"), expression.Name("subjectType"), expression.Name("description"))
 
 	expr, err := expression.NewBuilder().WithFilter(filt).WithProjection(proj).Build()
 
@@ -72,6 +72,7 @@ func GetAllEvents(username string, conn *dynamodb.DynamoDB) ([]Event, error) {
 	err = dynamodbattribute.UnmarshalListOfMaps(output.Items, &events)
 	if err != nil {
 		log.Println("line 72 error with unmarshal")
+		log.Println(err)
 		return nil, errors.UnmarshalListOfMapsError
 	}
 
@@ -79,14 +80,14 @@ func GetAllEvents(username string, conn *dynamodb.DynamoDB) ([]Event, error) {
 }
 
 func GetWeeklyEvents(username string, conn *dynamodb.DynamoDB) ([]Event, error) {
-	now := time.Now().UnixNano()
-	nowAfterTwoWeeks := time.Now().AddDate(0, 0, 14).UnixNano()
+	now := time.Now().Unix()
+	nowAfterTwoWeeks := time.Now().AddDate(0, 0, 7).Unix()
 
 	filt := expression.Name("timestamp").GreaterThan(expression.Value(now)).
 		And(expression.Name("timestamp").LessThan(expression.Value(nowAfterTwoWeeks))).
 		And(expression.Name("username").Equal(expression.Value(username)))
 
-	proj := expression.NamesList(expression.Name("timestamp"), expression.Name("subject"), expression.Name("type"), expression.Name("description"))
+	proj := expression.NamesList(expression.Name("timestamp"), expression.Name("subject"), expression.Name("subjectType"), expression.Name("description"))
 
 	expr, err := expression.NewBuilder().WithFilter(filt).WithProjection(proj).Build()
 
@@ -130,13 +131,13 @@ func EditEvent(username string, subject string, subjectType int, description str
 				N: aws.String(strconv.FormatInt(timestamp, 10)),
 			},
 		},
-		UpdateExpression: aws.String("set subject = :subject, type = :type, description = :description"),
+		UpdateExpression: aws.String("set subject = :subject, subjectType = :subjectType, description = :description"),
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
 			":subject": {
 				S: aws.String(subject),
 			},
-			":type": {
-				S: aws.String(strconv.Itoa(subjectType)),
+			":subjectType": {
+				N: aws.String(strconv.Itoa(subjectType)),
 			},
 			":description": {
 				S: aws.String(description),
@@ -145,8 +146,10 @@ func EditEvent(username string, subject string, subjectType int, description str
 		ReturnValues: aws.String(dynamodb.ReturnValueUpdatedNew),
 	}
 
-	_, err := conn.UpdateItem(updateItemInput)
+	output, err := conn.UpdateItem(updateItemInput)
+	log.Println(output, "output")
 	if err != nil {
+		log.Println(err)
 		log.Println("line 107 error with update item")
 		return errors.UpdateItemError
 	}
@@ -172,3 +175,22 @@ func DeleteEvent(username string, timestamp int64, conn *dynamodb.DynamoDB) erro
 	}
 	return nil
 }
+
+func AdaptTimestamp(timestamp int64) int64 {
+	offSet, _ := time.ParseDuration("+02.00h")
+	now := time.Now().UTC().Add(offSet)
+	testDate := time.Unix(timestamp, 0).UTC().Add(offSet)
+	// log.Println(now)
+	// log.Println(testDate)
+	diff := testDate.YearDay() - now.YearDay()
+	// log.Println(diff)
+	newTimestamp := now.AddDate(0, 0, diff).Unix()
+	return newTimestamp
+}
+
+// func AdaptTimestamp(timestamp int64) int64 {
+// 	randInts := random.RangeInt(0, 86399000000000, 1)
+// 	randInt := randInts[0]
+// 	newTimestamp := int64(randInt) + timestamp
+// 	return newTimestamp
+// }

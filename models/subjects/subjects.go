@@ -4,6 +4,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -161,16 +162,22 @@ func UpdateSchedule(username string, schedule []ScheduleData, conn *dynamodb.Dyn
 }
 
 func GetNextPeriod(username string, conn *dynamodb.DynamoDB) (Period, error) {
-	// t := time.Now()
-	// nowHour := t.Hour()
-	// nowMinutes := t.Minute()
-	// nowDay := int(t.Weekday())
+	// .Add(time.Hour * time.Duration(24))
+	t := time.Now()
+	// log.Println(t)
+	nowHour := t.Hour()
+	nowMinutes := t.Minute()
+	nowDay := int(t.Weekday())
+	if nowDay == 0 || nowDay == 6 {
+		return Period{}, nil
+	}
+	// log.Println(nowHour, nowMinutes, nowDay)
 	//^^^^ correct
 
 	//down - test
-	nowHour := 7
-	nowMinutes := 30
-	nowDay := 4
+	// nowHour := 7
+	// nowMinutes := 30
+	// nowDay := 4
 	//end test
 
 	filt := expression.Name("day").Equal(expression.Value(nowDay)).
@@ -228,4 +235,5 @@ func GetNextPeriod(username string, conn *dynamodb.DynamoDB) (Period, error) {
 	}
 
 	return nextPeriod, nil
+
 }

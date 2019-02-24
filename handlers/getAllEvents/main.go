@@ -52,6 +52,8 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 
 	e, err := events.GetAllEvents(p.Username, conn)
 	log.Println(e, "all events")
+	// log.Println(time.Unix(e[0].Timestamp, 0))
+	// return qs.Response{}, nil
 
 	switch err {
 	case errors.ExpressionBuilderError:

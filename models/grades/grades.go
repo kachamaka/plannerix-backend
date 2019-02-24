@@ -66,7 +66,12 @@ func GetAllGrades(username string, conn *dynamodb.DynamoDB) ([]Grade, error) {
 }
 
 func GetWeeklyGrades(username string, conn *dynamodb.DynamoDB) ([]Grade, error) {
-	mondayTime := now.BeginningOfWeek().UnixNano()
+	// offSet, _ := time.ParseDuration("+02.00h")
+	mondayTime := now.Monday().Unix()
+	// log.Println("test", test)
+	// mondayTime := now.BeginningOfWeek().UTC().AddDate(0, 0, -6).Unix()
+	// log.Println(time.Unix(mondayTime, 0))
+	// log.Println(mondayTime)
 
 	filt := expression.Name("timestamp").GreaterThan(expression.Value(mondayTime)).
 		And(expression.Name("username").Equal(expression.Value(username)))
@@ -109,14 +114,14 @@ func GetYearGrades(username string, conn *dynamodb.DynamoDB) ([]Grade, error) {
 	var startDate int64
 	var endDate int64
 	if t.Month() >= 2 && t.Month() <= 8 {
-		startDate = time.Date(t.Year(), 2, 1, 0, 0, 0, 0, time.UTC).UnixNano()
-		endDate = time.Date(t.Year(), 8, 31, 23, 59, 59, 0, time.UTC).UnixNano()
+		startDate = time.Date(t.Year(), 2, 1, 0, 0, 0, 0, time.UTC).Unix()
+		endDate = time.Date(t.Year(), 8, 31, 23, 59, 59, 0, time.UTC).Unix()
 	} else if t.Month() == 1 {
-		startDate = time.Date(t.Year()-1, 9, 1, 0, 0, 0, 0, time.UTC).UnixNano()
-		endDate = time.Date(t.Year(), 1, 31, 23, 59, 59, 0, time.UTC).UnixNano()
+		startDate = time.Date(t.Year()-1, 9, 1, 0, 0, 0, 0, time.UTC).Unix()
+		endDate = time.Date(t.Year(), 1, 31, 23, 59, 59, 0, time.UTC).Unix()
 	} else {
-		startDate = time.Date(t.Year(), 9, 1, 0, 0, 0, 0, time.UTC).UnixNano()
-		endDate = time.Date(t.Year()+1, 1, 31, 23, 59, 59, 0, time.UTC).UnixNano()
+		startDate = time.Date(t.Year(), 9, 1, 0, 0, 0, 0, time.UTC).Unix()
+		endDate = time.Date(t.Year()+1, 1, 31, 23, 59, 59, 0, time.UTC).Unix()
 	}
 
 	filt := expression.Name("timestamp").Between(expression.Value(startDate), expression.Value(endDate)).
@@ -171,4 +176,17 @@ func DeleteGrade(username string, timestamp int64, conn *dynamodb.DynamoDB) erro
 		return errors.DeleteItemError
 	}
 	return nil
+}
+
+func AdaptTimestamp(timestamp int64) int64 {
+	// offSet, _ := time.ParseDuration("+02.00h")
+	// .Add(offSet)
+	now := time.Now()
+	gradeDate := time.Unix(timestamp, 0)
+	// log.Println(now)
+	// log.Println(testDate)
+	diff := gradeDate.YearDay() - now.YearDay()
+	// log.Println(diff)
+	newTimestamp := now.AddDate(0, 0, diff).Unix()
+	return newTimestamp
 }

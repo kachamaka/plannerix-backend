@@ -24,7 +24,7 @@ var conn *dynamodb.DynamoDB
 type Request struct {
 	Token       string `json:"token"`
 	Subject     string `json:"subject"`
-	Type        int    `json:"type"`
+	Type        int    `json:"subjectType"`
 	Description string `json:"description"`
 	Timestamp   int64  `json:"timestamp"`
 }
