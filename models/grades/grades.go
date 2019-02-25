@@ -184,7 +184,10 @@ func AdaptTimestamp(timestamp int64) int64 {
 	now := time.Now()
 	gradeDate := time.Unix(timestamp, 0)
 	// log.Println(now)
-	// log.Println(testDate)
+	// log.Println(gradeDate)
+	if gradeDate.Year() < now.Year() {
+		now = now.AddDate(gradeDate.Year()-now.Year(), 0, 0)
+	}
 	diff := gradeDate.YearDay() - now.YearDay()
 	// log.Println(diff)
 	newTimestamp := now.AddDate(0, 0, diff).Unix()
