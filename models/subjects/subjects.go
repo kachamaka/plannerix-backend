@@ -163,7 +163,8 @@ func UpdateSchedule(username string, schedule []ScheduleData, conn *dynamodb.Dyn
 
 func GetNextPeriod(username string, conn *dynamodb.DynamoDB) (Period, error) {
 	// .Add(time.Hour * time.Duration(24))
-	t := time.Now()
+	location, _ := time.LoadLocation("Europe/Sofia")
+	t := time.Now().In(location)
 	// log.Println(t)
 	nowHour := t.Hour()
 	nowMinutes := t.Minute()

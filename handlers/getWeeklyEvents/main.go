@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log"
 
 	"github.com/kinghunter58/jwe"
 	qs "gitlab.com/zapochvam-ei-sq/s-org-backend/models/QS"
@@ -48,7 +49,8 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	// log.Println(p.Username, "username")
 
 	weeklyevents, err := events.GetWeeklyEvents(p.Username, conn)
-	// log.Println(weeklyevents, "weekly events")
+
+	log.Println(weeklyevents, "weekly events")
 
 	switch err {
 	case errors.ExpressionBuilderError:

@@ -115,12 +115,12 @@ func GetYearGrades(username string, conn *dynamodb.DynamoDB) ([]Grade, error) {
 	var endDate int64
 	if t.Month() >= 2 && t.Month() <= 8 {
 		startDate = time.Date(t.Year(), 2, 1, 0, 0, 0, 0, time.UTC).Unix()
-		endDate = time.Date(t.Year(), 8, 31, 23, 59, 59, 0, time.UTC).Unix()
+		endDate = time.Date(t.Year(), 9, 14, 23, 59, 59, 0, time.UTC).Unix()
 	} else if t.Month() == 1 {
-		startDate = time.Date(t.Year()-1, 9, 1, 0, 0, 0, 0, time.UTC).Unix()
+		startDate = time.Date(t.Year()-1, 9, 15, 0, 0, 0, 0, time.UTC).Unix()
 		endDate = time.Date(t.Year(), 1, 31, 23, 59, 59, 0, time.UTC).Unix()
 	} else {
-		startDate = time.Date(t.Year(), 9, 1, 0, 0, 0, 0, time.UTC).Unix()
+		startDate = time.Date(t.Year(), 9, 15, 0, 0, 0, 0, time.UTC).Unix()
 		endDate = time.Date(t.Year()+1, 1, 31, 23, 59, 59, 0, time.UTC).Unix()
 	}
 

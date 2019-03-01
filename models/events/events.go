@@ -80,11 +80,14 @@ func GetAllEvents(username string, conn *dynamodb.DynamoDB) ([]Event, error) {
 }
 
 func GetWeeklyEvents(username string, conn *dynamodb.DynamoDB) ([]Event, error) {
-	now := time.Now().Unix()
-	nowAfterTwoWeeks := time.Now().AddDate(0, 0, 7).Unix()
+	location, _ := time.LoadLocation("Europe/Sofia")
+	now := time.Now().In(location)
+	nowTime := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, location)
+	// nowAfterTwoWeeks := time.Now().AddDate(0, 0, 7).Unix()
+	nowAfterTwoWeeksTime := time.Date(now.Year(), now.Month(), now.Day()+7, 23, 59, 59, 0, location)
 
-	filt := expression.Name("timestamp").GreaterThan(expression.Value(now)).
-		And(expression.Name("timestamp").LessThan(expression.Value(nowAfterTwoWeeks))).
+	filt := expression.Name("timestamp").GreaterThanEqual(expression.Value(nowTime.Unix())).
+		And(expression.Name("timestamp").LessThan(expression.Value(nowAfterTwoWeeksTime.Unix()))).
 		And(expression.Name("username").Equal(expression.Value(username)))
 
 	proj := expression.NamesList(expression.Name("timestamp"), expression.Name("subject"), expression.Name("subjectType"), expression.Name("description"))
@@ -178,7 +181,7 @@ func DeleteEvent(username string, timestamp int64, conn *dynamodb.DynamoDB) erro
 
 func AdaptTimestamp(timestamp int64) int64 {
 	offSet, _ := time.ParseDuration("+02.00h")
-	now := time.Now().UTC().Add(offSet)
+	now := time.Now().Add(offSet)
 	testDate := time.Unix(timestamp, 0).UTC().Add(offSet)
 	// log.Println(now)
 	// log.Println(testDate)
