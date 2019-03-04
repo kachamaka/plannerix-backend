@@ -2,13 +2,11 @@ package profile
 
 import (
 	"crypto/rsa"
-	"fmt"
 	"log"
 	"regexp"
 
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
-	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/database"
 	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/errors"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -21,19 +19,32 @@ import (
 
 //Profile is the data structure of a user profile
 type Profile struct {
-	Username string `json:"username"`
-	Password string // hashed password
-	Email    string `json:"email"`
-	ID       string
+	Username      string          `json:"username"`
+	Password      string          `json:"password"`
+	Email         string          `json:"email"`
+	Notifications map[string]bool `json:"notifications"`
+	ID            string
 	// Add more fields here
 }
 
 func NewProfile(un, email, password, id string, conn *dynamodb.DynamoDB) (Profile, error) {
-	j := fmt.Sprintf(`{"username": "%v", "email": "%v","password": "%v", "id":"%v"}`, un, email, password, id)
-	body, err := database.MarshalJSONToDynamoMap(j)
+	notifications := map[string]bool{
+		"all":         true,
+		"events":      true,
+		"improvement": true,
+		"period":      true,
+	}
+	profile := map[string]interface{}{
+		"username":      un,
+		"email":         email,
+		"password":      password,
+		"id":            id,
+		"notifications": notifications,
+	}
+	body, err := dynamodbattribute.MarshalMap(profile)
 	if err != nil {
-		log.Println("line 31 error with marshal json to map")
-		return Profile{}, errors.MarshalJsonToMapError
+		log.Println("line 45 error with marshal map")
+		return Profile{}, errors.MarshalMapError
 	}
 	input := &dynamodb.PutItemInput{
 		TableName:           aws.String("s-org-users"),
@@ -42,7 +53,7 @@ func NewProfile(un, email, password, id string, conn *dynamodb.DynamoDB) (Profil
 	}
 	_, err = conn.PutItem(input)
 	if err != nil {
-		log.Println("line 42 error with put item")
+		log.Println("line 55 error with put item")
 		return Profile{}, err
 	}
 	return Profile{Username: un, Password: password, Email: email, ID: id}, nil
@@ -53,7 +64,7 @@ func GetProfile(username string, conn *dynamodb.DynamoDB) (Profile, error) {
 
 	filt := expression.Name("username").Equal(expression.Value(username))
 
-	proj := expression.NamesList(expression.Name("username"), expression.Name("email"))
+	proj := expression.NamesList(expression.Name("username"), expression.Name("email"), expression.Name("password"), expression.Name("notifications"))
 
 	expr, err := expression.NewBuilder().WithFilter(filt).WithProjection(proj).Build()
 

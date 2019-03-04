@@ -58,6 +58,7 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 		return qs.NewError(err.Error(), 204)
 	default:
 	}
+	profileCreds.Password = ""
 
 	res := Response{
 		Success: true,

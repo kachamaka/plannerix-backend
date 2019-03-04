@@ -62,7 +62,7 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 		return qs.NewError(errors.NotFound("User").Error(), 404)
 	}
 	if ok := p.CheckPassword(body.Password); !ok {
-		return qs.NewError("Password not correct", 102)
+		return qs.NewError("Грешна парола", 102)
 	}
 
 	key, err := jwe.GetPrivateKeyFromEnv("RSAPRIVATEKEY")
