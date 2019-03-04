@@ -32,13 +32,13 @@ func NotFound(something string) error {
 	return errors.New(something + " not found")
 } //404
 func Invalid(something string) error {
-	return errors.New(something + " invalid")
+	return errors.New("Грешка с " + something)
 } //400
 func DoesNotExist(something string) error {
-	return errors.New(something + " does not exist")
+	return errors.New(something + " не съществува")
 } //401
 func ErrorWith(something string) error {
-	return errors.New("Error with " + something)
+	return errors.New("Грешка с " + something)
 } //402
 
 // Invalid Username 101

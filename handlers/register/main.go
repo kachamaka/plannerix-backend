@@ -39,24 +39,24 @@ type Response struct {
 func (r Request) validate() (error, int) {
 	//Validate request and give some feedback
 	if !profile.UsernameReg.Match([]byte(r.Username)) {
-		return errors.Invalid("Username"), 101
+		return errors.Invalid("потребитлеското име"), 101
 	}
 	if !profile.PasswordReg.Match([]byte(r.Password)) {
-		return errors.Invalid("Password"), 102
+		return errors.Invalid("паролата"), 102
 	}
 	if len(r.Subjects) == 0 {
-		return errors.Invalid("Subjects"), 103
+		return errors.Invalid("предметите"), 103
 	}
 	if len(r.Schedule) != 5 {
-		return errors.Invalid("Schedule"), 104
+		return errors.Invalid("програмата"), 104
 	}
 	err := emailx.Validate(r.Email)
 	if err != nil {
-		return errors.Invalid("Email"), 105
+		return errors.Invalid("имейла"), 105
 	}
 	err = sendEmail(r.Email)
 	if err != nil {
-		return errors.DoesNotExist("email"), 106
+		return errors.DoesNotExist("Този имейл"), 106
 	}
 
 	return nil, 42
@@ -109,7 +109,7 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	id := createID(body.Username)
 	p, err := profile.NewProfile(body.Username, body.Email, string(hashed), id, conn)
 	if err != nil && strings.Contains(err.Error(), dynamodb.ErrCodeConditionalCheckFailedException) {
-		return qs.NewError("Username taken!", 108)
+		return qs.NewError("Потребителското име е заето!", 108)
 	} else if err == errors.MarshalJsonToMapError {
 		log.Println("Error with marshaling json to map", err)
 		return qs.NewError(err.Error(), 201)
