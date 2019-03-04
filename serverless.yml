@@ -171,6 +171,14 @@ functions:
           path: changeEmail
           method: post
           cors: true
+  getProfile:
+    handler: bin/getProfile
+    memorySize: 1024
+    events:
+      - http:
+          path: getProfile
+          method: post
+          cors: true
 resources:
   - ${file(resources/dynamodb.yml)}
 

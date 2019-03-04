@@ -19,6 +19,7 @@ build:
 	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/createEvent ./handlers/createEvent
 	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/changePassword ./handlers/changePassword
 	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/changeEmail ./handlers/changeEmail
+	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/getProfile ./handlers/getProfile
 
 clean:
 	rm -rf ./bin

@@ -7,6 +7,7 @@ import (
 	"regexp"
 
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/database"
 	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/errors"
 
@@ -20,9 +21,9 @@ import (
 
 //Profile is the data structure of a user profile
 type Profile struct {
-	Username string
+	Username string `json:"username"`
 	Password string // hashed password
-	Email    string
+	Email    string `json:"email"`
 	ID       string
 	// Add more fields here
 }
@@ -49,26 +50,39 @@ func NewProfile(un, email, password, id string, conn *dynamodb.DynamoDB) (Profil
 
 //GetProfile gets the profile of the user from the db
 func GetProfile(username string, conn *dynamodb.DynamoDB) (Profile, error) {
-	getItemInput := &dynamodb.GetItemInput{
-		TableName: aws.String("s-org-users"),
-		Key: map[string]*dynamodb.AttributeValue{
-			"username": {
-				S: aws.String(username),
-			},
-		},
-	}
-	output, err := conn.GetItem(getItemInput)
+
+	filt := expression.Name("username").Equal(expression.Value(username))
+
+	proj := expression.NamesList(expression.Name("username"), expression.Name("email"))
+
+	expr, err := expression.NewBuilder().WithFilter(filt).WithProjection(proj).Build()
+
 	if err != nil {
-		log.Println("line 60 error with output")
+		log.Println("line 78 couldn't build expression")
+		return Profile{}, errors.ExpressionBuilderError
+	}
+
+	getItemScanInput := &dynamodb.ScanInput{
+		TableName:                 aws.String("s-org-users"),
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		FilterExpression:          expr.Filter(),
+		ProjectionExpression:      expr.Projection(),
+	}
+
+	output, err := conn.Scan(getItemScanInput)
+	if err != nil {
+		log.Println("line 92 error with output")
 		return Profile{}, errors.OutputError
 	}
-	p := Profile{}
-	err = dynamodbattribute.UnmarshalMap(output.Item, &p)
+	p := []Profile{}
+	err = dynamodbattribute.UnmarshalListOfMaps(output.Items, &p)
 	if err != nil {
-		log.Println("line 66 error with unmarshal")
-		return Profile{}, errors.UnmarshalMapError
+		log.Println("line 99 error with unmarshal")
+		return Profile{}, errors.UnmarshalListOfMapsError
 	}
-	return p, nil
+	log.Println(p)
+	return p[0], nil
 }
 
 func ChangePassword(username string, newPassword string, conn *dynamodb.DynamoDB) error {
