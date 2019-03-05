@@ -65,8 +65,8 @@ func TestMain(t *testing.T) {
 	body := map[string]interface{}{
 		"username": "testingWE12",
 		"password": "secret12",
-		// "email":    "martilevski1@abv.bg",
-		"email":    "traqn02@gmail.com",
+		"email":    "martilevski1@abv.bg",
+		// "email":    "traqn02@gmail.com",
 		"subjects": subjects,
 		"schedule": schedule,
 	}

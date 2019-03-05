@@ -131,17 +131,11 @@ func sendEmail(email string) error {
 
 	auth = smtp.PlainAuth("", "plannerix.noreply@gmail.com", "kowalskiAnal", "smtp.gmail.com")
 	templateData := struct {
-		Name    string
-		URL     string
-		From    string
-		To      string
-		Subject string
+		Name string
+		URL  string
 	}{
-		Name:    "Тест",
-		URL:     "https://plannerix.eu",
-		From:    "plannerix.noreply@gmail.com",
-		To:      email,
-		Subject: "Деба",
+		Name: "Тест",
+		URL:  "https://plannerix.eu",
 	}
 	r := NewRequest([]string{email}, "Plannerix Account", "")
 	err := r.ParseTemplate("template.html", templateData)
