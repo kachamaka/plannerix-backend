@@ -1,12 +1,10 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"encoding/hex"
 	"fmt"
 	"hash/fnv"
-	"html/template"
 	"log"
 	"net/smtp"
 	"strings"
@@ -39,15 +37,6 @@ type Response struct {
 	Token   string `json:"token"`
 }
 
-type EmailRequest struct {
-	from    string
-	to      []string
-	subject string
-	body    string
-}
-
-var auth smtp.Auth
-
 func (r Request) validate() (error, int) {
 	//Validate request and give some feedback
 	if !profile.UsernameReg.Match([]byte(r.Username)) {
@@ -66,81 +55,29 @@ func (r Request) validate() (error, int) {
 	if err != nil {
 		return errors.Invalid("имейла"), 105
 	}
-	err = sendEmail(r.Email)
-	if err != nil {
-		return errors.DoesNotExist("Този имейл"), 106
-	}
 
 	return nil, 42
 }
 
-func NewRequest(to []string, subject, body string) *EmailRequest {
-	return &EmailRequest{
-		to:      to,
-		subject: subject,
-		body:    body,
-	}
-}
-
-func (r *EmailRequest) SendEmail() (bool, error) {
-	mime := "MIME-version: 1.0;\nContent-Type: text/plain; charset=\"UTF-8\";\n\n"
-	subject := "Subject: " + r.subject + "!\n"
-	msg := []byte(subject + mime + "\n" + r.body)
-	addr := "smtp.gmail.com:587"
-
-	if err := smtp.SendMail(addr, auth, "plannerix.noreply@gmail.com", r.to, msg); err != nil {
-		return false, err
-	}
-	return true, nil
-}
-
-func (r *EmailRequest) ParseTemplate(templateFileName string, data interface{}) error {
-	t, err := template.ParseFiles(templateFileName)
-	if err != nil {
-		return err
-	}
-	buf := new(bytes.Buffer)
-	if err = t.Execute(buf, data); err != nil {
-		return err
-	}
-	r.body = buf.String()
-	return nil
-}
-
 func sendEmail(email string) error {
-	// from := "s.org.noreply@gmail.com"
-	// from := "plannerix.noreply@gmail.com"
-	// pass := "kowalskiAnal"
-	// to := email
-
-	// mime := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
-	// subject := "Subject: Създаване на акаунт\n\n"
-	// msg := []byte(subject + mime + "<html><body><p>Акаунтът Ви беше създаден успешно!</p></body></html>")
-
-	// payload := "From: " + from + "\n" +
-	// 	"To: " + to + "\n" +
-	// 	"Subject: Създаване на акаунт\n\n" + string(msg)
-
-	// err := smtp.SendMail("smtp.gmail.com:587",
-	// 	smtp.PlainAuth("", from, pass, "smtp.gmail.com"),
-	// 	from, []string{to}, []byte(payload))
-
-	// if err != nil {
-	// 	return err
-	// }
-
-	auth = smtp.PlainAuth("", "plannerix.noreply@gmail.com", "kowalskiAnal", "smtp.gmail.com")
+	profile.Auth = smtp.PlainAuth("", "plannerix.noreply@gmail.com", "kowalskiAnal", "smtp.gmail.com")
 	templateData := struct {
-		Name string
-		URL  string
+		Name    string
+		URL     string
+		From    string
+		To      string
+		Subject string
 	}{
-		Name: "Тест",
-		URL:  "https://plannerix.eu",
+		Name:    "Тест",
+		URL:     "https://plannerix.eu",
+		From:    "plannerix.noreply@gmail.com",
+		To:      email,
+		Subject: "Създаване на акаунт",
 	}
-	r := NewRequest([]string{email}, "Plannerix Account", "")
+	r := profile.NewRequest(email, "Plannerix Account", "")
 	err := r.ParseTemplate("template.html", templateData)
-	if err := r.ParseTemplate("template.html", templateData); err == nil {
-		ok, _ := r.SendEmail()
+	if err == nil {
+		ok, _ := r.SendEmail(email)
 		fmt.Println(ok)
 		return nil
 	}
@@ -178,6 +115,16 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 		return qs.NewError(err.Error(), 201)
 	} else if err == errors.PutItemError {
 		return qs.NewError(err.Error(), 300)
+	}
+
+	err = sendEmail(body.Email)
+	log.Println("email err", err)
+	if err != nil {
+		err = profile.DeleteProfile(body.Username, conn)
+		if err != nil {
+			return qs.NewError(err.Error(), 99)
+		}
+		return qs.NewError(errors.DoesNotExist("Този имейл").Error(), 106)
 	}
 
 	err = subjects.NewSchedule(body.Username, body.Schedule, conn)

@@ -1,8 +1,11 @@
 package profile
 
 import (
+	"bytes"
 	"crypto/rsa"
+	"html/template"
 	"log"
+	"net/smtp"
 	"regexp"
 
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
@@ -25,6 +28,48 @@ type Profile struct {
 	Notifications map[string]bool `json:"notifications"`
 	ID            string
 	// Add more fields here
+}
+
+type EmailRequest struct {
+	from    string
+	to      string
+	subject string
+	body    string
+}
+
+var Auth smtp.Auth
+
+func NewRequest(to string, subject, body string) *EmailRequest {
+	return &EmailRequest{
+		to:      to,
+		subject: subject,
+		body:    body,
+	}
+}
+
+func (r *EmailRequest) SendEmail(email string) (bool, error) {
+	mime := "MIME-version: 1.0;\nContent-Type: text/plain; charset=\"UTF-8\";\n\n"
+	subject := "Subject: " + r.subject + "!\n"
+	msg := []byte(subject + mime + "\n" + r.body)
+	addr := "smtp.gmail.com:587"
+
+	if err := smtp.SendMail(addr, Auth, "plannerix.noreply@gmail.com", []string{email, "plannerix.noreply@gmail.com"}, msg); err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func (r *EmailRequest) ParseTemplate(templateFileName string, data interface{}) error {
+	t, err := template.ParseFiles(templateFileName)
+	if err != nil {
+		return err
+	}
+	buf := new(bytes.Buffer)
+	if err = t.Execute(buf, data); err != nil {
+		return err
+	}
+	r.body = buf.String()
+	return nil
 }
 
 func NewProfile(un, email, password, id string, conn *dynamodb.DynamoDB) (Profile, error) {
@@ -57,6 +102,23 @@ func NewProfile(un, email, password, id string, conn *dynamodb.DynamoDB) (Profil
 		return Profile{}, err
 	}
 	return Profile{Username: un, Password: password, Email: email, ID: id}, nil
+}
+
+func DeleteProfile(username string, conn *dynamodb.DynamoDB) error {
+	deleteItemInput := &dynamodb.DeleteItemInput{
+		TableName: aws.String("s-org-users"),
+		Key: map[string]*dynamodb.AttributeValue{
+			"username": {
+				S: aws.String(username),
+			},
+		},
+	}
+	_, err := conn.DeleteItem(deleteItemInput)
+	if err != nil {
+		log.Println("line 169 error with unmarshal")
+		return errors.DeleteItemError
+	}
+	return nil
 }
 
 //GetProfile gets the profile of the user from the db
