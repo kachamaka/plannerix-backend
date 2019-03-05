@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/hex"
+	"fmt"
 	"hash/fnv"
+	"html/template"
 	"log"
 	"net/smtp"
 	"strings"
@@ -36,6 +39,15 @@ type Response struct {
 	Token   string `json:"token"`
 }
 
+type EmailRequest struct {
+	from    string
+	to      []string
+	subject string
+	body    string
+}
+
+var auth smtp.Auth
+
 func (r Request) validate() (error, int) {
 	//Validate request and give some feedback
 	if !profile.UsernameReg.Match([]byte(r.Username)) {
@@ -62,35 +74,92 @@ func (r Request) validate() (error, int) {
 	return nil, 42
 }
 
-func sendEmail(email string) error {
-	from := "s.org.noreply@gmail.com"
-	pass := "kowalskiAnal"
-	to := email
+func NewRequest(to []string, subject, body string) *EmailRequest {
+	return &EmailRequest{
+		to:      to,
+		subject: subject,
+		body:    body,
+	}
+}
 
-	msg := "From: " + from + "\n" +
-		"To: " + to + "\n" +
-		"Subject: Account activation\n\n" +
-		"Account created successfully \n kowalski anal"
+func (r *EmailRequest) SendEmail() (bool, error) {
+	mime := "MIME-version: 1.0;\nContent-Type: text/plain; charset=\"UTF-8\";\n\n"
+	subject := "Subject: " + r.subject + "!\n"
+	msg := []byte(subject + mime + "\n" + r.body)
+	addr := "smtp.gmail.com:587"
 
-	err := smtp.SendMail("smtp.gmail.com:587",
-		smtp.PlainAuth("", from, pass, "smtp.gmail.com"),
-		from, []string{to}, []byte(msg))
+	if err := smtp.SendMail(addr, auth, "plannerix.noreply@gmail.com", r.to, msg); err != nil {
+		return false, err
+	}
+	return true, nil
+}
 
+func (r *EmailRequest) ParseTemplate(templateFileName string, data interface{}) error {
+	t, err := template.ParseFiles(templateFileName)
 	if err != nil {
-		log.Printf("smtp error: %s", err)
 		return err
 	}
-
-	log.Print("sent, visit http://foobarbazz.mailinator.com")
+	buf := new(bytes.Buffer)
+	if err = t.Execute(buf, data); err != nil {
+		return err
+	}
+	r.body = buf.String()
 	return nil
+}
+
+func sendEmail(email string) error {
+	// from := "s.org.noreply@gmail.com"
+	// from := "plannerix.noreply@gmail.com"
+	// pass := "kowalskiAnal"
+	// to := email
+
+	// mime := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
+	// subject := "Subject: Създаване на акаунт\n\n"
+	// msg := []byte(subject + mime + "<html><body><p>Акаунтът Ви беше създаден успешно!</p></body></html>")
+
+	// payload := "From: " + from + "\n" +
+	// 	"To: " + to + "\n" +
+	// 	"Subject: Създаване на акаунт\n\n" + string(msg)
+
+	// err := smtp.SendMail("smtp.gmail.com:587",
+	// 	smtp.PlainAuth("", from, pass, "smtp.gmail.com"),
+	// 	from, []string{to}, []byte(payload))
+
+	// if err != nil {
+	// 	return err
+	// }
+
+	auth = smtp.PlainAuth("", "plannerix.noreply@gmail.com", "kowalskiAnal", "smtp.gmail.com")
+	templateData := struct {
+		Name    string
+		URL     string
+		From    string
+		To      string
+		Subject string
+	}{
+		Name:    "Тест",
+		URL:     "https://plannerix.eu",
+		From:    "plannerix.noreply@gmail.com",
+		To:      email,
+		Subject: "Деба",
+	}
+	r := NewRequest([]string{email}, "Plannerix Account", "")
+	err := r.ParseTemplate("template.html", templateData)
+	if err := r.ParseTemplate("template.html", templateData); err == nil {
+		ok, _ := r.SendEmail()
+		fmt.Println(ok)
+		return nil
+	}
+	return err
+
 }
 
 func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	body := Request{}
 	err := qs.GetBody(req, &body)
-	log.Println("req - ", req)
-	log.Println("body - ", body)
-	log.Println("err - ", err)
+	// log.Println("req - ", req)
+	// log.Println("body - ", body)
+	// log.Println("err - ", err)
 	if err != nil {
 		log.Println(err)
 		return qs.NewError(errors.LambdaError.Error(), -1)
