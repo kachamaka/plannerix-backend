@@ -146,6 +146,36 @@ func ChangeEmail(username string, newEmail string, conn *dynamodb.DynamoDB) erro
 	return nil
 }
 
+func UpdateNotifications(username string, notifications map[string]bool, conn *dynamodb.DynamoDB) error {
+	notificationsMarshal, err := dynamodbattribute.MarshalMap(notifications)
+	if err != nil {
+		log.Println("line 124 err with marshal map", err)
+		return errors.MarshalMapError
+	}
+	updateItemInput := &dynamodb.UpdateItemInput{
+		TableName: aws.String("s-org-users"),
+		Key: map[string]*dynamodb.AttributeValue{
+			"username": {
+				S: aws.String(username),
+			},
+		},
+		UpdateExpression: aws.String("set notifications = :notifications"),
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":notifications": {
+				M: notificationsMarshal,
+			},
+		},
+		ReturnValues: aws.String(dynamodb.ReturnValueUpdatedNew),
+	}
+
+	_, err = conn.UpdateItem(updateItemInput)
+	if err != nil {
+		log.Println("line 148 err with update item", err)
+		return errors.UpdateItemError
+	}
+	return nil
+}
+
 //CheckPassword is self-explanatory returns true if success
 func (p Profile) CheckPassword(password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(p.Password), []byte(password))

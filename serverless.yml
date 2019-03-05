@@ -179,6 +179,14 @@ functions:
           path: getProfile
           method: post
           cors: true
+  updateNotifications:
+    handler: bin/updateNotifications
+    memorySize: 1024
+    events:
+      - http:
+          path: updateNotifications
+          method: post
+          cors: true
 resources:
   - ${file(resources/dynamodb.yml)}
 
