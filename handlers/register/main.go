@@ -75,7 +75,7 @@ func sendEmail(email string) error {
 		Subject: "Създаване на акаунт",
 	}
 	r := profile.NewRequest(email, "Plannerix Account", "")
-	err := r.ParseTemplate("template.html", templateData)
+	err := r.ParseTemplate(assets, "template.html", templateData)
 	if err == nil {
 		ok, _ := r.SendEmail(email)
 		fmt.Println(ok)

@@ -3,13 +3,14 @@ package profile
 import (
 	"bytes"
 	"crypto/rsa"
-	"html/template"
 	"log"
+	"net/http"
 	"net/smtp"
 	"regexp"
 
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
+	"github.com/shurcooL/httpfs/html/vfstemplate"
 	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/errors"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -59,8 +60,9 @@ func (r *EmailRequest) SendEmail(email string) (bool, error) {
 	return true, nil
 }
 
-func (r *EmailRequest) ParseTemplate(templateFileName string, data interface{}) error {
-	t, err := template.ParseFiles(templateFileName)
+func (r *EmailRequest) ParseTemplate(assets http.FileSystem, templateFileName string, data interface{}) error {
+	t, err := vfstemplate.ParseFiles(assets, nil, templateFileName)
+
 	if err != nil {
 		return err
 	}

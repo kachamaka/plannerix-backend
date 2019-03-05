@@ -1,9 +1,12 @@
 package main
 
 import (
+	"log"
+	"net/http"
 	"os"
 	"testing"
 
+	"github.com/shurcooL/vfsgen"
 	lambdat "gitlab.com/zapochvam-ei-sq/s-org-backend/models/lambda-testing"
 )
 
@@ -63,7 +66,7 @@ func TestMain(t *testing.T) {
 		},
 	}
 	body := map[string]interface{}{
-		"username": "testingWE25",
+		"username": "testingWE26",
 		"password": "secret12",
 		"email":    "martilevski1@abv.bg",
 		// "email":    "traqn02@gmail.com",
@@ -79,4 +82,14 @@ func TestMain(t *testing.T) {
 		t.Error(err)
 	}
 	t.Log(res)
+}
+
+func TestPackageFunc(t *testing.T) {
+	var fs http.FileSystem = http.Dir("./assets/")
+
+	err := vfsgen.Generate(fs, vfsgen.Options{})
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 }
