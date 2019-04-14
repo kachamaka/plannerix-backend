@@ -180,9 +180,9 @@ func DeleteEvent(username string, timestamp int64, conn *dynamodb.DynamoDB) erro
 }
 
 func AdaptTimestamp(timestamp int64) int64 {
-	offSet, _ := time.ParseDuration("+02.00h")
-	now := time.Now().Add(offSet)
-	testDate := time.Unix(timestamp, 0).UTC().Add(offSet)
+	location, _ := time.LoadLocation("Europe/Sofia")
+	now := time.Now().In(location)
+	testDate := time.Unix(timestamp, 0).In(location)
 	// log.Println(now)
 	// log.Println(testDate)
 	diff := testDate.YearDay() - now.YearDay()
