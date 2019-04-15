@@ -187,6 +187,22 @@ functions:
           path: updateNotifications
           method: post
           cors: true
+  registerUnverified:
+    handler: bin/registerUnverified
+    memorySize: 1024
+    events:
+      - http:
+          path: registerUnverified
+          method: post
+          cors: true
+  checkVerified:
+    handler: bin/checkVerified
+    memorySize: 1024
+    events:
+      - http:
+          path: checkVerified
+          method: post
+          cors: true
 resources:
   - ${file(resources/dynamodb.yml)}
 

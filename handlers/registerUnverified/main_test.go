@@ -66,11 +66,9 @@ func TestMain(t *testing.T) {
 	// 	},
 	// }
 	body := map[string]interface{}{
-		// "username": "testingWE26",
-		// "password": "secret12",
-		// "email":    "martilevski1@abv.bg",
-		"verificationKey": "$2a$12$cs2PFSJ0qdeU5eh4hSG7o.c29by6WiHJX2B6Cn6gKnstQtm1UVitO",
-		// "email":    "traqn02@gmail.com",
+		"username": "testProfile1",
+		"password": "secret12",
+		"email":    "martilevski1@abv.bg",
 		// "subjects": subjects,
 		// "schedule": schedule,
 	}

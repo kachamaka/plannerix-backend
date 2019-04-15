@@ -12,47 +12,52 @@ import (
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/kinghunter58/jwe"
+	"github.com/goware/emailx"
 	qs "gitlab.com/zapochvam-ei-sq/s-org-backend/models/QS"
 	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/database"
 	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/errors"
 	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/profile"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var conn *dynamodb.DynamoDB
 
 type Request struct {
-	VerificationKey string `json:"verificationKey"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Email    string `json:"email"`
+	// Subjects []string               `json:"subjects"`
+	// Schedule []subjects.ScheduleDay `json:"schedule"`
 }
 
 type Response struct {
-	Success bool   `json:"success"`
-	Token   string `json:"token"`
+	Success bool `json:"success"`
 }
 
 func (r Request) validate() (error, int) {
 	//Validate request and give some feedback
-	// if !profile.UsernameReg.Match([]byte(r.Username)) {
-	// 	return errors.Invalid("потребитлеското име"), 101
-	// }
-	// if !profile.PasswordReg.Match([]byte(r.Password)) {
-	// 	return errors.Invalid("паролата"), 102
-	// }
+	if !profile.UsernameReg.Match([]byte(r.Username)) {
+		return errors.Invalid("потребитлеското име"), 101
+	}
+	if !profile.PasswordReg.Match([]byte(r.Password)) {
+		return errors.Invalid("паролата"), 102
+	}
 	// if len(r.Subjects) == 0 {
 	// 	return errors.Invalid("предметите"), 103
 	// }
 	// if len(r.Schedule) != 5 {
 	// 	return errors.Invalid("програмата"), 104
 	// }
-	// err := emailx.Validate(r.Email)
-	// if err != nil {
-	// 	return errors.Invalid("имейла"), 105
-	// }
+
+	err := emailx.Validate(r.Email)
+	if err != nil {
+		return errors.Invalid("имейла"), 105
+	}
 
 	return nil, 42
 }
 
-func sendEmail(email string) error {
+func sendVerificationKeyEmail(email string, verificationKey string) error {
 	profile.Auth = smtp.PlainAuth("", "plannerix.noreply@gmail.com", "kowalskiAnal", "smtp.gmail.com")
 	templateData := struct {
 		Name    string
@@ -62,7 +67,7 @@ func sendEmail(email string) error {
 		Subject string
 	}{
 		Name:    "Тест",
-		URL:     "https://plannerix.eu",
+		URL:     "https://plannerix.eu/link?verificationKey=" + verificationKey,
 		From:    "plannerix.noreply@gmail.com",
 		To:      email,
 		Subject: "Създаване на акаунт",
@@ -91,16 +96,16 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	if err, code := body.validate(); err != nil {
 		return qs.NewError(err.Error(), code)
 	}
-	// hashed, err := bcrypt.GenerateFromPassword([]byte(body.Password), 12)
-	// if err != nil {
-	// 	log.Println("Error with hashing password:", err)
-	// 	return qs.NewError(errors.ErrorWith("hashing password").Error(), 107)
-	// }
+	hashed, err := bcrypt.GenerateFromPassword([]byte(body.Password), 12)
+	if err != nil {
+		log.Println("Error with hashing password:", err)
+		return qs.NewError(errors.ErrorWith("hashing password").Error(), 107)
+	}
 	// log.Println("hash", string(hashed))
 	// return qs.Response{}, nil
 	database.SetConn(&conn)
-	// id := createID(body.Username)
-	p, err := profile.NewProfile(body.VerificationKey, conn)
+	id := createID(body.Username)
+	verificationKey, err := profile.NewUnverifiedProfile(body.Username, body.Email, string(hashed), id, conn)
 	if err != nil && strings.Contains(err.Error(), dynamodb.ErrCodeConditionalCheckFailedException) {
 		return qs.NewError("Потребителското име е заето!", 108)
 	} else if err == errors.MarshalJsonToMapError {
@@ -110,27 +115,37 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 		return qs.NewError(err.Error(), 300)
 	}
 
-	// err = sendEmail(body.Email)
-	// log.Println("email err", err)
-	// if err != nil {
-	// 	err = profile.DeleteProfile(body.Username, conn)
-	// 	if err != nil {
-	// 		return qs.NewError(err.Error(), 99)
-	// 	}
-	// 	return qs.NewError(errors.DoesNotExist("Този имейл").Error(), 106)
+	err = sendVerificationKeyEmail(body.Email, verificationKey)
+	log.Println("email err", err)
+	if err != nil {
+		err = profile.DeleteUnverifiedProfile(body.Username, conn)
+		if err != nil {
+			return qs.NewError(err.Error(), 310)
+		}
+		return qs.NewError(errors.DoesNotExist("Този имейл").Error(), 106)
+	}
+
+	// err = subjects.NewSchedule(body.Username, body.Schedule, conn)
+
+	// switch err {
+	// case errors.MarshalMapError:
+	// 	return qs.NewError(err.Error(), 200)
+	// case errors.PutItemError:
+	// 	return qs.NewError(err.Error(), 301)
+	// default:
 	// }
 
-	key, err := jwe.GetPrivateKeyFromEnv("RSAPRIVATEKEY")
-	if err != nil {
-		return qs.NewError("Internal server error! User is registered succesfully!", 109)
-	}
-	token, err := p.GetToken(&key.PublicKey)
-	if err != nil {
-		return qs.NewError("Internal server error! User is registered succesfuly!", 110)
-	}
+	// err = subjects.NewSubjects(body.Username, body.Subjects, conn)
+	// switch err {
+	// case errors.MarshalMapError:
+	// 	return qs.NewError(err.Error(), 200)
+	// case errors.PutItemError:
+	// 	return qs.NewError(err.Error(), 303)
+	// default:
+	// }
+
 	res := Response{
 		Success: true,
-		Token:   token,
 	}
 	return qs.NewResponse(200, res)
 }
