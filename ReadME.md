@@ -28,6 +28,7 @@ Makefile has some script for making development easier.
 |107|Hash Error|---|---|307|UpdateItemError - Events|---|---|
 |108|Username taken|---|---|308|UpdateItemError - Schedules|---|---|
 |---|---|---|---|309|UpdateItemError - Users|---|---|
+|---|---|---|---|310|DeleteItemError - Users|---|---|
 <!-- 
 |Code|Message|
 |----|-------|
@@ -52,7 +53,11 @@ Makefile has some script for making development easier.
 |302|PutItemError - Grades|
 |303|PutItemError - Subjects|
 |304|PutItemError - Events|
-|305|DeleteItemError - Grades|
+|305|
+
+
+
+- Grades|
 |306|DeleteItemError - Events|
 |307|UpdateItemError - Events|
 |308|UpdateItemError - Schedules|
