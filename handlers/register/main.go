@@ -7,6 +7,7 @@ import (
 	"hash/fnv"
 	"log"
 	"net/smtp"
+	"reflect"
 	"strings"
 	"time"
 
@@ -101,6 +102,11 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	database.SetConn(&conn)
 	// id := createID(body.Username)
 	p, err := profile.NewProfile(body.VerificationKey, conn)
+
+	if reflect.DeepEqual(p, profile.Profile{}) && (err == nil) {
+		return qs.NewError("Потребителят е вече потвърден", 108)
+	}
+
 	if err != nil && strings.Contains(err.Error(), dynamodb.ErrCodeConditionalCheckFailedException) {
 		return qs.NewError("Потребителското име е заето!", 108)
 	} else if err == errors.MarshalJsonToMapError {

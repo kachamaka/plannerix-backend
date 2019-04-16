@@ -18,11 +18,12 @@ var conn *dynamodb.DynamoDB
 
 //todo grade struct
 
-//Request is the grade input request
+//Request is the verification input request
 type Request struct {
 	Username string `json:"username"`
 }
 
+//Response is
 type Response struct {
 	Success  bool   `json:"success"`
 	Message  string `json:"message"`
