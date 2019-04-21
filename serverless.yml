@@ -203,6 +203,14 @@ functions:
           path: checkVerified
           method: post
           cors: true
+  sendEmail:
+    handler: bin/sendEmail
+    memorySize: 1024
+    events:
+      - http:
+          path: sendEmail
+          method: post
+          cors: true
 resources:
   - ${file(resources/dynamodb.yml)}
 

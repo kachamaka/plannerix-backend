@@ -23,8 +23,8 @@ func TestHandler(t *testing.T) {
 	// log.Println(time.Unix(now/1000000000, 0).Date())
 	// return
 	body := map[string]interface{}{
-		"token":       "eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkExMjhHQ00ifQ.ELYmqymn2ieoa34fwDewpiohZOrRXFXaLRMFSKGmFlVmWJPrJD092sEoGXnZ7boKkICoNJExsvK4T-iT7W0OIRySfUPy2iW4jU8fwUHhLDPqR5lNeHEhvCeC8Ouoji4ODndobqJJMxd1Y0MxwlKRysTW1ufdtIgk-Sa12eY7XbQPIpTsGHEllNCeDV4l5yp7Sn7WJ5jOopRtLyTm36LbKulo7_VNqJBiweJY3UtlqyHpw0APd8_WE9_J7xLvq6andamD3fzCkIPiv9pdn5fNzBMc5fSoLUBOeSUavQENmpZyCUMB_4fojZK4uALyPLVD3jHjoA5fZ0fLwyftm3Gsiw.KXvE4QRtqauTwn-_.nvY6Dswijv7aXdCcZv2evjXnTwSiyNE.N6VfcfHqdDqIZC88TZx6dg",
-		"subject":     "MAIKA MU",
+		"token":       "eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkExMjhHQ00ifQ.c61wP5tNKMwGJYlKM1fCvF9q5TNza_e-54O5DhwMS_fouSOINFuIcsFniiCbSH8zns60IbwaLZuOoww0PDAdPuGny8lmD3I6T4apV7afnZVq2DfSXxwYugr2TUiKtuQLgXBob6Sk9xfQBLrrBTxzmtywJejcIuWJWYYNSZfR2DjY9apUXy9xi4uOsPLWg_8QejbROMhG_dmaAotMzl8x8WX3lb09AOnXCX6vJxx-INOPCarY581R2kAAtBVHqlDDDtX1YPgL8vdIHlgK7sFf2kF4juNYqRCHvM6FfKdT8V_RlvMWcqfN8lyxsy0nA08oHxhpmTEHIT4jt4T5DbyuTA.YgiMp2kzA_l2Oh-f.YBCgYTua2FEZevrQj6vCjazOgZvV2S60fRY.K5GjAfxd3Q7fBMhanHU36A",
+		"subject":     "MAIKA MU2",
 		"description": "Za warudo",
 		"subjectType": 1,
 		"timestamp":   now,

@@ -3,16 +3,15 @@ package main
 import (
 	"context"
 	"encoding/hex"
-	"fmt"
 	"hash/fnv"
 	"log"
-	"net/smtp"
 	"strings"
 	"time"
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/goware/emailx"
+	mailgun "github.com/mailgun/mailgun-go"
 	qs "gitlab.com/zapochvam-ei-sq/s-org-backend/models/QS"
 	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/database"
 	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/errors"
@@ -57,30 +56,56 @@ func (r Request) validate() (error, int) {
 	return nil, 42
 }
 
-func sendVerificationKeyEmail(email string, verificationKey string) error {
-	profile.Auth = smtp.PlainAuth("", "plannerix.noreply@gmail.com", "kowalskiAnal", "smtp.gmail.com")
-	templateData := struct {
-		Name    string
-		URL     string
-		From    string
-		To      string
-		Subject string
-	}{
-		Name:    "Тест",
-		URL:     "https://plannerix.eu/link?verificationKey=" + verificationKey,
-		From:    "plannerix.noreply@gmail.com",
-		To:      email,
-		Subject: "Създаване на акаунт",
-	}
-	r := profile.NewRequest(email, "Plannerix Account", "")
-	err := r.ParseTemplate(assets, "template.html", templateData)
-	if err == nil {
-		ok, _ := r.SendEmail(email)
-		fmt.Println(ok)
-		return nil
-	}
-	return err
+// func sendVerificationKeyEmail(email string, verificationKey string) error {
+// 	profile.Auth = smtp.PlainAuth("", "plannerix.noreply@gmail.com", "kowalskiAnal", "smtp.gmail.com")
+// 	templateData := struct {
+// 		Name    string
+// 		URL     string
+// 		From    string
+// 		To      string
+// 		Subject string
+// 	}{
+// 		Name:    "Тест",
+// 		URL:     "https://plannerix.eu/link?verificationKey=" + verificationKey,
+// 		From:    "plannerix.noreply@gmail.com",
+// 		To:      email,
+// 		Subject: "Създаване на акаунт",
+// 	}
+// 	r := profile.NewRequest(email, "Plannerix Account", "")
+// 	err := r.ParseTemplate(assets, "template.html", templateData)
+// 	if err == nil {
+// 		ok, _ := r.SendEmail(email)
+// 		fmt.Println(ok)
+// 		return nil
+// 	}
+// 	return err
 
+// }
+
+func sendVerificationKeyEmail(email string, verificationKey string) error {
+	// Create an instance of the Mailgun Client
+	mg := mailgun.NewMailgun("sandboxd15ea31d048e4f92b7225d795260ccb5.mailgun.org", "57d452adb41fbed21081e953187a2de7-3fb021d1-6915ac04")
+
+	sender := "plannerix.noreply@gmail.com"
+	subject := "TEST subject!"
+	body := "Hello from Mailgun Go!\n" + "You can verify your Plannerix account here:\n " + "https://plannerix.eu/link?verificationKey=" + verificationKey
+	recipient := email
+
+	// The message object allows you to add attachments and Bcc recipients
+	message := mg.NewMessage(sender, subject, body, recipient)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+
+	// Send the message	with a 10 second timeout
+	resp, id, err := mg.Send(ctx, message)
+
+	if err != nil {
+		return err
+	}
+
+	log.Println(id, resp)
+	return nil
 }
 
 func handler(ctx context.Context, req interface{}) (qs.Response, error) {

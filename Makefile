@@ -23,6 +23,7 @@ build:
 	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/updateNotifications ./handlers/updateNotifications
 	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/registerUnverified ./handlers/registerUnverified
 	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/checkVerified ./handlers/checkVerified
+	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/sendEmail ./handlers/sendEmail
 
 clean:
 	rm -rf ./bin

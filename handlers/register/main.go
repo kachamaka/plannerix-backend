@@ -3,10 +3,8 @@ package main
 import (
 	"context"
 	"encoding/hex"
-	"fmt"
 	"hash/fnv"
 	"log"
-	"net/smtp"
 	"reflect"
 	"strings"
 	"time"
@@ -53,31 +51,31 @@ func (r Request) validate() (error, int) {
 	return nil, 42
 }
 
-func sendEmail(email string) error {
-	profile.Auth = smtp.PlainAuth("", "plannerix.noreply@gmail.com", "kowalskiAnal", "smtp.gmail.com")
-	templateData := struct {
-		Name    string
-		URL     string
-		From    string
-		To      string
-		Subject string
-	}{
-		Name:    "Тест",
-		URL:     "https://plannerix.eu",
-		From:    "plannerix.noreply@gmail.com",
-		To:      email,
-		Subject: "Създаване на акаунт",
-	}
-	r := profile.NewRequest(email, "Plannerix Account", "")
-	err := r.ParseTemplate(assets, "template.html", templateData)
-	if err == nil {
-		ok, _ := r.SendEmail(email)
-		fmt.Println(ok)
-		return nil
-	}
-	return err
+// func sendEmail(email string) error {
+// 	profile.Auth = smtp.PlainAuth("", "plannerix.noreply@gmail.com", "kowalskiAnal", "smtp.gmail.com")
+// 	templateData := struct {
+// 		Name    string
+// 		URL     string
+// 		From    string
+// 		To      string
+// 		Subject string
+// 	}{
+// 		Name:    "Тест",
+// 		URL:     "https://plannerix.eu",
+// 		From:    "plannerix.noreply@gmail.com",
+// 		To:      email,
+// 		Subject: "Създаване на акаунт",
+// 	}
+// 	r := profile.NewRequest(email, "Plannerix Account", "")
+// 	err := r.ParseTemplate(assets, "template.html", templateData)
+// 	if err == nil {
+// 		ok, _ := r.SendEmail(email)
+// 		fmt.Println(ok)
+// 		return nil
+// 	}
+// 	return err
 
-}
+// }
 
 func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	body := Request{}
