@@ -96,3 +96,17 @@ Resources:
         ReadCapacityUnits: ${self:custom.tableThroughput}
         WriteCapacityUnits: ${self:custom.tableThroughput}
   
+  Groups:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: s-org-groups
+      AttributeDefinitions:
+        - AttributeName: group_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: group_id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: ${self:custom.tableThroughput}
+        WriteCapacityUnits: ${self:custom.tableThroughput}
+  

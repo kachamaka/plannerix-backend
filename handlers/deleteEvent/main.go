@@ -5,11 +5,11 @@ import (
 	"log"
 
 	"github.com/kinghunter58/jwe"
-	qs "gitlab.com/zapochvam-ei-sq/s-org-backend/models/QS"
-	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/database"
-	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/errors"
-	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/events"
-	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/profile"
+	qs "gitlab.com/zapochvam-ei-sq/plannerix-backend/models/QS"
+	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/database"
+	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/errors"
+	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/events"
+	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/profile"
 
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 

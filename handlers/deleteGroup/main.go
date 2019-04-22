@@ -8,7 +8,7 @@ import (
 	qs "gitlab.com/zapochvam-ei-sq/plannerix-backend/models/QS"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/database"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/errors"
-	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/events"
+	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/groups"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/profile"
 
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -22,13 +22,11 @@ var conn *dynamodb.DynamoDB
 
 //Request is the grade input request
 type Request struct {
-	Token       string `json:"token"`
-	Subject     string `json:"subject"`
-	Type        int    `json:"subjectType"`
-	Description string `json:"description"`
-	Timestamp   int64  `json:"timestamp"`
+	Token   string `json:"token"`
+	GroupID string `json:"group_id"`
 }
 
+//Response is the grade input request
 type Response struct {
 	Success bool   `json:"success"`
 	Message string `json:"message"`
@@ -53,17 +51,18 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	jwe.ParseEncryptedToken(body.Token, key, &p)
 	log.Println(p.Username, "username")
 
-	err = events.EditEvent(p.Username, body.Subject, body.Type, body.Description, body.Timestamp, conn)
+	err = groups.DeleteGroup(body.GroupID, p.Username, conn)
 
+	log.Println(err)
 	switch err {
-	case errors.UpdateItemError:
-		return qs.NewError(err.Error(), 307)
+	case errors.DeleteItemError:
+		return qs.NewError(err.Error(), 306)
 	default:
 	}
 
 	res := Response{
 		Success: true,
-		Message: "event updated successfully",
+		Message: "group deleted successfully",
 	}
 	return qs.NewResponse(200, res)
 }

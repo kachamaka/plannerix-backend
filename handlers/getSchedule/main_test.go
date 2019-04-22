@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	lambdat "gitlab.com/zapochvam-ei-sq/s-org-backend/models/lambda-testing"
+	lambdat "gitlab.com/zapochvam-ei-sq/plannerix-backend/models/lambda-testing"
 )
 
 func TestUser(t *testing.T) {

@@ -2,14 +2,14 @@ package main
 
 import (
 	"context"
-	"log"
 
-	"github.com/kinghunter58/jwe"
 	qs "gitlab.com/zapochvam-ei-sq/plannerix-backend/models/QS"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/database"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/errors"
-	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/events"
+	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/groups"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/profile"
+
+	"github.com/kinghunter58/jwe"
 
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 
@@ -22,11 +22,8 @@ var conn *dynamodb.DynamoDB
 
 //Request is the grade input request
 type Request struct {
-	Token       string `json:"token"`
-	Subject     string `json:"subject"`
-	Type        int    `json:"subjectType"`
-	Description string `json:"description"`
-	Timestamp   int64  `json:"timestamp"`
+	Token     string `json:"token"`
+	GroupName string `json:"group_name"`
 }
 
 type Response struct {
@@ -51,19 +48,20 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 
 	p := profile.Payload{}
 	jwe.ParseEncryptedToken(body.Token, key, &p)
-	log.Println(p.Username, "username")
 
-	err = events.EditEvent(p.Username, body.Subject, body.Type, body.Description, body.Timestamp, conn)
+	err = groups.CreateGroup(body.GroupName, p.Username, conn)
 
 	switch err {
-	case errors.UpdateItemError:
-		return qs.NewError(err.Error(), 307)
+	case errors.MarshalMapError:
+		return qs.NewError(err.Error(), 300)
+	case errors.PutItemError:
+		return qs.NewError(err.Error(), 304)
 	default:
 	}
 
 	res := Response{
 		Success: true,
-		Message: "event updated successfully",
+		Message: "group created successfully",
 	}
 	return qs.NewResponse(200, res)
 }

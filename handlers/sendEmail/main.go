@@ -10,8 +10,8 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	mailgun "github.com/mailgun/mailgun-go"
-	qs "gitlab.com/zapochvam-ei-sq/s-org-backend/models/QS"
-	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/errors"
+	qs "gitlab.com/zapochvam-ei-sq/plannerix-backend/models/QS"
+	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/errors"
 )
 
 var conn *dynamodb.DynamoDB

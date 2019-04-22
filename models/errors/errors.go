@@ -15,6 +15,7 @@ var (
 	OutputError              = errors.New("Output Error")                 //205
 	ExpressionBuilderError   = errors.New("Expression Builder Error")     //206
 	PutItemError             = errors.New("Error with PutItem")
+	DuplicationError         = errors.New("Duplication error") //111
 	//300 - users
 	//301 - schedules
 	//302 - grades

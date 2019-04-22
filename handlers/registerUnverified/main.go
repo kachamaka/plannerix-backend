@@ -12,10 +12,10 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/goware/emailx"
 	mailgun "github.com/mailgun/mailgun-go"
-	qs "gitlab.com/zapochvam-ei-sq/s-org-backend/models/QS"
-	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/database"
-	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/errors"
-	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/profile"
+	qs "gitlab.com/zapochvam-ei-sq/plannerix-backend/models/QS"
+	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/database"
+	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/errors"
+	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/profile"
 	"golang.org/x/crypto/bcrypt"
 )
 

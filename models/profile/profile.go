@@ -74,7 +74,78 @@ func (r *EmailRequest) ParseTemplate(assets http.FileSystem, templateFileName st
 	return nil
 }
 
-func NewProfile(un, email, password, id string, conn *dynamodb.DynamoDB) (Profile, error) {
+func NewUnverifiedProfile(un, email, password, id string, conn *dynamodb.DynamoDB) (string, error) {
+	verificationKey := generateVerificationKey()
+	profile := map[string]interface{}{
+		"username":        un,
+		"email":           email,
+		"password":        password,
+		"id":              id,
+		"verificationKey": verificationKey,
+	}
+	body, err := dynamodbattribute.MarshalMap(profile)
+	if err != nil {
+		log.Println("line 45 error with marshal map")
+		return "", errors.MarshalMapError
+	}
+	input := &dynamodb.PutItemInput{
+		TableName:           aws.String("s-org-unverified"),
+		ConditionExpression: aws.String("attribute_not_exists(username)"),
+		Item:                body,
+	}
+	_, err = conn.PutItem(input)
+	if err != nil {
+		log.Println("line 55 error with put item")
+		return "", err
+	}
+	return verificationKey, nil
+}
+
+func NewProfile(verificationKey string, conn *dynamodb.DynamoDB) (Profile, error) {
+
+	filt := expression.Name("verificationKey").Equal(expression.Value(verificationKey))
+
+	proj := expression.NamesList(expression.Name("username"), expression.Name("email"), expression.Name("password"), expression.Name("id"))
+
+	expr, err := expression.NewBuilder().WithFilter(filt).WithProjection(proj).Build()
+
+	if err != nil {
+		log.Println("line 78 couldn't build expression")
+		return Profile{}, errors.ExpressionBuilderError
+	}
+
+	getItemScanInput := &dynamodb.ScanInput{
+		TableName:                 aws.String("s-org-unverified"),
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		FilterExpression:          expr.Filter(),
+		ProjectionExpression:      expr.Projection(),
+	}
+
+	output, err := conn.Scan(getItemScanInput)
+	if err != nil {
+		log.Println("line 92 error with output")
+		return Profile{}, errors.OutputError
+	}
+
+	if *output.Count == int64(0) {
+		return Profile{}, nil
+	}
+
+	p := []Profile{}
+	err = dynamodbattribute.UnmarshalListOfMaps(output.Items, &p)
+	if err != nil {
+		log.Println("line 99 error with unmarshal")
+		return Profile{}, errors.UnmarshalListOfMapsError
+	}
+	unverifiedUser := p[0]
+	log.Println(unverifiedUser, "unverified")
+	// return Profile{}, nil
+
+	err = DeleteUnverifiedProfile(unverifiedUser.Username, conn)
+	if err != nil {
+		return Profile{}, err
+	}
 	notifications := map[string]bool{
 		"all":         true,
 		"events":      true,
@@ -82,10 +153,10 @@ func NewProfile(un, email, password, id string, conn *dynamodb.DynamoDB) (Profil
 		"period":      true,
 	}
 	profile := map[string]interface{}{
-		"username":      un,
-		"email":         email,
-		"password":      password,
-		"id":            id,
+		"username":      unverifiedUser.Username,
+		"email":         unverifiedUser.Email,
+		"password":      unverifiedUser.Password,
+		"id":            unverifiedUser.ID,
 		"notifications": notifications,
 	}
 	body, err := dynamodbattribute.MarshalMap(profile)
@@ -103,7 +174,118 @@ func NewProfile(un, email, password, id string, conn *dynamodb.DynamoDB) (Profil
 		log.Println("line 55 error with put item")
 		return Profile{}, err
 	}
-	return Profile{Username: un, Password: password, Email: email, ID: id}, nil
+	return Profile{Username: unverifiedUser.Username, Password: unverifiedUser.Password, Email: unverifiedUser.Email, ID: unverifiedUser.ID}, nil
+}
+
+func DeleteUnverifiedProfile(username string, conn *dynamodb.DynamoDB) error {
+	deleteItemInput := &dynamodb.DeleteItemInput{
+		TableName: aws.String("s-org-unverified"),
+		Key: map[string]*dynamodb.AttributeValue{
+			"username": {
+				S: aws.String(username),
+			},
+		},
+	}
+	_, err := conn.DeleteItem(deleteItemInput)
+	if err != nil {
+		log.Println("line 169 error with unmarshal")
+		return errors.DeleteItemError
+	}
+	return nil
+}
+
+func CheckVerified(username string, conn *dynamodb.DynamoDB) (bool, error) {
+
+	filt := expression.Name("username").Equal(expression.Value(username))
+
+	proj := expression.NamesList(expression.Name("username"))
+
+	expr, err := expression.NewBuilder().WithFilter(filt).WithProjection(proj).Build()
+
+	if err != nil {
+		log.Println("line 78 couldn't build expression")
+		return false, errors.ExpressionBuilderError
+	}
+
+	getItemScanInput := &dynamodb.ScanInput{
+		TableName:                 aws.String("s-org-unverified"),
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		FilterExpression:          expr.Filter(),
+		ProjectionExpression:      expr.Projection(),
+	}
+
+	output, err := conn.Scan(getItemScanInput)
+	if err != nil {
+		log.Println("line 92 error with output")
+		return false, errors.OutputError
+	}
+	if *output.Count != int64(0) {
+		return false, nil
+	}
+
+	return true, nil
+}
+
+func ChangePasswordReset(Username string, newPassword string, conn *dynamodb.DynamoDB) (string, error) {
+	updateItemInput := &dynamodb.UpdateItemInput{
+		TableName: aws.String("s-org-users"),
+		Key: map[string]*dynamodb.AttributeValue{
+			"username": {
+				S: aws.String(Username),
+			},
+		},
+		UpdateExpression: aws.String("set password = :password"),
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":password": {
+				S: aws.String(newPassword),
+			},
+		},
+		ReturnValues: aws.String(dynamodb.ReturnValueUpdatedNew),
+	}
+
+	_, err := conn.UpdateItem(updateItemInput)
+	if err != nil {
+		log.Println("line 107 error with update item")
+		log.Println(err)
+		return "", errors.UpdateItemError
+	}
+
+	filt := expression.Name("username").Equal(expression.Value(Username))
+
+	proj := expression.NamesList(expression.Name("username"), expression.Name("email"))
+
+	expr, err := expression.NewBuilder().WithFilter(filt).WithProjection(proj).Build()
+
+	if err != nil {
+		log.Println("line 78 couldn't build expression")
+		return "", errors.ExpressionBuilderError
+	}
+
+	getItemScanInput := &dynamodb.ScanInput{
+		TableName:                 aws.String("s-org-users"),
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		FilterExpression:          expr.Filter(),
+		ProjectionExpression:      expr.Projection(),
+	}
+
+	output, err := conn.Scan(getItemScanInput)
+	if err != nil {
+		log.Println("line 92 error with output")
+		return "", errors.OutputError
+	}
+
+	users := []Profile{}
+	err = dynamodbattribute.UnmarshalListOfMaps(output.Items, &users)
+	if err != nil {
+		log.Println("line 99 error with unmarshal")
+		return "", errors.UnmarshalListOfMapsError
+	}
+	log.Println(users[0])
+	email := users[0].Email
+
+	return email, nil
 }
 
 func DeleteProfile(username string, conn *dynamodb.DynamoDB) error {
@@ -240,6 +422,27 @@ func UpdateNotifications(username string, notifications map[string]bool, conn *d
 	return nil
 }
 
+func CheckUserExists(username string, conn *dynamodb.DynamoDB) (bool, error) {
+	getItemInput := &dynamodb.QueryInput{
+		TableName:              aws.String("s-org-users"),
+		KeyConditionExpression: aws.String("username = :username"),
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":username": {
+				S: aws.String(username),
+			},
+		},
+	}
+	output, err := conn.Query(getItemInput)
+	if err != nil {
+		log.Println("line 82", err)
+		return false, errors.OutputError
+	}
+	if *output.Count <= int64(0) {
+		return false, nil
+	}
+	return true, nil
+}
+
 //CheckPassword is self-explanatory returns true if success
 func (p Profile) CheckPassword(password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(p.Password), []byte(password))
@@ -264,6 +467,11 @@ func (p Profile) GetToken(pk *rsa.PublicKey) (string, error) {
 	payl := p.newPayload()
 	// fmt.Println(payl)
 	return jwe.GetEncryptedToken(payl, pk)
+}
+
+func generateVerificationKey() string {
+	verificationKey, _ := bcrypt.GenerateFromPassword([]byte("kowalski anal"), 12)
+	return string(verificationKey)
 }
 
 var UsernameReg = regexp.MustCompile("^\\w.{3,16}$")

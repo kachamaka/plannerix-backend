@@ -4,12 +4,11 @@ import (
 	"context"
 	"log"
 
-	qs "gitlab.com/zapochvam-ei-sq/s-org-backend/models/QS"
-	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/database"
-	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/errors"
-	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/profile"
-
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	qs "gitlab.com/zapochvam-ei-sq/plannerix-backend/models/QS"
+	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/database"
+	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/errors"
+	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/profile"
 
 	"github.com/aws/aws-lambda-go/lambda"
 )

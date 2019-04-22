@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/shurcooL/vfsgen"
-	lambdat "gitlab.com/zapochvam-ei-sq/s-org-backend/models/lambda-testing"
+	lambdat "gitlab.com/zapochvam-ei-sq/plannerix-backend/models/lambda-testing"
 )
 
 func TestMain(t *testing.T) {
