@@ -29,6 +29,7 @@ Makefile has some script for making development easier.
 |108|Username taken|---|---|308|UpdateItemError - Schedules|---|---|
 |109|Email Error|---|---|309|UpdateItemError - Users|---|---|
 |110|User does not exist|---|---|310|DeleteItemError - Users|---|---|
+|111|Duplication Error|---|---|---|---|---|---|
 <!-- 
 |Code|Message|
 |----|-------|
