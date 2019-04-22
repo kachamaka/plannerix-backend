@@ -28,7 +28,7 @@ Makefile has some script for making development easier.
 |107|Hash Error|---|---|307|UpdateItemError - Events|---|---|
 |108|Username taken|---|---|308|UpdateItemError - Schedules|---|---|
 |109|Email Error|---|---|309|UpdateItemError - Users|---|---|
-|---|---|---|---|310|DeleteItemError - Users|---|---|
+|110|User does not exist|---|---|310|DeleteItemError - Users|---|---|
 <!-- 
 |Code|Message|
 |----|-------|
