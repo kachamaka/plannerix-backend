@@ -53,7 +53,27 @@ func CreateGroup(groupName string, owner string, conn *dynamodb.DynamoDB) error 
 	return nil
 }
 
-func AddMember(groupID string, owner string, member string, conn *dynamodb.DynamoDB) error {
+func DeleteGroup(groupID string, owner string, conn *dynamodb.DynamoDB) error {
+	deleteItemInput := &dynamodb.DeleteItemInput{
+		TableName: aws.String("s-org-groups"),
+		Key: map[string]*dynamodb.AttributeValue{
+			"group_id": {
+				S: aws.String(groupID),
+			},
+			"owner": {
+				S: aws.String(owner),
+			},
+		},
+	}
+	_, err := conn.DeleteItem(deleteItemInput)
+	if err != nil {
+		log.Println("line 127 error with delete item", err)
+		return errors.DeleteItemError
+	}
+	return nil
+}
+
+func getMembers(groupID string, owner string, conn *dynamodb.DynamoDB) ([]string, error) {
 
 	filt := expression.Name("group_id").Equal(expression.Value(groupID)).
 		And(expression.Name("owner").Equal(expression.Value(owner)))
@@ -64,7 +84,7 @@ func AddMember(groupID string, owner string, member string, conn *dynamodb.Dynam
 
 	if err != nil {
 		log.Println("line 78 couldn't build expression")
-		return errors.ExpressionBuilderError
+		return nil, errors.ExpressionBuilderError
 	}
 
 	getItemScanInput := &dynamodb.ScanInput{
@@ -78,18 +98,26 @@ func AddMember(groupID string, owner string, member string, conn *dynamodb.Dynam
 	output, err := conn.Scan(getItemScanInput)
 	if err != nil {
 		log.Println("line 92 error with output")
-		return errors.OutputError
+		return nil, errors.OutputError
 	}
 
 	group := []Group{}
 	err = dynamodbattribute.UnmarshalListOfMaps(output.Items, &group)
 	if err != nil {
 		log.Println("line 99 error with unmarshal")
-		return errors.UnmarshalListOfMapsError
+		return nil, errors.UnmarshalListOfMapsError
 	}
-	// log.Println(group[0], "group")
-
 	members := group[0].Members
+	return members, nil
+}
+
+func AddMember(groupID string, owner string, member string, conn *dynamodb.DynamoDB) error {
+	members, err := getMembers(groupID, owner, conn)
+
+	if err != nil {
+		return err
+	}
+
 	if contains(members, member) == true {
 		return errors.DuplicationError
 	}
@@ -131,8 +159,22 @@ func AddMember(groupID string, owner string, member string, conn *dynamodb.Dynam
 	return nil
 }
 
-func DeleteGroup(groupID string, owner string, conn *dynamodb.DynamoDB) error {
-	deleteItemInput := &dynamodb.DeleteItemInput{
+func DeleteMember(groupID string, owner string, member string, conn *dynamodb.DynamoDB) error {
+
+	members, err := getMembers(groupID, owner, conn)
+	if err != nil {
+		return err
+	}
+
+	for i, m := range members {
+		if m == member {
+			members = append(members[:i], members[i+1:]...)
+		}
+	}
+
+	membersMarshal, err := dynamodbattribute.MarshalList(members)
+
+	updateItemInput := &dynamodb.UpdateItemInput{
 		TableName: aws.String("s-org-groups"),
 		Key: map[string]*dynamodb.AttributeValue{
 			"group_id": {
@@ -142,11 +184,19 @@ func DeleteGroup(groupID string, owner string, conn *dynamodb.DynamoDB) error {
 				S: aws.String(owner),
 			},
 		},
+		UpdateExpression: aws.String("set members = :members"),
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":members": {
+				L: membersMarshal,
+			},
+		},
+		ReturnValues: aws.String(dynamodb.ReturnValueUpdatedNew),
 	}
-	_, err := conn.DeleteItem(deleteItemInput)
+
+	_, err = conn.UpdateItem(updateItemInput)
 	if err != nil {
-		log.Println("line 127 error with delete item", err)
-		return errors.DeleteItemError
+		log.Println("line 148 err with update item", err)
+		return errors.UpdateItemError
 	}
 	return nil
 }
