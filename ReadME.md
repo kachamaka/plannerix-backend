@@ -1,4 +1,4 @@
-# S-Org #
+# Plannerix #
 
 In `/handlers` there is the code to use for the api endpoints.
 
