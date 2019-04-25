@@ -3,6 +3,7 @@ package profile
 import (
 	"bytes"
 	"crypto/rsa"
+	"fmt"
 	"log"
 	"net/http"
 	"net/smtp"
@@ -310,7 +311,7 @@ func GetProfile(username string, conn *dynamodb.DynamoDB) (Profile, error) {
 
 	filt := expression.Name("username").Equal(expression.Value(username))
 
-	proj := expression.NamesList(expression.Name("username"), expression.Name("email"), expression.Name("password"), expression.Name("notifications"))
+	proj := expression.NamesList(expression.Name("username"), expression.Name("email"), expression.Name("password"), expression.Name("id"), expression.Name("notifications"))
 
 	expr, err := expression.NewBuilder().WithFilter(filt).WithProjection(proj).Build()
 
@@ -456,16 +457,17 @@ func (p Profile) CheckPassword(password string) bool {
 //Payload is the data that gets encrypted in the token
 type Payload struct {
 	Username string `json:"username"`
+	ID       string `json:"id"`
 }
 
 func (p Profile) newPayload() Payload {
-	return Payload{Username: p.Username}
+	return Payload{Username: p.Username, ID: p.ID}
 }
 
 //GetToken creates a jwe token from the profile data
 func (p Profile) GetToken(pk *rsa.PublicKey) (string, error) {
 	payl := p.newPayload()
-	// fmt.Println(payl)
+	fmt.Println(payl)
 	return jwe.GetEncryptedToken(payl, pk)
 }
 

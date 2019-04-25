@@ -51,6 +51,7 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	database.SetConn(&conn)
 	p, err := profile.GetProfile(body.Username, conn)
 	// log.Printf("Profile %+v:  %+v\n", p, body, req)
+	log.Println(p)
 	switch err {
 	case errors.OutputError:
 		return qs.NewError(err.Error(), 205)

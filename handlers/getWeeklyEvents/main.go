@@ -48,7 +48,7 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	jwe.ParseEncryptedToken(body.Token, key, &p)
 	// log.Println(p.Username, "username")
 
-	weeklyevents, err := events.GetWeeklyEvents(p.Username, conn)
+	weeklyevents, err := events.GetWeeklyEvents(p.ID, conn)
 
 	log.Println(weeklyevents, "weekly events")
 

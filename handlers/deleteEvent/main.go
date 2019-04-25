@@ -51,7 +51,7 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	jwe.ParseEncryptedToken(body.Token, key, &p)
 	log.Println(p.Username, "username")
 
-	err = events.DeleteEvent(p.Username, body.Timestamp, conn)
+	err = events.DeleteEvent(p.ID, body.Timestamp, conn)
 
 	switch err {
 	case errors.DeleteItemError:
