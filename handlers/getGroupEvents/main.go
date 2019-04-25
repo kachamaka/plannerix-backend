@@ -21,7 +21,8 @@ var conn *dynamodb.DynamoDB
 
 //Request is the grade input request
 type Request struct {
-	Token string `json:"token"`
+	Token   string `json:"token"`
+	GroupID string `json:"group_id"`
 }
 
 type Response struct {
@@ -49,7 +50,7 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	jwe.ParseEncryptedToken(body.Token, key, &p)
 	log.Println(p.Username, "username")
 
-	e, err := events.GetAllEvents(p.ID, conn)
+	e, err := events.GetAllEvents(body.GroupID, conn)
 	log.Println(e, "all events")
 	// log.Println(time.Unix(e[0].Timestamp, 0))
 	// return qs.Response{}, nil

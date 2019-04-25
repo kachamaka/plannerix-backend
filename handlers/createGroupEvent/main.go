@@ -3,14 +3,16 @@ package main
 import (
 	"context"
 	"log"
+	"time"
 
-	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/kinghunter58/jwe"
 	qs "gitlab.com/zapochvam-ei-sq/plannerix-backend/models/QS"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/database"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/errors"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/events"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/profile"
+
+	"github.com/aws/aws-sdk-go/service/dynamodb"
 
 	"github.com/aws/aws-lambda-go/lambda"
 )
@@ -21,13 +23,17 @@ var conn *dynamodb.DynamoDB
 
 //Request is the grade input request
 type Request struct {
-	Token string `json:"token"`
+	Token       string `json:"token"`
+	GroupID     string `json:"group_id"`
+	Subject     string `json:"subject"`
+	Type        int    `json:"subjectType"`
+	Description string `json:"description"`
+	Timestamp   int64  `json:"timestamp"`
 }
 
 type Response struct {
-	Success bool           `json:"success"`
-	Message string         `json:"message"`
-	Events  []events.Event `json:"events"`
+	Success bool   `json:"success"`
+	Message string `json:"message"`
 }
 
 func handler(ctx context.Context, req interface{}) (qs.Response, error) {
@@ -47,27 +53,25 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 
 	p := profile.Payload{}
 	jwe.ParseEncryptedToken(body.Token, key, &p)
-	log.Println(p.Username, "username")
 
-	e, err := events.GetAllEvents(p.ID, conn)
-	log.Println(e, "all events")
-	// log.Println(time.Unix(e[0].Timestamp, 0))
+	body.Timestamp = events.AdaptTimestamp(body.Timestamp)
+	log.Println(time.Unix(body.Timestamp, 0))
+
+	// log.Println(p.ID)
 	// return qs.Response{}, nil
+	err = events.CreateEvent(body.GroupID, body.Subject, body.Type, body.Description, body.Timestamp, conn)
 
 	switch err {
-	case errors.ExpressionBuilderError:
-		return qs.NewError(err.Error(), 206)
-	case errors.OutputError:
-		return qs.NewError(err.Error(), 205)
-	case errors.UnmarshalListOfMapsError:
-		return qs.NewError(err.Error(), 204)
+	case errors.MarshalJsonToMapError:
+		return qs.NewError(err.Error(), 201)
+	case errors.PutItemError:
+		return qs.NewError(err.Error(), 304)
 	default:
 	}
 
 	res := Response{
 		Success: true,
-		Message: "events fetched successfully",
-		Events:  e,
+		Message: "event created successfully",
 	}
 	return qs.NewResponse(200, res)
 }

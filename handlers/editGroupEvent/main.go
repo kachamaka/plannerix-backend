@@ -4,13 +4,14 @@ import (
 	"context"
 	"log"
 
-	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/kinghunter58/jwe"
 	qs "gitlab.com/zapochvam-ei-sq/plannerix-backend/models/QS"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/database"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/errors"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/events"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/profile"
+
+	"github.com/aws/aws-sdk-go/service/dynamodb"
 
 	"github.com/aws/aws-lambda-go/lambda"
 )
@@ -21,13 +22,17 @@ var conn *dynamodb.DynamoDB
 
 //Request is the grade input request
 type Request struct {
-	Token string `json:"token"`
+	Token       string `json:"token"`
+	GroupID     string `json:"group_id"`
+	Subject     string `json:"subject"`
+	Type        int    `json:"subjectType"`
+	Description string `json:"description"`
+	Timestamp   int64  `json:"timestamp"`
 }
 
 type Response struct {
-	Success bool           `json:"success"`
-	Message string         `json:"message"`
-	Events  []events.Event `json:"events"`
+	Success bool   `json:"success"`
+	Message string `json:"message"`
 }
 
 func handler(ctx context.Context, req interface{}) (qs.Response, error) {
@@ -49,25 +54,17 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	jwe.ParseEncryptedToken(body.Token, key, &p)
 	log.Println(p.Username, "username")
 
-	e, err := events.GetAllEvents(p.ID, conn)
-	log.Println(e, "all events")
-	// log.Println(time.Unix(e[0].Timestamp, 0))
-	// return qs.Response{}, nil
+	err = events.EditEvent(body.GroupID, body.Subject, body.Type, body.Description, body.Timestamp, conn)
 
 	switch err {
-	case errors.ExpressionBuilderError:
-		return qs.NewError(err.Error(), 206)
-	case errors.OutputError:
-		return qs.NewError(err.Error(), 205)
-	case errors.UnmarshalListOfMapsError:
-		return qs.NewError(err.Error(), 204)
+	case errors.UpdateItemError:
+		return qs.NewError(err.Error(), 307)
 	default:
 	}
 
 	res := Response{
 		Success: true,
-		Message: "events fetched successfully",
-		Events:  e,
+		Message: "event updated successfully",
 	}
 	return qs.NewResponse(200, res)
 }
