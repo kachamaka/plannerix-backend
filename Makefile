@@ -32,5 +32,9 @@ deploy: clean build
 	sls deploy --noDeploy
 	./go-serverless
 	aws cloudformation deploy --template-file ./.serverless/cloudformation-template-update-stack.json --stack-name s-org --s3-bucket s-org-kinghunter58 --force-upload
-db: 
-	dynamodb.sh
+
+db-t:
+	java -Djava.library.path=/home/trayan/Code/dynamodb/DynamoDBLocal_lib -jar /home/trayan/Code/dynamodb/DynamoDBLocal.jar -dbPath ./resources/ -sharedDb
+
+db-local:
+	dynamodb-admin -o

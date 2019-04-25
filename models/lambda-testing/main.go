@@ -34,7 +34,11 @@ func InvokeHandler(handler interface{}, request interface{}) (string, error) {
 			break
 		}
 	}
-	res, err := golambdainvoke.Run(9000, request)
+	input := golambdainvoke.Input{
+		Port:    9000,
+		Payload: request,
+	}
+	res, err := golambdainvoke.Run(input)
 	if err != nil && err.Error() != string([]byte{60, 110, 105, 108, 62, 10}) {
 		return "", err
 	}

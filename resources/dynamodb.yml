@@ -110,3 +110,34 @@ Resources:
         ReadCapacityUnits: ${self:custom.tableThroughput}
         WriteCapacityUnits: ${self:custom.tableThroughput}
   
+  NewSubjects:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: plannerix-subjects
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: ${self:custom.tableThroughput}
+        WriteCapacityUnits: ${self:custom.tableThroughput}
+
+  NewSchedules:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: plannerix-schedule
+      AttributeDefinitions:
+        - AttributeName: user_id
+          AttributeType: S
+        - AttributeNameL: day
+          AttributeType: N
+      KeySchema:
+        - AttributeName: user_id
+          KeyType: HASH
+        - AttributeName: day
+          KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: ${self:custom.tableThroughput}
+        WriteCapacityUnits: ${self:custom.tableThroughput}
