@@ -2,13 +2,14 @@ package main
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
-	db "github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/kinghunter58/jwe"
-
+	errorsWrap "github.com/pkg/errors"
 	qs "gitlab.com/zapochvam-ei-sq/plannerix-backend/models/QS"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/database"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/errors"
@@ -18,6 +19,9 @@ import (
 
 var conn *dynamodb.DynamoDB
 
+//todo grade struct
+
+//Request is the grade input request
 type Request struct {
 	Token    string             `json:"token"`
 	Subjects []schedule.Subject `json:"subjects"`
@@ -32,6 +36,8 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	body := Request{}
 	err := qs.GetBody(req, &body)
 
+	fmt.Println(req)
+	fmt.Println(body)
 	if err != nil {
 		return qs.NewError(errors.LambdaError.Error(), -1)
 	}
@@ -39,39 +45,36 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	key, err := jwe.GetPrivateKeyFromEnv("RSAPRIVATEKEY")
 
 	if err != nil {
-		return qs.NewError("Internal Server Error", 6)
+		return qs.NewError(errors.KeyError.Error(), 109)
 	}
+	fmt.Println(body)
 
 	p := profile.Payload{}
-	err = jwe.ParseEncryptedToken(body.Token, key, &p)
-	if err != nil {
-		return qs.NewError("Internal Server Error", 6) // Fix output
-	}
+	jwe.ParseEncryptedToken(body.Token, key, &p)
 	database.SetConn(&conn)
 	for i := range body.Subjects {
-		input := &db.UpdateItemInput{
-			TableName: aws.String("plannerix-subjects"),
-			Key: map[string]*dynamodb.AttributeValue{
-				"id":      {S: aws.String(body.Subjects[i].ID)},
-				"user_id": {S: aws.String(p.ID)},
-			},
+		body.Subjects[i].ID = schedule.CreateID(p.ID)
+		body.Subjects[i].UserID = p.ID
+		inputBody, err := dynamodbattribute.MarshalMap(body.Subjects[i])
+		if err != nil {
+			return qs.NewError(errorsWrap.Wrapf(err, "Could not marshal body of %v, index: %v", body.Subjects[i].Name, i).Error(), 300)
+		}
+		input := &dynamodb.PutItemInput{
+			Item:                inputBody,
+			TableName:           aws.String("plannerix-subjects"),
+			ConditionExpression: aws.String("attribute_not_exists(#name)"),
 			ExpressionAttributeNames: map[string]*string{
 				"#name": aws.String("name"),
 			},
-			ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
-				":newName": {S: aws.String(body.Subjects[i].Name)},
-			},
-			UpdateExpression: aws.String("set #name = :newName"),
 		}
-		_, err := conn.UpdateItem(input)
+		_, err = conn.PutItem(input)
 		if err != nil {
-			return qs.NewError(err.Error(), 304)
+			return qs.NewError(errorsWrap.Wrapf(err, "Could not put item in database | V: %v ; I: %v; ID: %v", body.Subjects[i].Name, i, body.Subjects[i].ID).Error(), 304)
 		}
 	}
-
 	res := Response{
 		Success: true,
-		Message: "subjects updated successfully",
+		Message: "subjects created successfully",
 	}
 	return qs.NewResponse(200, res)
 }

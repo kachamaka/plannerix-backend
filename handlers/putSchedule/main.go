@@ -2,25 +2,24 @@ package main
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/kinghunter58/jwe"
+
 	qs "gitlab.com/zapochvam-ei-sq/plannerix-backend/models/QS"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/database"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/errors"
-	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/groups"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/profile"
+	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/schedule"
 )
 
 var conn *dynamodb.DynamoDB
 
-//todo grade struct
-
-//Request is the grade input request
 type Request struct {
-	Token     string `json:"token"`
-	GroupName string `json:"group_name"`
+	Token string                            `json:"token"`
+	Data  map[string]schedule.DailySchedule `json:"schedule"`
 }
 
 type Response struct {
@@ -30,35 +29,46 @@ type Response struct {
 
 func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	body := Request{}
+	fmt.Println(req)
 	err := qs.GetBody(req, &body)
+	fmt.Println(body)
 
 	if err != nil {
 		return qs.NewError(errors.LambdaError.Error(), -1)
 	}
 
-	database.SetConn(&conn)
 	key, err := jwe.GetPrivateKeyFromEnv("RSAPRIVATEKEY")
 
 	if err != nil {
-		return qs.NewError(errors.KeyError.Error(), 109)
+		return qs.NewError("Internal Server Error", 6)
 	}
 
 	p := profile.Payload{}
-	jwe.ParseEncryptedToken(body.Token, key, &p)
+	err = jwe.ParseEncryptedToken(body.Token, key, &p)
+	if err != nil {
+		return qs.NewError("Internal Server Error", 6) // Fix output
+	}
+	database.SetConn(&conn)
+	sch := schedule.Schedule{
+		Schedule: body.Data,
+		UserID:   p.ID,
+		Conn:     conn,
+	}
+	// fmt.Println("henlo")
+	sch.LoadSubjectIDs()
+	err = sch.CheckIfIDsExist()
+	if err != nil {
+		return qs.NewError(err.Error(), 7)
+	}
 
-	err = groups.CreateGroup(body.GroupName, p.Username, conn)
-
-	switch err {
-	case errors.MarshalMapError:
-		return qs.NewError(err.Error(), 300)
-	case errors.PutItemError:
-		return qs.NewError(err.Error(), 304)
-	default:
+	err = sch.InsertItem()
+	if err != nil {
+		return qs.NewError(err.Error(), 8)
 	}
 
 	res := Response{
 		Success: true,
-		Message: "group created successfully",
+		Message: "schedule updated successfully",
 	}
 	return qs.NewResponse(200, res)
 }

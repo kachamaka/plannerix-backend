@@ -454,6 +454,8 @@ func (p Profile) CheckPassword(password string) bool {
 	}
 }
 
+func (p *Profile) SetSubjects() {}
+
 //Payload is the data that gets encrypted in the token
 type Payload struct {
 	Username string `json:"username"`

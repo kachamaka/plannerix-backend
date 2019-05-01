@@ -6,21 +6,19 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
-	db "github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/kinghunter58/jwe"
 
 	qs "gitlab.com/zapochvam-ei-sq/plannerix-backend/models/QS"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/database"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/errors"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/profile"
-	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/schedule"
 )
 
 var conn *dynamodb.DynamoDB
 
 type Request struct {
-	Token    string             `json:"token"`
-	Subjects []schedule.Subject `json:"subjects"`
+	Token      string   `json:"token"`
+	SubjectIDs []string `json:"subjects"`
 }
 
 type Response struct {
@@ -48,22 +46,19 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 		return qs.NewError("Internal Server Error", 6) // Fix output
 	}
 	database.SetConn(&conn)
-	for i := range body.Subjects {
-		input := &db.UpdateItemInput{
-			TableName: aws.String("plannerix-subjects"),
+	for _, v := range body.SubjectIDs {
+		input := &dynamodb.DeleteItemInput{
 			Key: map[string]*dynamodb.AttributeValue{
-				"id":      {S: aws.String(body.Subjects[i].ID)},
-				"user_id": {S: aws.String(p.ID)},
+				"user_id": {
+					S: aws.String(p.ID),
+				},
+				"id": {
+					S: aws.String(v),
+				},
 			},
-			ExpressionAttributeNames: map[string]*string{
-				"#name": aws.String("name"),
-			},
-			ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
-				":newName": {S: aws.String(body.Subjects[i].Name)},
-			},
-			UpdateExpression: aws.String("set #name = :newName"),
+			TableName: aws.String("plannerix-subjects"),
 		}
-		_, err := conn.UpdateItem(input)
+		_, err := conn.DeleteItem(input)
 		if err != nil {
 			return qs.NewError(err.Error(), 304)
 		}
@@ -71,7 +66,7 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 
 	res := Response{
 		Success: true,
-		Message: "subjects updated successfully",
+		Message: "subjects deleted successfully",
 	}
 	return qs.NewResponse(200, res)
 }
