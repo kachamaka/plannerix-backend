@@ -115,11 +115,15 @@ Resources:
     Properties:
       TableName: plannerix-subjects
       AttributeDefinitions:
-        - AttributeName: id
+        - AttributeName: user_id
           AttributeType: S
-      KeySchema:
         - AttributeName: id
+          AttributeType: S  
+      KeySchema:
+        - AttributeName: user_id
           KeyType: HASH
+        - AttributeName: id
+          KeyType: RANGE
       ProvisionedThroughput:
         ReadCapacityUnits: ${self:custom.tableThroughput}
         WriteCapacityUnits: ${self:custom.tableThroughput}
@@ -131,7 +135,7 @@ Resources:
       AttributeDefinitions:
         - AttributeName: user_id
           AttributeType: S
-        - AttributeNameL: day
+        - AttributeName: day
           AttributeType: N
       KeySchema:
         - AttributeName: user_id

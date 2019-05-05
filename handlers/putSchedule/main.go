@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"log"
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -29,9 +29,7 @@ type Response struct {
 
 func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	body := Request{}
-	fmt.Println(req)
 	err := qs.GetBody(req, &body)
-	fmt.Println(body)
 
 	if err != nil {
 		return qs.NewError(errors.LambdaError.Error(), -1)
@@ -54,13 +52,12 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 		UserID:   p.ID,
 		Conn:     conn,
 	}
-	// fmt.Println("henlo")
 	sch.LoadSubjectIDs()
+	log.Println(sch)
 	err = sch.CheckIfIDsExist()
 	if err != nil {
 		return qs.NewError(err.Error(), 7)
 	}
-
 	err = sch.InsertItem()
 	if err != nil {
 		return qs.NewError(err.Error(), 8)

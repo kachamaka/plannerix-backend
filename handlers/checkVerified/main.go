@@ -8,7 +8,7 @@ import (
 	qs "gitlab.com/zapochvam-ei-sq/plannerix-backend/models/QS"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/database"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/errors"
-	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/profile"
+	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/profile"
 
 	"github.com/aws/aws-lambda-go/lambda"
 )

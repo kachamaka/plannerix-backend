@@ -15,7 +15,7 @@ import (
 type Subject struct {
 	ID     string `json:"id"`
 	Name   string `json:"name"`
-	UserID string `json:"user_id"`
+	UserID string `json:"user_id,omitempty"`
 }
 
 func addSubjects(subjects []Subject, userID string, db *dynamodb.DynamoDB) error {
@@ -71,7 +71,7 @@ func putInDatabase(subjects []Subject, indexes []int, db *dynamodb.DynamoDB) err
 	return nil
 }
 
-func getSubejctsFromDB(userID string, db *dynamodb.DynamoDB) ([]Subject, error) {
+func GetSubejctsFromDB(userID string, db *dynamodb.DynamoDB) ([]Subject, error) {
 	qInput := &dynamodb.QueryInput{
 		TableName: aws.String("plannerix-subjects"),
 		KeyConditions: map[string]*dynamodb.Condition{

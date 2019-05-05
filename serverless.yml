@@ -5,7 +5,7 @@ frameworkVersion: ">=1.28.0 <2.0.0"
 provider:
   name: aws
   runtime: go1.x
-  memorySize: 128
+  memorySize: 1024
   deploymentBucket:
     name: s-org-kinghunter58
   # stage: dev
@@ -81,22 +81,6 @@ functions:
     events:
       - http:
           path: getWeeklyEvents
-          method: post
-          cors: true
-  getSubjects:
-    handler: bin/getSubjects
-    memorySize: 1024
-    events:
-      - http:
-          path: getSubjects
-          method: post
-          cors: true
-  getSchedule:
-    handler: bin/getSchedule
-    memorySize: 1024
-    events:
-      - http:
-          path: getSchedule
           method: post
           cors: true
   getNextPeriod:
@@ -211,6 +195,52 @@ functions:
           path: sendEmail
           method: post
           cors: true
+
+          
+  getSchedule:
+    handler: bin/getSchedule
+    events:
+      - http:
+          path: getSchedule
+          method: post
+          cors: true 
+  putSchedule:
+    handler: bin/putSchedule
+    events:
+      - http:
+          path: putSchedule
+          method: post
+          cors: true
+  updateSubjects:
+    handler: bin/updateSubjects
+    events:
+      - http:
+          path: updateSubjects
+          method: post
+          cors: true
+  createSubjects:
+    handler: bin/createSubjects
+    events:
+      - http:
+          path: createSubjects
+          method: post
+          cors: true
+  deleteSubjects:
+    handler: deleteSubjects
+    events:
+      - http:
+          path: deleteSubjects
+          method: post
+          cors: true
+  getSubjects:
+    handler: bin/getSubjects
+    memorySize: 1024
+    events:
+      - http:
+          path: getSubjects
+          method: post
+          cors: true
+
 resources:
   - ${file(resources/dynamodb.yml)}
 

@@ -15,7 +15,11 @@ func TestHandler(t *testing.T) {
 		"monday": schedule.DailySchedule{
 			Lessons: []schedule.Lesson{
 				{Start: 123, Duration: 40, SubjectID: "ac09f0807e65a421"},
+				{Start: 165, Duration: 30, SubjectID: "ac09f0807e65a421"},
 			},
+		},
+		"tuesday": schedule.DailySchedule{
+			Lessons: []schedule.Lesson{},
 		},
 	}
 
@@ -28,6 +32,7 @@ func TestHandler(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+	// t.Log(req)
 	res, err := lambdat.InvokeHandler(handler, req)
 	if err != nil {
 		t.Error(err)

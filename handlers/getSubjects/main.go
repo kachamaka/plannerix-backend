@@ -10,7 +10,7 @@ import (
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/database"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/errors"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/profile"
-	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/subjects"
+	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/schedule"
 
 	"github.com/aws/aws-lambda-go/lambda"
 )
@@ -25,9 +25,9 @@ type Request struct {
 }
 
 type Response struct {
-	Success  bool     `json:"success"`
-	Message  string   `json:"message"`
-	Subjects []string `json:"subjects"`
+	Success  bool               `json:"success"`
+	Message  string             `json:"message"`
+	Subjects []schedule.Subject `json:"subjects"`
 }
 
 func handler(ctx context.Context, req interface{}) (qs.Response, error) {
@@ -37,8 +37,6 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	if err != nil {
 		return qs.NewError(errors.LambdaError.Error(), -1)
 	}
-
-	database.SetConn(&conn)
 	key, err := jwe.GetPrivateKeyFromEnv("RSAPRIVATEKEY")
 
 	if err != nil {
@@ -49,8 +47,9 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	jwe.ParseEncryptedToken(body.Token, key, &p)
 	log.Println(p.Username, "username")
 
-	subjects, err := subjects.GetSubjects(p.Username, conn)
-	log.Println(subjects, "all subjects")
+	database.SetConn(&conn)
+
+	subjects, err := schedule.GetSubejctsFromDB(p.ID, conn)
 
 	switch err {
 	case errors.OutputError:

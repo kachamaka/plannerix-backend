@@ -8,8 +8,6 @@ build:
 	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/getYearGrades ./handlers/getYearGrades
 	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/getWeeklyGrades ./handlers/getWeeklyGrades
 	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/getWeeklyEvents ./handlers/getWeeklyEvents
-	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/getSubjects ./handlers/getSubjects
-	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/getSchedule ./handlers/getSchedule
 	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/getNextPeriod ./handlers/getNextPeriod
 	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/getAllGrades ./handlers/getAllGrades
 	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/getAllEvents ./handlers/getAllEvents
@@ -24,6 +22,16 @@ build:
 	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/registerUnverified ./handlers/registerUnverified
 	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/checkVerified ./handlers/checkVerified
 	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/sendEmail ./handlers/sendEmail
+
+	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/getSchedule ./handlers/getSchedule
+	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/putSchedule ./handlers/putSchedule
+
+	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/getSubjects ./handlers/getSubjects
+	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/updateSubjects ./handlers/updateSubjects
+	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/createSubjects ./handlers/createSubjects
+	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/deleteSubjects ./handlers/deleteSubjects
+
+	
 
 clean:
 	rm -rf ./bin
