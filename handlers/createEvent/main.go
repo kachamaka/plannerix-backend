@@ -56,7 +56,7 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	body.Timestamp = events.AdaptTimestamp(body.Timestamp)
 	log.Println(time.Unix(body.Timestamp, 0))
 
-	// log.Println(p.ID)
+	log.Println(p.ID)
 	// return qs.Response{}, nil
 	err = events.CreateEvent(p.ID, body.Subject, body.Type, body.Description, body.Timestamp, conn)
 

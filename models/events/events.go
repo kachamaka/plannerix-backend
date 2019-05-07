@@ -35,6 +35,7 @@ func CreateEvent(id string, subject string, subjectType int, description string,
 	}
 	_, err = conn.PutItem(input)
 	if err != nil {
+		log.Println(err)
 		log.Println("line 36 error with put item")
 		return errors.PutItemError
 	}

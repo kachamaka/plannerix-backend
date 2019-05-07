@@ -37,7 +37,7 @@ Resources:
     Properties:
       TableName: s-org-events
       AttributeDefinitions:
-        - AttributeName: username
+        - AttributeName: id
           AttributeType: S
         - AttributeName: timestamp
           AttributeType: N

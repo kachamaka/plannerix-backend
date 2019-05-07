@@ -69,7 +69,7 @@ func TestMain(t *testing.T) {
 		// "username": "testingWE26",
 		// "password": "secret12",
 		// "email":    "martilevski1@abv.bg",
-		"verificationKey": "$2a$12$MKUYfmb7Od9w2BN/prVY/uPG6qvjByciGCBjZaJwBWkK.42IyaNoW",
+		"verificationKey": "$2a$12$xClDFofHXAOx7H/Sd.1qieJvDjeIlmujefNj9kG9bIm2u43ZewqCO",
 		// "email":    "traqn02@gmail.com",
 		// "subjects": subjects,
 		// "schedule": schedule,
