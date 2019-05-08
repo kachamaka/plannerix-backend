@@ -2,9 +2,11 @@ Resources:
   Users:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: s-org-users
+      TableName: plannerix-users
       AttributeDefinitions:
         - AttributeName: username
+          AttributeType: S
+        - AttributeName: id
           AttributeType: S
       KeySchema:
         - AttributeName: username
@@ -13,11 +15,21 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: ${self:custom.tableThroughput}
         WriteCapacityUnits: ${self:custom.tableThroughput}
+      GlobalSecondaryIndexes:
+        - IndexName : idIndex
+          KeySchema :
+            - AttributeName: id
+              KeyType: HASH
+          Projection : 
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: ${self:custom.tableThroughput}
+            WriteCapacityUnits: ${self:custom.tableThroughput}
 
   Grades:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: s-org-grades
+      TableName: plannerix-grades
       AttributeDefinitions:
         - AttributeName: username
           AttributeType: S
@@ -27,56 +39,6 @@ Resources:
         - AttributeName: username
           KeyType: HASH
         - AttributeName: timestamp
-          KeyType: RANGE
-      ProvisionedThroughput:
-        ReadCapacityUnits: ${self:custom.tableThroughput}
-        WriteCapacityUnits: ${self:custom.tableThroughput}
-
-  Events:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: s-org-events
-      AttributeDefinitions:
-        - AttributeName: id
-          AttributeType: S
-        - AttributeName: timestamp
-          AttributeType: N
-      KeySchema:
-        - AttributeName: id
-          KeyType: HASH
-        - AttributeName: timestamp
-          KeyType: RANGE
-      ProvisionedThroughput:
-        ReadCapacityUnits: ${self:custom.tableThroughput}
-        WriteCapacityUnits: ${self:custom.tableThroughput}
-
-  Subjects:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: s-org-subjects
-      AttributeDefinitions:
-        - AttributeName: username
-          AttributeType: S
-      KeySchema:
-        - AttributeName: username
-          KeyType: HASH
-      ProvisionedThroughput:
-        ReadCapacityUnits: ${self:custom.tableThroughput}
-        WriteCapacityUnits: ${self:custom.tableThroughput}
-
-  Schedules:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: s-org-schedules
-      AttributeDefinitions:
-        - AttributeName: username
-          AttributeType: S
-        - AttributeName: day
-          AttributeType: N
-      KeySchema:
-        - AttributeName: username
-          KeyType: HASH
-        - AttributeName: day
           KeyType: RANGE
       ProvisionedThroughput:
         ReadCapacityUnits: ${self:custom.tableThroughput}
@@ -85,7 +47,7 @@ Resources:
   Unverified:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: s-org-unverified
+      TableName: plannerix-unverified
       AttributeDefinitions:
         - AttributeName: username
           AttributeType: S
@@ -126,7 +88,7 @@ Resources:
             ReadCapacityUnits: ${self:custom.tableThroughput}
             WriteCapacityUnits: ${self:custom.tableThroughput}
   
-  NewSubjects:
+  Subjects:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName: plannerix-subjects
@@ -144,7 +106,7 @@ Resources:
         ReadCapacityUnits: ${self:custom.tableThroughput}
         WriteCapacityUnits: ${self:custom.tableThroughput}
 
-  NewSchedules:
+  Schedule:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName: plannerix-schedule
@@ -162,7 +124,7 @@ Resources:
         ReadCapacityUnits: ${self:custom.tableThroughput}
         WriteCapacityUnits: ${self:custom.tableThroughput}
 
-  NewEvents:
+  Events:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName: plannerix-events

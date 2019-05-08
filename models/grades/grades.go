@@ -30,7 +30,7 @@ func InputGrade(username string, timestamp int64, value int, subject string, con
 		return errors.MarshalJsonToMapError
 	}
 	input := &dynamodb.PutItemInput{
-		TableName: aws.String("s-org-grades"),
+		TableName: aws.String("plannerix-grades"),
 		Item:      body,
 	}
 	_, err = conn.PutItem(input)
@@ -43,7 +43,7 @@ func InputGrade(username string, timestamp int64, value int, subject string, con
 
 func GetAllGrades(username string, conn *dynamodb.DynamoDB) ([]Grade, error) {
 	getItemInput := &dynamodb.QueryInput{
-		TableName:              aws.String("s-org-grades"),
+		TableName:              aws.String("plannerix-grades"),
 		KeyConditionExpression: aws.String("username = :username"),
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
 			":username": {
@@ -86,7 +86,7 @@ func GetWeeklyGrades(username string, conn *dynamodb.DynamoDB) ([]Grade, error) 
 	}
 
 	getItemScanInput := &dynamodb.ScanInput{
-		TableName:                 aws.String("s-org-grades"),
+		TableName:                 aws.String("plannerix-grades"),
 		ExpressionAttributeNames:  expr.Names(),
 		ExpressionAttributeValues: expr.Values(),
 		FilterExpression:          expr.Filter(),
@@ -137,7 +137,7 @@ func GetYearGrades(username string, conn *dynamodb.DynamoDB) ([]Grade, error) {
 	}
 
 	getItemScanInput := &dynamodb.ScanInput{
-		TableName:                 aws.String("s-org-grades"),
+		TableName:                 aws.String("plannerix-grades"),
 		ExpressionAttributeNames:  expr.Names(),
 		ExpressionAttributeValues: expr.Values(),
 		FilterExpression:          expr.Filter(),
@@ -160,7 +160,7 @@ func GetYearGrades(username string, conn *dynamodb.DynamoDB) ([]Grade, error) {
 
 func DeleteGrade(username string, timestamp int64, conn *dynamodb.DynamoDB) error {
 	deleteItemInput := &dynamodb.DeleteItemInput{
-		TableName: aws.String("s-org-grades"),
+		TableName: aws.String("plannerix-grades"),
 		Key: map[string]*dynamodb.AttributeValue{
 			"username": {
 				S: aws.String(username),

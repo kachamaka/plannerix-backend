@@ -13,7 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 	"github.com/shurcooL/httpfs/html/vfstemplate"
-	"gitlab.com/zapochvam-ei-sq/s-org-backend/models/errors"
+	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/errors"
 
 	"github.com/aws/aws-sdk-go/aws"
 
@@ -91,7 +91,7 @@ func NewUnverifiedProfile(un, email, password, id string, conn *dynamodb.DynamoD
 		return "", errors.MarshalMapError
 	}
 	input := &dynamodb.PutItemInput{
-		TableName:           aws.String("s-org-unverified"),
+		TableName:           aws.String("plannerix-unverified"),
 		ConditionExpression: aws.String("attribute_not_exists(username)"),
 		Item:                body,
 	}
@@ -117,7 +117,7 @@ func NewProfile(verificationKey string, conn *dynamodb.DynamoDB) (Profile, error
 	}
 
 	getItemScanInput := &dynamodb.ScanInput{
-		TableName:                 aws.String("s-org-unverified"),
+		TableName:                 aws.String("plannerix-unverified"),
 		ExpressionAttributeNames:  expr.Names(),
 		ExpressionAttributeValues: expr.Values(),
 		FilterExpression:          expr.Filter(),
@@ -167,7 +167,7 @@ func NewProfile(verificationKey string, conn *dynamodb.DynamoDB) (Profile, error
 		return Profile{}, errors.MarshalMapError
 	}
 	input := &dynamodb.PutItemInput{
-		TableName:           aws.String("s-org-users"),
+		TableName:           aws.String("plannerix-users"),
 		ConditionExpression: aws.String("attribute_not_exists(username)"),
 		Item:                body,
 	}
@@ -181,7 +181,7 @@ func NewProfile(verificationKey string, conn *dynamodb.DynamoDB) (Profile, error
 
 func DeleteUnverifiedProfile(username string, conn *dynamodb.DynamoDB) error {
 	deleteItemInput := &dynamodb.DeleteItemInput{
-		TableName: aws.String("s-org-unverified"),
+		TableName: aws.String("plannerix-unverified"),
 		Key: map[string]*dynamodb.AttributeValue{
 			"username": {
 				S: aws.String(username),
@@ -210,7 +210,7 @@ func CheckVerified(username string, conn *dynamodb.DynamoDB) (bool, error) {
 	}
 
 	getItemScanInput := &dynamodb.ScanInput{
-		TableName:                 aws.String("s-org-unverified"),
+		TableName:                 aws.String("plannerix-unverified"),
 		ExpressionAttributeNames:  expr.Names(),
 		ExpressionAttributeValues: expr.Values(),
 		FilterExpression:          expr.Filter(),
@@ -231,7 +231,7 @@ func CheckVerified(username string, conn *dynamodb.DynamoDB) (bool, error) {
 
 func ChangePasswordReset(Username string, newPassword string, conn *dynamodb.DynamoDB) (string, error) {
 	updateItemInput := &dynamodb.UpdateItemInput{
-		TableName: aws.String("s-org-users"),
+		TableName: aws.String("plannerix-users"),
 		Key: map[string]*dynamodb.AttributeValue{
 			"username": {
 				S: aws.String(Username),
@@ -265,7 +265,7 @@ func ChangePasswordReset(Username string, newPassword string, conn *dynamodb.Dyn
 	}
 
 	getItemScanInput := &dynamodb.ScanInput{
-		TableName:                 aws.String("s-org-users"),
+		TableName:                 aws.String("plannerix-users"),
 		ExpressionAttributeNames:  expr.Names(),
 		ExpressionAttributeValues: expr.Values(),
 		FilterExpression:          expr.Filter(),
@@ -292,7 +292,7 @@ func ChangePasswordReset(Username string, newPassword string, conn *dynamodb.Dyn
 
 func DeleteProfile(username string, conn *dynamodb.DynamoDB) error {
 	deleteItemInput := &dynamodb.DeleteItemInput{
-		TableName: aws.String("s-org-users"),
+		TableName: aws.String("plannerix-users"),
 		Key: map[string]*dynamodb.AttributeValue{
 			"username": {
 				S: aws.String(username),
@@ -322,7 +322,7 @@ func GetProfile(username string, conn *dynamodb.DynamoDB) (Profile, error) {
 	}
 
 	getItemScanInput := &dynamodb.ScanInput{
-		TableName:                 aws.String("s-org-users"),
+		TableName:                 aws.String("plannerix-users"),
 		ExpressionAttributeNames:  expr.Names(),
 		ExpressionAttributeValues: expr.Values(),
 		FilterExpression:          expr.Filter(),
@@ -346,7 +346,7 @@ func GetProfile(username string, conn *dynamodb.DynamoDB) (Profile, error) {
 
 func ChangePassword(username string, newPassword string, conn *dynamodb.DynamoDB) error {
 	updateItemInput := &dynamodb.UpdateItemInput{
-		TableName: aws.String("s-org-users"),
+		TableName: aws.String("plannerix-users"),
 		Key: map[string]*dynamodb.AttributeValue{
 			"username": {
 				S: aws.String(username),
@@ -371,7 +371,7 @@ func ChangePassword(username string, newPassword string, conn *dynamodb.DynamoDB
 
 func ChangeEmail(username string, newEmail string, conn *dynamodb.DynamoDB) error {
 	updateItemInput := &dynamodb.UpdateItemInput{
-		TableName: aws.String("s-org-users"),
+		TableName: aws.String("plannerix-users"),
 		Key: map[string]*dynamodb.AttributeValue{
 			"username": {
 				S: aws.String(username),
@@ -401,7 +401,7 @@ func UpdateNotifications(username string, notifications map[string]bool, conn *d
 		return errors.MarshalMapError
 	}
 	updateItemInput := &dynamodb.UpdateItemInput{
-		TableName: aws.String("s-org-users"),
+		TableName: aws.String("plannerix-users"),
 		Key: map[string]*dynamodb.AttributeValue{
 			"username": {
 				S: aws.String(username),
@@ -426,7 +426,7 @@ func UpdateNotifications(username string, notifications map[string]bool, conn *d
 
 func CheckUserExists(username string, conn *dynamodb.DynamoDB) (bool, error) {
 	getItemInput := &dynamodb.QueryInput{
-		TableName:              aws.String("s-org-users"),
+		TableName:              aws.String("plannerix-users"),
 		KeyConditionExpression: aws.String("username = :username"),
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
 			":username": {
@@ -486,7 +486,7 @@ var errUserHasNoSub = errgen.New("user does not have subscription")
 
 func GetSubscription(userId string, conn *dynamodb.DynamoDB) (string, error) {
 	queryInput := dynamodb.QueryInput{
-		TableName: aws.String("s-org-users"),
+		TableName: aws.String("plannerix-users"),
 		IndexName: aws.String("idIndex"),
 		KeyConditions: map[string]*dynamodb.Condition{
 			"id": &dynamodb.Condition{

@@ -11,7 +11,7 @@ import (
 
 func TestUpdateUsersTable(t *testing.T) {
 	updateTable := dynamodb.UpdateTableInput{
-		TableName: aws.String("s-org-users"),
+		TableName: aws.String("plannerix-users"),
 		GlobalSecondaryIndexUpdates: []*dynamodb.GlobalSecondaryIndexUpdate{
 			&dynamodb.GlobalSecondaryIndexUpdate{
 				Create: &dynamodb.CreateGlobalSecondaryIndexAction{

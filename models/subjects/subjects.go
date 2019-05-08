@@ -46,7 +46,7 @@ func NewSchedule(un string, schedule []ScheduleDay, conn *dynamodb.DynamoDB) err
 			return errors.MarshalMapError
 		}
 		input := &dynamodb.PutItemInput{
-			TableName: aws.String("s-org-schedules"),
+			TableName: aws.String("plannerix-schedules"),
 			Item:      periodDayMap,
 		}
 		_, err = conn.PutItem(input)
@@ -68,7 +68,7 @@ func NewSubjects(un string, subjects []string, conn *dynamodb.DynamoDB) error {
 		return errors.MarshalMapError
 	}
 	input := &dynamodb.PutItemInput{
-		TableName: aws.String("s-org-subjects"),
+		TableName: aws.String("plannerix-subjects"),
 		Item:      userSubjectsMap,
 	}
 	_, err = conn.PutItem(input)
@@ -80,7 +80,7 @@ func NewSubjects(un string, subjects []string, conn *dynamodb.DynamoDB) error {
 
 func GetSubjects(username string, conn *dynamodb.DynamoDB) ([]string, error) {
 	getItemInput := &dynamodb.QueryInput{
-		TableName:              aws.String("s-org-subjects"),
+		TableName:              aws.String("plannerix-subjects"),
 		KeyConditionExpression: aws.String("username = :username"),
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
 			":username": {
@@ -104,7 +104,7 @@ func GetSubjects(username string, conn *dynamodb.DynamoDB) ([]string, error) {
 
 func GetSchedule(username string, conn *dynamodb.DynamoDB) ([]ScheduleData, error) {
 	getItemInput := &dynamodb.QueryInput{
-		TableName:              aws.String("s-org-schedules"),
+		TableName:              aws.String("plannerix-schedules"),
 		KeyConditionExpression: aws.String("username = :username"),
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
 			":username": {
@@ -134,7 +134,7 @@ func UpdateSchedule(username string, schedule []ScheduleData, conn *dynamodb.Dyn
 			return errors.MarshalListError
 		}
 		updateItemInput := &dynamodb.UpdateItemInput{
-			TableName: aws.String("s-org-schedules"),
+			TableName: aws.String("plannerix-schedules"),
 			Key: map[string]*dynamodb.AttributeValue{
 				"username": {
 					S: aws.String(username),
@@ -192,7 +192,7 @@ func GetNextPeriod(username string, conn *dynamodb.DynamoDB) (Period, error) {
 	}
 
 	getItemScanInput := &dynamodb.ScanInput{
-		TableName:                 aws.String("s-org-schedules"),
+		TableName:                 aws.String("plannerix-schedules"),
 		ExpressionAttributeNames:  expr.Names(),
 		ExpressionAttributeValues: expr.Values(),
 		FilterExpression:          expr.Filter(),

@@ -16,7 +16,7 @@ const RANGE = 5
 
 func UpdateSubscriptionOfUser(p profile.Payload, subscription string, conn *dynamodb.DynamoDB) error {
 	updateInput := dynamodb.UpdateItemInput{
-		TableName: aws.String("s-org-users"),
+		TableName: aws.String("plannerix-users"),
 		Key: map[string]*dynamodb.AttributeValue{
 			"username": {
 				S: &p.Username,
