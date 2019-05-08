@@ -92,6 +92,27 @@ func GetSubejctsFromDB(userID string, db *dynamodb.DynamoDB) ([]Subject, error) 
 	return subjects, err
 }
 
+func getSubjectById(userId, subjectId string, conn *dynamodb.DynamoDB) (Subject, error) {
+	getInput := dynamodb.GetItemInput{
+		TableName: aws.String("plannerix-subjects"),
+		Key: map[string]*dynamodb.AttributeValue{
+			"user_id": &dynamodb.AttributeValue{
+				S: aws.String(userId),
+			},
+			"id": &dynamodb.AttributeValue{
+				S: aws.String(subjectId),
+			},
+		},
+	}
+	out, err := conn.GetItem(&getInput)
+	if err != nil {
+		return Subject{}, err
+	}
+	s := Subject{}
+	err = dynamodbattribute.UnmarshalMap(out.Item, &s)
+	return s, err
+}
+
 func checkForUpdate(fromDb []Subject, fromReq []Subject, bd *dynamodb.DynamoDB) {
 	for i := range fromDb {
 		id := fromDb[i].ID

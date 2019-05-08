@@ -1,4 +1,4 @@
-service: s-org 
+service: plannerix
 
 frameworkVersion: ">=1.21.0 <2.0.0"
 
@@ -7,7 +7,6 @@ provider:
   runtime: go1.x
   memorySize: 1024
   deploymentBucket:
-    # name: s-org-kinghunter58
     name: plannerix-kinghunter58
   # stage: dev
   region: eu-central-1
