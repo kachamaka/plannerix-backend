@@ -1,13 +1,14 @@
 service: s-org 
 
-frameworkVersion: ">=1.28.0 <2.0.0"
+frameworkVersion: ">=1.21.0 <2.0.0"
 
 provider:
   name: aws
   runtime: go1.x
   memorySize: 1024
   deploymentBucket:
-    name: s-org-kinghunter58
+    # name: s-org-kinghunter58
+    name: plannerix-kinghunter58
   # stage: dev
   region: eu-central-1
   role: arn:aws:iam::890356408027:role/Lambda
@@ -320,8 +321,13 @@ resources:
   - ${file(resources/dynamodb.yml)}
 
 custom:
+  splitStacks:
+    perFunction: true
   stage: ${opt:stage, self:provider.stage}
   tableThroughputs:
     prod: 1
     default: 1
   tableThroughput: ${self:custom.tableThroughputs.${self:custom.stage}, self:custom.tableThroughputs.default}
+
+plugins:
+  - serverless-plugin-split-stacks

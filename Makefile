@@ -30,6 +30,16 @@ build:
 	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/updateSubjects ./handlers/updateSubjects
 	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/createSubjects ./handlers/createSubjects
 	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/deleteSubjects ./handlers/deleteSubjects
+	
+	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/createGroup ./handlers/createGroup
+	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/getGroups ./handlers/getGroups
+	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/getGroupEvents ./handlers/getGroupEvents
+	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/createGroupEvent ./handlers/createGroupEvent
+	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/editGroupEvent ./handlers/editGroupEvent
+	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/addMember ./handlers/addMember
+	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/deleteMember ./handlers/deleteMember
+	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/deleteGroup ./handlers/deleteGroup
+	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/deleteGroupEvent ./handlers/deleteGroupEvent
 
 	
 

@@ -1,0 +1,9 @@
+{
+  "name": "s-org",
+  "description": "",
+  "version": "0.1.0",
+  "dependencies": {},
+  "devDependencies": {
+    "serverless-plugin-split-stacks": "^1.7.2"
+  }
+}

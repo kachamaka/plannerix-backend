@@ -42,7 +42,7 @@ Resources:
         - AttributeName: timestamp
           AttributeType: N
       KeySchema:
-        - AttributeName: username
+        - AttributeName: id
           KeyType: HASH
         - AttributeName: timestamp
           KeyType: RANGE
@@ -114,17 +114,17 @@ Resources:
         ReadCapacityUnits: ${self:custom.tableThroughput}
         WriteCapacityUnits: ${self:custom.tableThroughput}
       GlobalSecondaryIndexes:
-        IndexName : ownerIndex
-        KeySchema :
-          - AttributeName: owner
-            KeyType: HASH
-          - AttributeName: group_id
-            KeyType: RANGE
-        Projection : 
-          ProjectionType: ALL
-        ProvisionedThroughput:
-          ReadCapacityUnits: ${self:custom.tableThroughput}
-          WriteCapacityUnits: ${self:custom.tableThroughput}
+        - IndexName : ownerIndex
+          KeySchema :
+            - AttributeName: owner
+              KeyType: HASH
+            - AttributeName: group_id
+              KeyType: RANGE
+          Projection : 
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: ${self:custom.tableThroughput}
+            WriteCapacityUnits: ${self:custom.tableThroughput}
   
   NewSubjects:
     Type: AWS::DynamoDB::Table
@@ -180,14 +180,14 @@ Resources:
         ReadCapacityUnits: ${self:custom.tableThroughput}
         WriteCapacityUnits: ${self:custom.tableThroughput}
       GlobalSecondaryIndexes:
-        IndexName : queryIndex
-        KeySchema :
-          - AttributeName: id
-            KeyType: HASH
-          - AttributeName: event_id
-            KeyType: RANGE
-        Projection : 
-          ProjectionType: ALL
-        ProvisionedThroughput:
-          ReadCapacityUnits: ${self:custom.tableThroughput}
-          WriteCapacityUnits: ${self:custom.tableThroughput}
+        - IndexName : queryIndex
+          KeySchema :
+            - AttributeName: id
+              KeyType: HASH
+            - AttributeName: event_id
+              KeyType: RANGE
+          Projection : 
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: ${self:custom.tableThroughput}
+            WriteCapacityUnits: ${self:custom.tableThroughput}
