@@ -1,7 +1,9 @@
 package events
 
 import (
+	"encoding/hex"
 	"fmt"
+	"hash/fnv"
 	"log"
 	"strconv"
 	"time"
@@ -16,21 +18,24 @@ import (
 )
 
 type Event struct {
+	EventID     string `json:"event_id"`
+	ID          string `json:"id"`
 	Subject     string `json:"subject"`
 	Type        int    `json:"subjectType"`
 	Description string `json:"description"`
-	Timestamp   int64  `json:"timestamp"`
+	Timestamp   int64  `json:"eventTime"`
 }
 
 func CreateEvent(id string, subject string, subjectType int, description string, timestamp int64, conn *dynamodb.DynamoDB) error {
-	j := fmt.Sprintf(`{"id": "%v","timestamp": %v, "subject":"%v", "subjectType":%v, "description":"%v"}`, id, timestamp, subject, subjectType, description)
+	eventID := generateEventID()
+	j := fmt.Sprintf(`{"event_id": "%v", "id": "%v","eventTime": %v, "subject":"%v", "subjectType":%v, "description":"%v"}`, eventID, id, timestamp, subject, subjectType, description)
 	body, err := database.MarshalJSONToDynamoMap(j)
 	if err != nil {
 		log.Println("line 27 error with marshal json to map")
 		return errors.MarshalJsonToMapError
 	}
 	input := &dynamodb.PutItemInput{
-		TableName: aws.String("s-org-events"),
+		TableName: aws.String("plannerix-events"),
 		Item:      body,
 	}
 	_, err = conn.PutItem(input)
@@ -43,37 +48,29 @@ func CreateEvent(id string, subject string, subjectType int, description string,
 }
 
 func GetAllEvents(id string, conn *dynamodb.DynamoDB) ([]Event, error) {
+	queryInput := &dynamodb.QueryInput{
+		TableName: aws.String("plannerix-events"),
+		IndexName: aws.String("queryIndex"),
+		KeyConditions: map[string]*dynamodb.Condition{
+			"id": {
+				ComparisonOperator: aws.String("EQ"),
+				AttributeValueList: []*dynamodb.AttributeValue{{S: aws.String(id)}},
+			},
+		},
+	}
 
-	filt := expression.Name("id").Equal(expression.Value(id))
-
-	proj := expression.NamesList(expression.Name("timestamp"), expression.Name("subject"), expression.Name("subjectType"), expression.Name("description"))
-
-	expr, err := expression.NewBuilder().WithFilter(filt).WithProjection(proj).Build()
-
+	res, err := conn.Query(queryInput)
+	log.Println(err)
 	if err != nil {
-		log.Println("line 51 error with building expression")
-		return nil, errors.ExpressionBuilderError
+		return nil, err
 	}
-
-	getItemScanInput := &dynamodb.ScanInput{
-		TableName:                 aws.String("s-org-events"),
-		ExpressionAttributeNames:  expr.Names(),
-		ExpressionAttributeValues: expr.Values(),
-		FilterExpression:          expr.Filter(),
-		ProjectionExpression:      expr.Projection(),
-	}
-
-	output, err := conn.Scan(getItemScanInput)
-	if err != nil {
-		log.Println("line 65 error with output")
-		return []Event{}, errors.OutputError
-	}
+	// log.Println(res, "test")
 
 	events := []Event{}
-	err = dynamodbattribute.UnmarshalListOfMaps(output.Items, &events)
+	err = dynamodbattribute.UnmarshalListOfMaps(res.Items, &events)
+
 	if err != nil {
-		log.Println("line 72 error with unmarshal")
-		log.Println(err)
+		log.Println("line 99 error with unmarshal")
 		return nil, errors.UnmarshalListOfMapsError
 	}
 
@@ -81,6 +78,7 @@ func GetAllEvents(id string, conn *dynamodb.DynamoDB) ([]Event, error) {
 }
 
 func GetWeeklyEvents(id string, conn *dynamodb.DynamoDB) ([]Event, error) {
+
 	location, _ := time.LoadLocation("Europe/Sofia")
 	now := time.Now().In(location)
 	nowTime := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, location)
@@ -101,7 +99,7 @@ func GetWeeklyEvents(id string, conn *dynamodb.DynamoDB) ([]Event, error) {
 	}
 
 	getItemScanInput := &dynamodb.ScanInput{
-		TableName:                 aws.String("s-org-events"),
+		TableName:                 aws.String("plannerix-events"),
 		ExpressionAttributeNames:  expr.Names(),
 		ExpressionAttributeValues: expr.Values(),
 		FilterExpression:          expr.Filter(),
@@ -124,18 +122,18 @@ func GetWeeklyEvents(id string, conn *dynamodb.DynamoDB) ([]Event, error) {
 	return weeklyEvents, nil
 }
 
-func EditEvent(id string, subject string, subjectType int, description string, timestamp int64, conn *dynamodb.DynamoDB) error {
+func EditEvent(event_id string, id string, subject string, subjectType int, description string, timestamp int64, conn *dynamodb.DynamoDB) error {
 	updateItemInput := &dynamodb.UpdateItemInput{
-		TableName: aws.String("s-org-events"),
+		TableName: aws.String("plannerix-events"),
 		Key: map[string]*dynamodb.AttributeValue{
+			"event_id": {
+				S: aws.String(event_id),
+			},
 			"id": {
 				S: aws.String(id),
 			},
-			"timestamp": {
-				N: aws.String(strconv.FormatInt(timestamp, 10)),
-			},
 		},
-		UpdateExpression: aws.String("set subject = :subject, subjectType = :subjectType, description = :description"),
+		UpdateExpression: aws.String("set subject = :subject, subjectType = :subjectType, description = :description, eventTime = :eventTime"),
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
 			":subject": {
 				S: aws.String(subject),
@@ -145,6 +143,9 @@ func EditEvent(id string, subject string, subjectType int, description string, t
 			},
 			":description": {
 				S: aws.String(description),
+			},
+			":eventTime": {
+				N: aws.String(strconv.FormatInt(timestamp, 10)),
 			},
 		},
 		ReturnValues: aws.String(dynamodb.ReturnValueUpdatedNew),
@@ -160,15 +161,15 @@ func EditEvent(id string, subject string, subjectType int, description string, t
 	return nil
 }
 
-func DeleteEvent(id string, timestamp int64, conn *dynamodb.DynamoDB) error {
+func DeleteEvent(event_id string, id string, conn *dynamodb.DynamoDB) error {
 	deleteItemInput := &dynamodb.DeleteItemInput{
-		TableName: aws.String("s-org-events"),
+		TableName: aws.String("plannerix-events"),
 		Key: map[string]*dynamodb.AttributeValue{
+			"event_id": {
+				S: aws.String(event_id),
+			},
 			"id": {
 				S: aws.String(id),
-			},
-			"timestamp": {
-				N: aws.String(strconv.FormatInt(timestamp, 10)),
 			},
 		},
 	}
@@ -190,6 +191,16 @@ func AdaptTimestamp(timestamp int64) int64 {
 	// log.Println(diff)
 	newTimestamp := now.AddDate(0, 0, diff).Unix()
 	return newTimestamp
+}
+
+func generateEventID() string {
+	h := fnv.New64a()
+	t := time.Now().String()
+	h.Write([]byte(t))
+	// h.Write([]byte(username))
+	h.Write([]byte("kowalski event anal"))
+	hash := hex.EncodeToString(h.Sum(nil))
+	return hash
 }
 
 // func AdaptTimestamp(timestamp int64) int64 {

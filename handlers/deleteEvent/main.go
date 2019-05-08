@@ -22,8 +22,8 @@ var conn *dynamodb.DynamoDB
 
 //Request is the grade input request
 type Request struct {
-	Token     string `json:"token"`
-	Timestamp int64  `json:"timestamp"`
+	Token   string `json:"token"`
+	EventID string `json:"event_id"`
 }
 
 //Response is the grade input request
@@ -51,7 +51,7 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	jwe.ParseEncryptedToken(body.Token, key, &p)
 	log.Println(p.Username, "username")
 
-	err = events.DeleteEvent(p.ID, body.Timestamp, conn)
+	err = events.DeleteEvent(body.EventID, p.ID, conn)
 
 	switch err {
 	case errors.DeleteItemError:

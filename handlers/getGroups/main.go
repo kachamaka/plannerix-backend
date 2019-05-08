@@ -4,15 +4,13 @@ import (
 	"context"
 	"log"
 
+	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/kinghunter58/jwe"
 	qs "gitlab.com/zapochvam-ei-sq/plannerix-backend/models/QS"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/database"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/errors"
-	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/events"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/groups"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/profile"
-
-	"github.com/aws/aws-sdk-go/service/dynamodb"
 
 	"github.com/aws/aws-lambda-go/lambda"
 )
@@ -23,15 +21,15 @@ var conn *dynamodb.DynamoDB
 
 //Request is the grade input request
 type Request struct {
-	Token   string `json:"token"`
-	EventID string `json:"event_id"`
-	GroupID string `json:"group_id"`
+	Token string `json:"token"`
+	// GroupID string `json:"group_id"`
 }
 
-//Response is the grade input request
 type Response struct {
-	Success bool   `json:"success"`
-	Message string `json:"message"`
+	Success     bool           `json:"success"`
+	Message     string         `json:"message"`
+	OwnedGroups []groups.Group `json:"ownedGroups"`
+	MyGroups    []groups.Group `json:"myGroups"`
 }
 
 func handler(ctx context.Context, req interface{}) (qs.Response, error) {
@@ -51,33 +49,33 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 
 	p := profile.Payload{}
 	jwe.ParseEncryptedToken(body.Token, key, &p)
-	log.Println(p.ID, "id")
-	isOwner, err := groups.CheckGroupUser(p.Username, body.GroupID, conn)
+	log.Println(p.Username, "username")
 
-	if err != nil {
-		return qs.NewError(err.Error(), 0)
-	}
+	ownedGroups, err := groups.GetOwnedGroups(p.Username, conn)
+	log.Println(ownedGroups, "owned groups")
 
-	log.Println(isOwner)
-	if isOwner == false {
-		res := Response{
-			Success: true,
-			Message: "you are not the owner of this group",
-		}
-		return qs.NewResponse(200, res)
-	}
+	myGroups, err := groups.GetMyGroups(p.Username, conn)
+	log.Println(myGroups, "my groups")
+	//check errors
 
-	err = events.DeleteEvent(body.EventID, body.GroupID, conn)
+	// log.Println(time.Unix(e[0].Timestamp, 0))
+	// return qs.Response{}, nil
 
-	switch err {
-	case errors.DeleteItemError:
-		return qs.NewError(err.Error(), 306)
-	default:
-	}
+	// switch err {
+	// case errors.ExpressionBuilderError:
+	// 	return qs.NewError(err.Error(), 206)
+	// case errors.OutputError:
+	// 	return qs.NewError(err.Error(), 205)
+	// case errors.UnmarshalListOfMapsError:
+	// 	return qs.NewError(err.Error(), 204)
+	// default:
+	// }
 
 	res := Response{
-		Success: true,
-		Message: "event deleted successfully",
+		Success:     true,
+		Message:     "groups fetched successfully",
+		OwnedGroups: ownedGroups,
+		MyGroups:    myGroups,
 	}
 	return qs.NewResponse(200, res)
 }

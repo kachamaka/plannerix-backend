@@ -19,11 +19,12 @@ func TestHandler(t *testing.T) {
 
 	body := map[string]interface{}{
 		"token":       "eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkExMjhHQ00ifQ.dGmhC0fI5ZPoXadEGiG2Qh8XVIJywnmc8q5jjvHsOcW6S2Qf7rG3Ihh7DEMAEis9joBba6G-jg3l7Dds2_2oZwraXThreByMNduCKHQYT6R5ugwf1tSL2fSNgjgwhw6x-Q4eLEPSJ9754FrYKwMigEeevj1vJllblkK2bm52s93F95wbqW3W_kbcqKt97ATCGJ4NK3CGSa9iZkx08252RcSBBJZeDcRBL14h3A26rCpC_oVUxsKH1966tpiWIe94l0OQBICanhv7G9SgX4GQHRii0SjA9E5s37ojacTRpuGWGuZX3MYTF2OUPenocGNNWLTj36-Et8vLZkeQ_0rD5Q.aJsLgtPEOQCJ8PcV.ne7By1gWbwozHP3koJmmdqiyTogiSOY.z9Vn1pgf1hK0MbGM8oqsCA",
-		"group_id":    "506cc1bccc189a72",
+		"event_id":    "56edfc39a1b653d5",
+		"group_id":    "3a5fa36f4f5713d5",
 		"subject":     "JOTARO",
 		"subjectType": 1,
 		"description": "ORA ORA ORA ORA",
-		"timestamp":   1556392929,
+		"timestamp":   1557792000,
 	}
 	req, err := lambdat.ReadBody(body)
 	if err != nil {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log"
 
 	qs "gitlab.com/zapochvam-ei-sq/plannerix-backend/models/QS"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/database"
@@ -67,6 +68,21 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 			Message: "owner cannot delete himself",
 		}
 		return qs.NewResponse(110, res)
+	}
+
+	isOwner, err := groups.CheckGroupUser(p.Username, body.GroupID, conn)
+
+	if err != nil {
+		return qs.NewError(err.Error(), 0)
+	}
+
+	log.Println(isOwner)
+	if isOwner == false {
+		res := Response{
+			Success: true,
+			Message: "you are not the owner of this group",
+		}
+		return qs.NewResponse(200, res)
 	}
 
 	err = groups.DeleteMember(body.GroupID, p.Username, body.Member, conn)

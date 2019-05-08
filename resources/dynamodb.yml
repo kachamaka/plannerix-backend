@@ -99,16 +99,32 @@ Resources:
   Groups:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: s-org-groups
+      TableName: plannerix-groups
       AttributeDefinitions:
         - AttributeName: group_id
+          AttributeType: S
+        - AttributeName: owner
           AttributeType: S
       KeySchema:
         - AttributeName: group_id
           KeyType: HASH
+        - AttributeName: owner
+          KeyType: RANGE
       ProvisionedThroughput:
         ReadCapacityUnits: ${self:custom.tableThroughput}
         WriteCapacityUnits: ${self:custom.tableThroughput}
+      GlobalSecondaryIndexes:
+        IndexName : ownerIndex
+        KeySchema :
+          - AttributeName: owner
+            KeyType: HASH
+          - AttributeName: group_id
+            KeyType: RANGE
+        Projection : 
+          ProjectionType: ALL
+        ProvisionedThroughput:
+          ReadCapacityUnits: ${self:custom.tableThroughput}
+          WriteCapacityUnits: ${self:custom.tableThroughput}
   
   NewSubjects:
     Type: AWS::DynamoDB::Table
@@ -145,3 +161,33 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: ${self:custom.tableThroughput}
         WriteCapacityUnits: ${self:custom.tableThroughput}
+
+  NewEvents:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: plannerix-events
+      AttributeDefinitions:
+        - AttributeName: event_id
+          AttributeType: S
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: event_id
+          KeyType: HASH
+        - AttributeName: id
+          KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: ${self:custom.tableThroughput}
+        WriteCapacityUnits: ${self:custom.tableThroughput}
+      GlobalSecondaryIndexes:
+        IndexName : queryIndex
+        KeySchema :
+          - AttributeName: id
+            KeyType: HASH
+          - AttributeName: event_id
+            KeyType: RANGE
+        Projection : 
+          ProjectionType: ALL
+        ProvisionedThroughput:
+          ReadCapacityUnits: ${self:custom.tableThroughput}
+          WriteCapacityUnits: ${self:custom.tableThroughput}
