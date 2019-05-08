@@ -12,7 +12,7 @@ import (
 )
 
 //RANGE is also the rate of the cheduler function
-const RANGE = 30
+const RANGE = 5
 
 func UpdateSubscriptionOfUser(p profile.Payload, subscription string, conn *dynamodb.DynamoDB) error {
 	updateInput := dynamodb.UpdateItemInput{
@@ -143,4 +143,9 @@ func deleteItem(item FirstLessonNotificationItem, conn *dynamodb.DynamoDB) error
 type FirstLessonNotificationItem struct {
 	Minutes int    `json:"time"`
 	UserID  string `json:"user_id"`
+}
+
+type NotificationPayload struct {
+	UserID string `json:"user_id"`
+	Type   int    `json:"type"`
 }

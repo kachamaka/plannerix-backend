@@ -3,6 +3,7 @@ package profile
 import (
 	"bytes"
 	"crypto/rsa"
+	errgen "errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -480,3 +481,46 @@ func generateVerificationKey() string {
 
 var UsernameReg = regexp.MustCompile("^\\w.{3,16}$")
 var PasswordReg = regexp.MustCompile("^[a-z0-9]{8,35}$")
+
+var errUserHasNoSub = errgen.New("user does not have subscription")
+
+func GetSubscription(userId string, conn *dynamodb.DynamoDB) (string, error) {
+	queryInput := dynamodb.QueryInput{
+		TableName: aws.String("s-org-users"),
+		IndexName: aws.String("idIndex"),
+		KeyConditions: map[string]*dynamodb.Condition{
+			"id": &dynamodb.Condition{
+				ComparisonOperator: aws.String("EQ"),
+				AttributeValueList: []*dynamodb.AttributeValue{
+					&dynamodb.AttributeValue{
+						S: &userId,
+					},
+				},
+			},
+		},
+		AttributesToGet: []*string{
+			aws.String("subscription"),
+		},
+	}
+	out, err := conn.Query(&queryInput)
+	if err != nil {
+		return "", err
+	}
+	var arr []subscription
+	err = dynamodbattribute.UnmarshalListOfMaps(out.Items, &arr)
+	if err != nil {
+		return "", err
+	}
+
+	sub := arr[0].Subscription
+
+	if len(sub) == 0 {
+		return "", errUserHasNoSub
+	}
+
+	return arr[0].Subscription, nil
+}
+
+type subscription struct {
+	Subscription string `json:"subscription"`
+}

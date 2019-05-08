@@ -2,6 +2,10 @@ package schedule
 
 import (
 	"log"
+	"strconv"
+	"time"
+
+	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/notifications"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -10,9 +14,12 @@ import (
 )
 
 var (
-	errIDNotFound = errors.New("This id does not exist")
-	errNoSuchDay  = errors.New("Such day doesn't exist")
+	errIDNotFound     = errors.New("This id does not exist")
+	errNoSuchDay      = errors.New("Such day doesn't exist")
+	errNoLessonsToday = errors.New("There are no lessons today")
 )
+
+const timeBeforeFirstLesson = 60
 
 var DAYS = map[string]int{
 	"monday":    1,
@@ -177,9 +184,58 @@ type Lesson struct {
 	Subject   *Subject `json:"subject,omitempty"`
 }
 
-// to save
-// Unmarshal -> delete previous schedule -> set new schedule
+func GetFirstLessonForDay(userID string, day time.Weekday, conn *dynamodb.DynamoDB) (Lesson, error) {
+	todaysShcedule, err := getTodaysSchedule(userID, day, conn)
+	if err != nil {
+		return Lesson{}, err
+	}
+	firstLesson, err := getFirstLesson(todaysShcedule)
+	if err != nil {
+		return Lesson{}, err
+	}
+	subj, err := getSubjectById(userID, firstLesson.SubjectID, conn)
+	if err != nil {
+		return Lesson{}, err
+	}
+	firstLesson.Subject = &subj
+	return firstLesson, nil
+}
 
-//to get
-// get from db -> parse in Schedule -> get Subjects -> join on subject id -> return to user
-// Note: maybe use context package for performence boost
+func getTodaysSchedule(userID string, day time.Weekday, conn *dynamodb.DynamoDB) (DailySchedule, error) {
+	getInput := dynamodb.GetItemInput{
+		TableName: aws.String("plannerix-schedule"),
+		Key: map[string]*dynamodb.AttributeValue{
+			"user_id": &dynamodb.AttributeValue{
+				S: &userID,
+			},
+			"day": &dynamodb.AttributeValue{
+				N: aws.String(strconv.Itoa(int(day))),
+			},
+		},
+	}
+	out, err := conn.GetItem(&getInput)
+	if err != nil {
+		return DailySchedule{}, err
+	}
+	todaysSchedule := DailySchedule{}
+	err = dynamodbattribute.UnmarshalMap(out.Item, &todaysSchedule)
+	return todaysSchedule, err
+}
+
+func getFirstLesson(ds DailySchedule) (Lesson, error) {
+	if len(ds.Lessons) == 0 {
+		return Lesson{}, errNoLessonsToday
+	}
+	return ds.Lessons[0], nil
+}
+
+func CreateFirstLessonItem(ds DailySchedule, userId string) (notifications.FirstLessonNotificationItem, error) {
+	fl, err := getFirstLesson(ds)
+	if err != nil {
+		return notifications.FirstLessonNotificationItem{}, err
+	}
+	return notifications.FirstLessonNotificationItem{
+		Minutes: fl.Start - timeBeforeFirstLesson,
+		UserID:  userId,
+	}, nil
+}
