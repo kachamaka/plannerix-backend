@@ -2,15 +2,14 @@ package main
 
 import (
 	"context"
-	"log"
 
-	"github.com/kinghunter58/jwe"
 	qs "gitlab.com/zapochvam-ei-sq/plannerix-backend/models/QS"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/database"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/errors"
-	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/events"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/groups"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/profile"
+
+	"github.com/kinghunter58/jwe"
 
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 
@@ -23,12 +22,10 @@ var conn *dynamodb.DynamoDB
 
 //Request is the grade input request
 type Request struct {
-	Token   string `json:"token"`
-	EventID string `json:"event_id"`
-	GroupID string `json:"group_id"`
+	Token     string `json:"token"`
+	GroupName string `json:"group_name"`
 }
 
-//Response is the grade input request
 type Response struct {
 	Success bool   `json:"success"`
 	Message string `json:"message"`
@@ -51,33 +48,20 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 
 	p := profile.Payload{}
 	jwe.ParseEncryptedToken(body.Token, key, &p)
-	log.Println(p.ID, "id")
-	isOwner, err := groups.CheckGroupUser(p.Username, body.GroupID, conn)
 
-	if err != nil {
-		return qs.NewError(err.Error(), 0)
-	}
-
-	log.Println(isOwner)
-	if isOwner == false {
-		res := Response{
-			Success: true,
-			Message: "you are not the owner of this group",
-		}
-		return qs.NewResponse(200, res)
-	}
-
-	err = events.DeleteEvent(body.EventID, body.GroupID, conn)
+	err = groups.CreateTable(conn)
 
 	switch err {
-	case errors.DeleteItemError:
-		return qs.NewError(err.Error(), 306)
+	case errors.MarshalMapError:
+		return qs.NewError(err.Error(), 300)
+	case errors.PutItemError:
+		return qs.NewError(err.Error(), 304)
 	default:
 	}
 
 	res := Response{
 		Success: true,
-		Message: "event deleted successfully",
+		Message: "group created successfully",
 	}
 	return qs.NewResponse(200, res)
 }

@@ -10,6 +10,7 @@ import (
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/database"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/errors"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/events"
+	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/groups"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/profile"
 
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -59,6 +60,22 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 
 	// log.Println(p.ID)
 	// return qs.Response{}, nil
+
+	isOwner, err := groups.CheckGroupUser(p.Username, body.GroupID, conn)
+
+	if err != nil {
+		return qs.NewError(err.Error(), 0)
+	}
+
+	log.Println(isOwner)
+	if isOwner == false {
+		res := Response{
+			Success: true,
+			Message: "you are not the owner of this group",
+		}
+		return qs.NewResponse(200, res)
+	}
+
 	err = events.CreateEvent(body.GroupID, body.Subject, body.Type, body.Description, body.Timestamp, conn)
 
 	switch err {

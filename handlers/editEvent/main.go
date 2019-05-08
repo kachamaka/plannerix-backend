@@ -23,6 +23,7 @@ var conn *dynamodb.DynamoDB
 //Request is the grade input request
 type Request struct {
 	Token       string `json:"token"`
+	EventID     string `json:"event_id"`
 	Subject     string `json:"subject"`
 	Type        int    `json:"subjectType"`
 	Description string `json:"description"`
@@ -53,7 +54,7 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	jwe.ParseEncryptedToken(body.Token, key, &p)
 	log.Println(p.Username, "username")
 
-	err = events.EditEvent(p.Username, body.Subject, body.Type, body.Description, body.Timestamp, conn)
+	err = events.EditEvent(body.EventID, p.ID, body.Subject, body.Type, body.Description, body.Timestamp, conn)
 
 	switch err {
 	case errors.UpdateItemError:

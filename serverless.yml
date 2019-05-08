@@ -241,6 +241,81 @@ functions:
           method: post
           cors: true
 
+
+  createGroup:
+    handler: bin/createGroup
+    memorySize: 1024
+    events:
+      - http:
+          path: createGroup
+          method: post
+          cors: true
+  getGroups:
+    handler: bin/getGroups
+    memorySize: 1024
+    events:
+      - http:
+          path: getGroups
+          method: post
+          cors: true
+  getGroupEvents:
+    handler: bin/getGroupEvents
+    memorySize: 1024
+    events:
+      - http:
+          path: getGroupEvents
+          method: post
+          cors: true
+  createGroupEvent:
+    handler: bin/createGroupEvent
+    memorySize: 1024
+    events:
+      - http:
+          path: createGroupEvent
+          method: post
+          cors: true
+  editGroupEvent:
+    handler: bin/editGroupEvent
+    memorySize: 1024
+    events:
+      - http:
+          path: editGroupEvent
+          method: post
+          cors: true
+  addMember:
+    handler: bin/addMember
+    memorySize: 1024
+    events:
+      - http:
+          path: addMember
+          method: post
+          cors: true
+  deleteMember:
+    handler: bin/deleteMember
+    memorySize: 1024
+    events:
+      - http:
+          path: deleteMember
+          method: post
+          cors: true
+  deleteGroup:
+    handler: bin/deleteGroup
+    memorySize: 1024
+    events:
+      - http:
+          path: deleteGroup
+          method: post
+          cors: true
+  deleteGroupEvent:
+    handler: bin/deleteGroupEvent
+    memorySize: 1024
+    events:
+      - http:
+          path: deleteGroupEvent
+          method: post
+          cors: true
+          
+
 resources:
   - ${file(resources/dynamodb.yml)}
 

@@ -18,11 +18,12 @@ func TestHandler(t *testing.T) {
 	// log.Printf("%T", now)
 
 	body := map[string]interface{}{
-		"token":       "eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkExMjhHQ00ifQ.dGmhC0fI5ZPoXadEGiG2Qh8XVIJywnmc8q5jjvHsOcW6S2Qf7rG3Ihh7DEMAEis9joBba6G-jg3l7Dds2_2oZwraXThreByMNduCKHQYT6R5ugwf1tSL2fSNgjgwhw6x-Q4eLEPSJ9754FrYKwMigEeevj1vJllblkK2bm52s93F95wbqW3W_kbcqKt97ATCGJ4NK3CGSa9iZkx08252RcSBBJZeDcRBL14h3A26rCpC_oVUxsKH1966tpiWIe94l0OQBICanhv7G9SgX4GQHRii0SjA9E5s37ojacTRpuGWGuZX3MYTF2OUPenocGNNWLTj36-Et8vLZkeQ_0rD5Q.aJsLgtPEOQCJ8PcV.ne7By1gWbwozHP3koJmmdqiyTogiSOY.z9Vn1pgf1hK0MbGM8oqsCA",
-		"subject":     "Bio",
+		"token":       "eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkExMjhHQ00ifQ.uZtq_fw8XDfuelKXsIPhOb0k3x0Mfyyi9fH6hx_-jQpyjcdRIyfdWR8X_kHf9SCpNeU9uX57IPLoW0ufBmfl-Nw_pnSLHjGsHcrPI8YDDrFk1x3IYP8MLTyOe5h9D0F6Y-uY-EUso29rOlbmczD_4lPV_dsho1EZ4ecdMHcobZSWVtrri8_k5vH3J6-T6QUbnOTBNCS-be2Fs43d2jEfZmH7EFuBrJSaMJ8WJaOstLdNQr3ad3nmOhXs0K-_s6B_LmlYdhRyFk-YXTMLJwYonx_GFzDPZuB8QKQGl_jvrvqv1zUGj78RQSNixd2YljaIZApS6KcHY8PPtuSIzlVB4Q.sf4HKznaKbxOixYC.sp48TkE2ddvaPxUpTjWpY8v0URkT3iNBpu13z3Lxvz8vwzDtPHlEWP69-3PQkq6I.2hd1-dy3NWuIzsYniFK6jw",
+		"event_id":    "d73b1e945e98d595",
+		"subject":     "JOTARO",
 		"subjectType": 1,
-		"description": "Uroci 5-55",
-		"timestamp":   1551376938,
+		"description": "SUTA PURACHINA",
+		"timestamp":   1557705600,
 	}
 	req, err := lambdat.ReadBody(body)
 	if err != nil {

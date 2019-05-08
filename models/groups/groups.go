@@ -2,6 +2,7 @@ package groups
 
 import (
 	"encoding/hex"
+	"fmt"
 	"hash/fnv"
 	"log"
 	"time"
@@ -11,27 +12,23 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/errors"
-	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/events"
 )
 
 type Group struct {
-	ID      string         `json:"group_id"`
-	Name    int            `json:"group_name"`
-	Owner   string         `json:"owner"`
-	Events  []events.Event `json:"group_events"`
-	Members []string       `json:"members"`
+	ID      string   `json:"group_id"`
+	Name    string   `json:"group_name"`
+	Owner   string   `json:"owner"`
+	Members []string `json:"members"`
 }
 
 func CreateGroup(groupName string, owner string, conn *dynamodb.DynamoDB) error {
 	groupID := generateGroupID()
-	events := map[string]interface{}{}
 	members := map[string]string{}
 
 	group := map[string]interface{}{
 		"group_id":   groupID,
 		"group_name": groupName,
 		"owner":      owner,
-		"events":     events,
 		"members":    members,
 	}
 	body, err := dynamodbattribute.MarshalMap(group)
@@ -40,7 +37,8 @@ func CreateGroup(groupName string, owner string, conn *dynamodb.DynamoDB) error 
 		return errors.MarshalMapError
 	}
 	input := &dynamodb.PutItemInput{
-		TableName:           aws.String("s-org-groups"),
+		// TableName:           aws.String("plannerix-groups"),
+		TableName:           aws.String("plannerix-groups"),
 		ConditionExpression: aws.String("attribute_not_exists(group_id)"),
 		Item:                body,
 	}
@@ -55,7 +53,7 @@ func CreateGroup(groupName string, owner string, conn *dynamodb.DynamoDB) error 
 
 func DeleteGroup(groupID string, owner string, conn *dynamodb.DynamoDB) error {
 	deleteItemInput := &dynamodb.DeleteItemInput{
-		TableName: aws.String("s-org-groups"),
+		TableName: aws.String("plannerix-groups"),
 		Key: map[string]*dynamodb.AttributeValue{
 			"group_id": {
 				S: aws.String(groupID),
@@ -74,21 +72,90 @@ func DeleteGroup(groupID string, owner string, conn *dynamodb.DynamoDB) error {
 }
 
 func getGroup(groupID string, owner string, conn *dynamodb.DynamoDB) (Group, error) {
+	queryInput := &dynamodb.QueryInput{
+		TableName: aws.String("plannerix-groups"),
+		// IndexName: aws.String("ownerIndex"),
+		KeyConditions: map[string]*dynamodb.Condition{
+			"group_id": {
+				ComparisonOperator: aws.String("EQ"),
+				AttributeValueList: []*dynamodb.AttributeValue{{S: aws.String(groupID)}},
+			},
+			"owner": {
+				ComparisonOperator: aws.String("EQ"),
+				AttributeValueList: []*dynamodb.AttributeValue{{S: aws.String(owner)}},
+			},
+		},
+	}
 
-	filt := expression.Name("group_id").Equal(expression.Value(groupID)).
-		And(expression.Name("owner").Equal(expression.Value(owner)))
+	res, err := conn.Query(queryInput)
+	log.Println(res)
+	if err != nil {
+		log.Println(err)
+		return Group{}, err
+	}
+	// log.Println(res, "test")
 
-	proj := expression.NamesList(expression.Name("group_id"), expression.Name("members"))
+	groups := []Group{}
+	err = dynamodbattribute.UnmarshalListOfMaps(res.Items, &groups)
+
+	if err != nil {
+		log.Println("line 99 error with unmarshal")
+		log.Println(err)
+		return Group{}, errors.UnmarshalListOfMapsError
+	}
+	if len(groups) == 0 {
+		return Group{}, nil
+	}
+
+	return groups[0], nil
+
+}
+
+func GetOwnedGroups(owner string, conn *dynamodb.DynamoDB) ([]Group, error) {
+	queryInput := &dynamodb.QueryInput{
+		TableName: aws.String("plannerix-groups"),
+		IndexName: aws.String("ownerIndex"),
+		KeyConditions: map[string]*dynamodb.Condition{
+			"owner": {
+				ComparisonOperator: aws.String("EQ"),
+				AttributeValueList: []*dynamodb.AttributeValue{{S: aws.String(owner)}},
+			},
+		},
+	}
+
+	res, err := conn.Query(queryInput)
+	log.Println(err)
+	if err != nil {
+		return nil, err
+	}
+	// log.Println(res, "test")
+
+	groups := []Group{}
+	err = dynamodbattribute.UnmarshalListOfMaps(res.Items, &groups)
+
+	if err != nil {
+		log.Println("line 99 error with unmarshal")
+		return nil, errors.UnmarshalListOfMapsError
+	}
+
+	return groups, nil
+}
+
+func GetMyGroups(user string, conn *dynamodb.DynamoDB) ([]Group, error) {
+
+	filt := expression.Name("owner").NotEqual(expression.Value(user))
+
+	proj := expression.NamesList(expression.Name("group_id"), expression.Name("owner"), expression.Name("group_name"), expression.Name("members"))
 
 	expr, err := expression.NewBuilder().WithFilter(filt).WithProjection(proj).Build()
 
 	if err != nil {
 		log.Println("line 78 couldn't build expression")
-		return Group{}, errors.ExpressionBuilderError
+		return nil, errors.ExpressionBuilderError
 	}
 
 	getItemScanInput := &dynamodb.ScanInput{
-		TableName:                 aws.String("s-org-groups"),
+		TableName:                 aws.String("plannerix-groups"),
 		ExpressionAttributeNames:  expr.Names(),
 		ExpressionAttributeValues: expr.Values(),
 		FilterExpression:          expr.Filter(),
@@ -98,20 +165,26 @@ func getGroup(groupID string, owner string, conn *dynamodb.DynamoDB) (Group, err
 	output, err := conn.Scan(getItemScanInput)
 	if err != nil {
 		log.Println("line 92 error with output")
-		return Group{}, errors.OutputError
+		return nil, errors.OutputError
 	}
+	// log.Println(output)
 
-	if *output.Count <= int64(0) {
-		return Group{}, nil
-	}
-
-	group := []Group{}
-	err = dynamodbattribute.UnmarshalListOfMaps(output.Items, &group)
+	allGroups := []Group{}
+	err = dynamodbattribute.UnmarshalListOfMaps(output.Items, &allGroups)
 	if err != nil {
 		log.Println("line 99 error with unmarshal")
-		return Group{}, errors.UnmarshalListOfMapsError
+		log.Println(err)
+		return nil, errors.UnmarshalListOfMapsError
 	}
-	return group[0], nil
+	groups := []Group{}
+	for _, g := range allGroups {
+		if contains(g.Members, user) {
+			groups = append(groups, g)
+		}
+	}
+
+	return groups, nil
+
 }
 
 func AddMember(groupID string, owner string, member string, conn *dynamodb.DynamoDB) error {
@@ -136,7 +209,7 @@ func AddMember(groupID string, owner string, member string, conn *dynamodb.Dynam
 		return errors.MarshalMapError
 	}
 	updateItemInput := &dynamodb.UpdateItemInput{
-		TableName: aws.String("s-org-groups"),
+		TableName: aws.String("plannerix-groups"),
 		Key: map[string]*dynamodb.AttributeValue{
 			"group_id": {
 				S: aws.String(groupID),
@@ -180,7 +253,7 @@ func DeleteMember(groupID string, owner string, member string, conn *dynamodb.Dy
 	membersMarshal, err := dynamodbattribute.MarshalList(members)
 
 	updateItemInput := &dynamodb.UpdateItemInput{
-		TableName: aws.String("s-org-groups"),
+		TableName: aws.String("plannerix-groups"),
 		Key: map[string]*dynamodb.AttributeValue{
 			"group_id": {
 				S: aws.String(groupID),
@@ -218,7 +291,7 @@ func EditGroupName(groupID string, owner string, groupName string, conn *dynamod
 	}
 
 	updateItemInput := &dynamodb.UpdateItemInput{
-		TableName: aws.String("s-org-groups"),
+		TableName: aws.String("plannerix-groups"),
 		Key: map[string]*dynamodb.AttributeValue{
 			"group_id": {
 				S: aws.String(groupID),
@@ -245,12 +318,76 @@ func EditGroupName(groupID string, owner string, groupName string, conn *dynamod
 	return nil
 }
 
+func CreateTable(conn *dynamodb.DynamoDB) error {
+	params := &dynamodb.CreateTableInput{
+		TableName: aws.String("plannerix-events"),
+		GlobalSecondaryIndexes: []*dynamodb.GlobalSecondaryIndex{
+			&dynamodb.GlobalSecondaryIndex{
+				IndexName: aws.String("queryIndex"),
+				KeySchema: []*dynamodb.KeySchemaElement{
+					&dynamodb.KeySchemaElement{
+						AttributeName: aws.String("id"),
+						KeyType:       aws.String("HASH"),
+					},
+					&dynamodb.KeySchemaElement{
+						AttributeName: aws.String("event_id"),
+						KeyType:       aws.String("RANGE"),
+					},
+				},
+				Projection: &dynamodb.Projection{
+					ProjectionType: aws.String("ALL"),
+				},
+				ProvisionedThroughput: &dynamodb.ProvisionedThroughput{
+					ReadCapacityUnits:  aws.Int64(1),
+					WriteCapacityUnits: aws.Int64(1),
+				},
+			},
+		},
+		KeySchema: []*dynamodb.KeySchemaElement{
+			{AttributeName: aws.String("event_id"), KeyType: aws.String("HASH")},
+			{AttributeName: aws.String("id"), KeyType: aws.String("RANGE")},
+		},
+		AttributeDefinitions: []*dynamodb.AttributeDefinition{
+			{AttributeName: aws.String("event_id"), AttributeType: aws.String("S")},
+			{AttributeName: aws.String("id"), AttributeType: aws.String("S")},
+		},
+		ProvisionedThroughput: &dynamodb.ProvisionedThroughput{
+			ReadCapacityUnits:  aws.Int64(3),
+			WriteCapacityUnits: aws.Int64(3),
+		},
+	}
+
+	// create the table
+	resp, err := conn.CreateTable(params)
+	if err != nil {
+		fmt.Println(err.Error())
+		return err
+	}
+
+	// print the response data
+	fmt.Println(resp)
+	return nil
+}
+
+func CheckGroupUser(user string, groupID string, conn *dynamodb.DynamoDB) (bool, error) {
+	g, err := getGroup(groupID, user, conn)
+	if err != nil {
+		return false, err
+	}
+	if g.ID != "" {
+		return true, nil
+	}
+
+	return false, nil
+
+}
+
 func generateGroupID() string {
 	h := fnv.New64a()
 	t := time.Now().String()
 	h.Write([]byte(t))
 	// h.Write([]byte(username))
-	h.Write([]byte("kowalski group analysis"))
+	h.Write([]byte("kowalski group anal"))
 	hash := hex.EncodeToString(h.Sum(nil))
 	return hash
 }
