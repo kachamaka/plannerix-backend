@@ -141,6 +141,21 @@ func GetWeeklyEvents(id string, conn *dynamodb.DynamoDB) ([]Event, error) {
 		return nil, errors.UnmarshalListOfMapsError
 	}
 
+	subjects, err := schedule.GetSubejctsFromDB(id, conn)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for i := 0; i < len(weeklyEvents); i++ {
+		for _, s := range subjects {
+			if weeklyEvents[i].SubjectID == s.ID {
+				weeklyEvents[i].Subject = s.Name
+				break
+			}
+		}
+	}
+
 	return weeklyEvents, nil
 }
 
