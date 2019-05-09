@@ -109,7 +109,7 @@ func GetWeeklyEvents(id string, conn *dynamodb.DynamoDB) ([]Event, error) {
 		And(expression.Name("eventTime").LessThan(expression.Value(nowAfterTwoWeeksTime.Unix()))).
 		And(expression.Name("id").Equal(expression.Value(id)))
 
-	proj := expression.NamesList(expression.Name("eventTime"), expression.Name("subject"), expression.Name("subjectType"), expression.Name("description"))
+	proj := expression.NamesList(expression.Name("event_id"), expression.Name("id"), expression.Name("eventTime"), expression.Name("subject_id"), expression.Name("subjectType"), expression.Name("description"))
 
 	expr, err := expression.NewBuilder().WithFilter(filt).WithProjection(proj).Build()
 
@@ -128,6 +128,7 @@ func GetWeeklyEvents(id string, conn *dynamodb.DynamoDB) ([]Event, error) {
 
 	output, err := conn.Scan(getItemScanInput)
 	if err != nil {
+		log.Println(err)
 		log.Println("line 92 error with output")
 		return nil, errors.OutputError
 	}
