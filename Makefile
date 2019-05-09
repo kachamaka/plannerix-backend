@@ -44,6 +44,7 @@ build:
 	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/notificationPusher ./handlers/notificationPusher
 	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/scheduler ./handlers/scheduler
 	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/updateSubscription ./handlers/updateSubscription
+	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/wellcomeNotification ./handlers/wellcomeNotification
 
 
 
