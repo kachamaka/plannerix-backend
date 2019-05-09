@@ -315,6 +315,12 @@ functions:
           method: post
           cors: true
           
+  scheduler:
+    handler: bin/scheduler
+    events: 
+      - schedule: rate(5 minutes)
+  nitficationPusher:
+    handler: bin/notificationsPusher
 
 resources:
   - ${file(resources/dynamodb.yml)}
