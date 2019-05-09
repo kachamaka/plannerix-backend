@@ -136,6 +136,7 @@ func (s *Schedule) GetSchedule() error {
 	if err != nil {
 		return err
 	}
+	log.Println(out, "out")
 	sch := []QueryOut{}
 	err = dynamodbattribute.UnmarshalListOfMaps(out.Items, &sch)
 	if err != nil {

@@ -28,7 +28,7 @@ type Event struct {
 
 func CreateEvent(id string, subject string, subjectType int, description string, timestamp int64, conn *dynamodb.DynamoDB) error {
 	eventID := generateEventID()
-	j := fmt.Sprintf(`{"event_id": "%v", "id": "%v","eventTime": %v, "subject":"%v", "subjectType":%v, "description":"%v"}`, eventID, id, timestamp, subject, subjectType, description)
+	j := fmt.Sprintf(`{"event_id": "%v", "id": "%v","eventTime": %v, "subject_id":"%v", "subjectType":%v, "description":"%v"}`, eventID, id, timestamp, subject, subjectType, description)
 	body, err := database.MarshalJSONToDynamoMap(j)
 	if err != nil {
 		log.Println("line 27 error with marshal json to map")

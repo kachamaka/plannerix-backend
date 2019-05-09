@@ -331,6 +331,7 @@ func GetProfile(username string, conn *dynamodb.DynamoDB) (Profile, error) {
 
 	output, err := conn.Scan(getItemScanInput)
 	if err != nil {
+		log.Println(err)
 		log.Println("line 92 error with output")
 		return Profile{}, errors.OutputError
 	}

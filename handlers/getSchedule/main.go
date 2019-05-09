@@ -48,7 +48,7 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	p := profile.Payload{}
 	jwe.ParseEncryptedToken(body.Token, key, &p)
 	database.SetConn(&conn)
-	// log.Println(p.Username, "username")
+	log.Println(p.Username, "username")
 	sch := schedule.Schedule{
 		UserID: p.ID,
 		Conn:   conn,
