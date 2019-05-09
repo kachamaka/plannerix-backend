@@ -49,7 +49,7 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	jwe.ParseEncryptedToken(body.Token, key, &p)
 	log.Println(p.Username, "username")
 
-	e, err := events.GetAllEvents(p.ID, conn)
+	e, err := events.GetAllEvents(p.ID, "", conn)
 	log.Println(e, "all events")
 	// log.Println(time.Unix(e[0].Timestamp, 0))
 	// return qs.Response{}, nil

@@ -49,7 +49,7 @@ func CreateEvent(id string, subject string, subjectType int, description string,
 	return nil
 }
 
-func GetAllEvents(id string, conn *dynamodb.DynamoDB) ([]Event, error) {
+func GetAllEvents(id string, owner string, conn *dynamodb.DynamoDB) ([]Event, error) {
 	queryInput := &dynamodb.QueryInput{
 		TableName: aws.String("plannerix-events"),
 		IndexName: aws.String("queryIndex"),
@@ -76,7 +76,13 @@ func GetAllEvents(id string, conn *dynamodb.DynamoDB) ([]Event, error) {
 		return nil, errors.UnmarshalListOfMapsError
 	}
 
-	subjects, err := schedule.GetSubejctsFromDB(id, conn)
+	subID := ""
+	if owner == "" {
+		subID = id
+	} else {
+		subID = owner
+	}
+	subjects, err := schedule.GetSubejctsFromDB(subID, conn)
 
 	if err != nil {
 		return nil, err
@@ -89,6 +95,7 @@ func GetAllEvents(id string, conn *dynamodb.DynamoDB) ([]Event, error) {
 				break
 			}
 		}
+		log.Println(events[i].Subject)
 	}
 
 	return events, nil

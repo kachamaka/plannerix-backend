@@ -97,6 +97,7 @@ func NewUnverifiedProfile(un, email, password, id string, conn *dynamodb.DynamoD
 	}
 	_, err = conn.PutItem(input)
 	if err != nil {
+		log.Println(err)
 		log.Println("line 55 error with put item")
 		return "", err
 	}

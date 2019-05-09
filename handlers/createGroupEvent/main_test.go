@@ -25,7 +25,7 @@ func TestHandler(t *testing.T) {
 	body := map[string]interface{}{
 		"token":       "eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkExMjhHQ00ifQ.u7R_7ydn3q7enXx3_Rw3SniDWa9TPF2_gJd3RY1X-yfLoL4K4rNgMtHigpehIjCDEttAHb5cSb6Kf8v3PAGIGR1bLX7lK2e24-gE56SRDF_wmhQb9qZlRdxKmY8XLRVEBMQLy4J5qWAot5hMVemy0V4hIOx10mR5m5Qgm8ILl5EzvlHAYaMNqJ90zO2zShPdDrLFYMU35G6vB_9DCkDUVVQsl5ZZZ60T1WMelQSTq_Y1XZnHnk65UwcGx5r-b2oCZvWPUmlGxTGDvRcLBLmKBWNFFImuDnsMHxKgsA_GX0zBhBlWDOZG9jC_8XF8wuXHwO61Wr6Jdyvu33dhQnLV-Q.1hm5eh7FEZwEPeM7.z9OaL5ktGpOhzPxkOFmO_PijokIIknVE7kyKcJH3nMKiSWBaYIO8XlpcdpgYeUbKkVs.PcZr3XJk31yfyAyr_gj0uA",
 		"group_id":    "bfdcc08eab2351be",
-		"subject":     "DIO group event",
+		"subject_id":  "b0ceb207dd42bf04",
 		"description": "MUDAAA",
 		"subjectType": 0,
 		"timestamp":   now,
