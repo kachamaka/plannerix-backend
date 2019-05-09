@@ -279,6 +279,75 @@ func DeleteMember(groupID string, owner string, member string, conn *dynamodb.Dy
 	return nil
 }
 
+func LeaveGroup(groupID string, user string, conn *dynamodb.DynamoDB) error {
+	queryInput := &dynamodb.QueryInput{
+		TableName: aws.String("plannerix-groups"),
+		// IndexName: aws.String("ownerIndex"),
+		KeyConditions: map[string]*dynamodb.Condition{
+			"group_id": {
+				ComparisonOperator: aws.String("EQ"),
+				AttributeValueList: []*dynamodb.AttributeValue{{S: aws.String(groupID)}},
+			},
+		},
+	}
+
+	res, err := conn.Query(queryInput)
+	log.Println(res)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	// log.Println(res, "test")
+
+	groups := []Group{}
+	err = dynamodbattribute.UnmarshalListOfMaps(res.Items, &groups)
+
+	if err != nil {
+		log.Println("line 99 error with unmarshal")
+		log.Println(err)
+		return errors.UnmarshalListOfMapsError
+	}
+	if len(groups) == 0 {
+		return errors.DoesNotExist("Group")
+	}
+	group := groups[0]
+	newMembers := []string{}
+	for _, member := range group.Members {
+		if member != user {
+			newMembers = append(newMembers, member)
+		}
+	}
+
+	newMembersMarshal, err := dynamodbattribute.MarshalList(newMembers)
+
+	updateItemInput := &dynamodb.UpdateItemInput{
+		TableName: aws.String("plannerix-groups"),
+		Key: map[string]*dynamodb.AttributeValue{
+			"group_id": {
+				S: aws.String(groupID),
+			},
+			"owner": {
+				S: aws.String(group.Owner),
+			},
+		},
+		UpdateExpression: aws.String("set members = :members"),
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":members": {
+				L: newMembersMarshal,
+			},
+		},
+		ReturnValues: aws.String(dynamodb.ReturnValueUpdatedNew),
+	}
+
+	_, err = conn.UpdateItem(updateItemInput)
+	if err != nil {
+		log.Println("line 148 err with update item", err)
+		return errors.UpdateItemError
+	}
+
+	return nil
+}
+
 func EditGroupName(groupID string, owner string, groupName string, conn *dynamodb.DynamoDB) error {
 
 	group, err := getGroup(groupID, owner, conn)
