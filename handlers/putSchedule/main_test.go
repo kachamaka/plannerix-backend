@@ -14,8 +14,8 @@ func TestHandler(t *testing.T) {
 	sch := map[string]schedule.DailySchedule{
 		"monday": schedule.DailySchedule{
 			Lessons: []schedule.Lesson{
-				{Start: 123, Duration: 40, SubjectID: "ac09f0807e65a421"},
-				{Start: 165, Duration: 30, SubjectID: "ac09f0807e65a421"},
+				{Start: 123, Duration: 40, SubjectID: "840708ace8f3688c"},
+				{Start: 165, Duration: 30, SubjectID: "b0ceb207dd42bf04"},
 			},
 		},
 		"tuesday": schedule.DailySchedule{
@@ -24,7 +24,7 @@ func TestHandler(t *testing.T) {
 	}
 
 	body := map[string]interface{}{
-		"token":    "eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkExMjhHQ00ifQ.zUHwj9uLzUay5Sh9FWz7pWTQNp3iTk1viodV8wcS3ifMCYraBOzaRSQL69g4FlNDNT_WgdLFr5WqfQSqaVc5MCnsawmo3d-afBuoXFG8Xqzezw7RQsQ7fmNgY0tbAnnB5I_5auvFuGj44X1Y8Wlb_Qazq1_G7gqA-ry06foX-yg6x5zKHELTAPgTQp7QOSFYbO5291LFwqFQ0H1ztYUDsK9SX7LhmF4V_Qv0AFgqhK4b3EHuY5aC_1qyVajC3lDfHj5TBf3h_L8LQSXLBFmC2qtAO3vr1a93IohungVyI7uHdsXs0eznJp5YscO36ozFuYK-1GHa7QObN1gh3n09yQ.is03er0lOgddJslO.SMIKfmnpuvL5uFHyYvJFY3IVNz-CpdZBVqzje0-0UFrr3rws-BIdkyv2QOzC8muKKM4.jvijUgDvToZmAESUw89IwQ",
+		"token":    "eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkExMjhHQ00ifQ.BUZinbUicab6r3OKkNB_PQk1gQIgQVFQihfh7TO8mtk1065qwIOnoVSniADgG3GUmzORZDM4-UIVOBafzyw347kVQmOJf-QLp47FWgswgsB_Ff_bzdnBRRDI05O7RnIfYRxvfb6HTloC4eVIreH8hptO0OoLcN36rH9IQ3qQ_Y38bAZzkQi9s9565YXy4PVSa-YJ2IKtnRx6rS3ckUj0AfUL7R3MnJAE8JspdgPdRXRX6m6FLPXBBgjTwEbF8SN0euj9FfPdRHgcwruFqImiXWmLoq3dxyjoinkJjFuBIZ9CODdg6VueOGHMVD5FIM0X-8v0w6V-7RF1cc_Fi9zYYQ.835ajiy_4LVNTZVf.FMtyTWSiTueQYi1wziX-MDSS4gVORFgU71az8DxYKvMVI5uPf80QKOkbhlFDZxY9.NhlCqeUssZmwT1DkfSuDMQ",
 		"schedule": sch,
 	}
 
