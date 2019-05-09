@@ -25,6 +25,7 @@ build:
 
 	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/getSchedule ./handlers/getSchedule
 	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/putSchedule ./handlers/putSchedule
+	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/getDailySchedule ./handlers/getDailySchedule
 
 	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/getSubjects ./handlers/getSubjects
 	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/updateSubjects ./handlers/updateSubjects
