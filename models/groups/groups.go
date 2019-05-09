@@ -111,6 +111,42 @@ func getGroup(groupID string, owner string, conn *dynamodb.DynamoDB) (Group, err
 
 }
 
+func GetGroupOwner(groupID string, conn *dynamodb.DynamoDB) (string, error) {
+	queryInput := &dynamodb.QueryInput{
+		TableName: aws.String("plannerix-groups"),
+		// IndexName: aws.String("ownerIndex"),
+		KeyConditions: map[string]*dynamodb.Condition{
+			"group_id": {
+				ComparisonOperator: aws.String("EQ"),
+				AttributeValueList: []*dynamodb.AttributeValue{{S: aws.String(groupID)}},
+			},
+		},
+	}
+
+	res, err := conn.Query(queryInput)
+	// log.Println(res)
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+	// log.Println(res, "test")
+
+	groups := []Group{}
+	err = dynamodbattribute.UnmarshalListOfMaps(res.Items, &groups)
+
+	if err != nil {
+		log.Println("line 99 error with unmarshal")
+		log.Println(err)
+		return "", errors.UnmarshalListOfMapsError
+	}
+	if len(groups) == 0 {
+		return "", nil
+	}
+
+	return groups[0].Owner, nil
+
+}
+
 func GetOwnedGroups(owner string, conn *dynamodb.DynamoDB) ([]Group, error) {
 	queryInput := &dynamodb.QueryInput{
 		TableName: aws.String("plannerix-groups"),
