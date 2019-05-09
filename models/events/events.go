@@ -11,6 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/database"
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/errors"
+	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/schedule"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -20,6 +21,7 @@ import (
 type Event struct {
 	EventID     string `json:"event_id"`
 	ID          string `json:"id"`
+	Subject     string `json:"subject"`
 	SubjectID   string `json:"subject_id"`
 	Type        int    `json:"subjectType"`
 	Description string `json:"description"`
@@ -72,6 +74,21 @@ func GetAllEvents(id string, conn *dynamodb.DynamoDB) ([]Event, error) {
 	if err != nil {
 		log.Println("line 99 error with unmarshal")
 		return nil, errors.UnmarshalListOfMapsError
+	}
+
+	subjects, err := schedule.GetSubejctsFromDB(id, conn)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for i := 0; i < len(events); i++ {
+		for _, s := range subjects {
+			if events[i].SubjectID == s.ID {
+				events[i].Subject = s.Name
+				break
+			}
+		}
 	}
 
 	return events, nil
