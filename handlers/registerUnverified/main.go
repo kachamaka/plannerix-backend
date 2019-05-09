@@ -129,7 +129,7 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 		log.Println("Error with hashing password:", err)
 		return qs.NewError(errors.ErrorWith("hashing password").Error(), 107)
 	}
-	// log.Println("hash", string(hashed))
+	log.Println("hash", string(hashed))
 	// return qs.Response{}, nil
 	database.SetConn(&conn)
 	id := createID(body.Username)
