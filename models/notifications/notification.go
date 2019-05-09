@@ -9,10 +9,16 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	lclient "github.com/aws/aws-sdk-go/service/lambda"
 )
 
 //RANGE is also the rate of the cheduler function
 const RANGE = 5
+
+func InvokeNotificationFunction(client *lclient.Lambda, payload []byte) (*lclient.InvokeOutput, error) {
+	response, err := client.Invoke(&lclient.InvokeInput{FunctionName: aws.String("plannerix-dev-notificationPusher"), Payload: payload})
+	return response, err
+}
 
 func UpdateSubscriptionOfUser(p profile.Payload, subscription string, conn *dynamodb.DynamoDB) error {
 	updateInput := dynamodb.UpdateItemInput{
@@ -148,4 +154,5 @@ type FirstLessonNotificationItem struct {
 type NotificationPayload struct {
 	UserID string `json:"user_id"`
 	Type   int    `json:"type"`
+	Msg    string `json:"message"`
 }

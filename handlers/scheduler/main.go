@@ -39,16 +39,21 @@ func handler(ctx context.Context) {
 }
 
 func InvokeLambda(firstLesson notifications.FirstLessonNotificationItem, client *lclient.Lambda) {
-	payload, err := json.Marshal(firstLesson)
+	p := notifications.NotificationPayload{
+		UserID: firstLesson.UserID,
+		Type:   1,
+	}
+	payload, err := json.Marshal(p)
 	if err != nil {
 		fmt.Println("Error marshalling firstLesson request", err)
 		return
 	}
-	_, err = client.Invoke(&lclient.InvokeInput{FunctionName: aws.String("plannerix-dev-notificationPusher"), Payload: payload})
+	_, err = notifications.InvokeNotificationFunction(client, payload)
 	if err != nil {
-		fmt.Println("Error calling Notification", err)
+		fmt.Println("Error marshalling firstLesson request", err)
 		return
 	}
+
 }
 
 func main() {

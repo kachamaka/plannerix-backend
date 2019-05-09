@@ -328,6 +328,13 @@ functions:
           path: updateSubscription
           method: post
           cors: true
+  wellcomeNotification:
+    handler: bin/wellcomeNotification
+    events:
+      - http:
+          path: wellcomeNotification
+          method: post
+          cors: true
   
 
 resources:
