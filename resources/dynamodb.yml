@@ -153,3 +153,32 @@ Resources:
           ProvisionedThroughput:
             ReadCapacityUnits: ${self:custom.tableThroughput}
             WriteCapacityUnits: ${self:custom.tableThroughput}
+  FirstLessonNotifications:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: plannerix-first-lesson-notifications
+      AttributeDefinitions:
+        - AttributeName: time
+          AttributeType: N
+        - AttributeName: user_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: time
+          KeyType: HASH
+        - AttributeName: user_id
+          KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: ${self:custom.tableThroughput}
+        WriteCapacityUnits: ${self:custom.tableThroughput}
+      GlobalSecondaryIndexes:
+        - IndexName : userIDIndex
+          KeySchema :
+            - AttributeName: user_id
+              KeyType: HASH
+            - AttributeName: time
+              KeyType: RANGE
+          Projection : 
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: ${self:custom.tableThroughput}
+            WriteCapacityUnits: ${self:custom.tableThroughput}
