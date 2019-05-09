@@ -23,8 +23,8 @@ func TestHandler(t *testing.T) {
 	// log.Println(time.Unix(now/1000000000, 0).Date())
 	// return
 	body := map[string]interface{}{
-		"token":       "eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkExMjhHQ00ifQ.uZtq_fw8XDfuelKXsIPhOb0k3x0Mfyyi9fH6hx_-jQpyjcdRIyfdWR8X_kHf9SCpNeU9uX57IPLoW0ufBmfl-Nw_pnSLHjGsHcrPI8YDDrFk1x3IYP8MLTyOe5h9D0F6Y-uY-EUso29rOlbmczD_4lPV_dsho1EZ4ecdMHcobZSWVtrri8_k5vH3J6-T6QUbnOTBNCS-be2Fs43d2jEfZmH7EFuBrJSaMJ8WJaOstLdNQr3ad3nmOhXs0K-_s6B_LmlYdhRyFk-YXTMLJwYonx_GFzDPZuB8QKQGl_jvrvqv1zUGj78RQSNixd2YljaIZApS6KcHY8PPtuSIzlVB4Q.sf4HKznaKbxOixYC.sp48TkE2ddvaPxUpTjWpY8v0URkT3iNBpu13z3Lxvz8vwzDtPHlEWP69-3PQkq6I.2hd1-dy3NWuIzsYniFK6jw",
-		"group_id":    "3a5fa36f4f5713d5",
+		"token":       "eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkExMjhHQ00ifQ.u7R_7ydn3q7enXx3_Rw3SniDWa9TPF2_gJd3RY1X-yfLoL4K4rNgMtHigpehIjCDEttAHb5cSb6Kf8v3PAGIGR1bLX7lK2e24-gE56SRDF_wmhQb9qZlRdxKmY8XLRVEBMQLy4J5qWAot5hMVemy0V4hIOx10mR5m5Qgm8ILl5EzvlHAYaMNqJ90zO2zShPdDrLFYMU35G6vB_9DCkDUVVQsl5ZZZ60T1WMelQSTq_Y1XZnHnk65UwcGx5r-b2oCZvWPUmlGxTGDvRcLBLmKBWNFFImuDnsMHxKgsA_GX0zBhBlWDOZG9jC_8XF8wuXHwO61Wr6Jdyvu33dhQnLV-Q.1hm5eh7FEZwEPeM7.z9OaL5ktGpOhzPxkOFmO_PijokIIknVE7kyKcJH3nMKiSWBaYIO8XlpcdpgYeUbKkVs.PcZr3XJk31yfyAyr_gj0uA",
+		"group_id":    "bfdcc08eab2351be",
 		"subject":     "DIO group event",
 		"description": "MUDAAA",
 		"subjectType": 0,

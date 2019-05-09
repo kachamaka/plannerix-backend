@@ -26,7 +26,7 @@ var conn *dynamodb.DynamoDB
 type Request struct {
 	Token       string `json:"token"`
 	GroupID     string `json:"group_id"`
-	Subject     string `json:"subject"`
+	SubjectID   string `json:"subject_id"`
 	Type        int    `json:"subjectType"`
 	Description string `json:"description"`
 	Timestamp   int64  `json:"timestamp"`
@@ -76,7 +76,7 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 		return qs.NewResponse(200, res)
 	}
 
-	err = events.CreateEvent(body.GroupID, body.Subject, body.Type, body.Description, body.Timestamp, conn)
+	err = events.CreateEvent(body.GroupID, body.SubjectID, body.Type, body.Description, body.Timestamp, conn)
 
 	switch err {
 	case errors.MarshalJsonToMapError:

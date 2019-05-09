@@ -20,7 +20,7 @@ import (
 type Event struct {
 	EventID     string `json:"event_id"`
 	ID          string `json:"id"`
-	Subject     string `json:"subject"`
+	SubjectID   string `json:"subject_id"`
 	Type        int    `json:"subjectType"`
 	Description string `json:"description"`
 	Timestamp   int64  `json:"eventTime"`
@@ -140,9 +140,9 @@ func EditEvent(event_id string, id string, subject string, subjectType int, desc
 				S: aws.String(id),
 			},
 		},
-		UpdateExpression: aws.String("set subject = :subject, subjectType = :subjectType, description = :description, eventTime = :eventTime"),
+		UpdateExpression: aws.String("set subject_id = :subject_id, subjectType = :subjectType, description = :description, eventTime = :eventTime"),
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
-			":subject": {
+			":subject_id": {
 				S: aws.String(subject),
 			},
 			":subjectType": {
