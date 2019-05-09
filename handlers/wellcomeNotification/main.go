@@ -60,8 +60,9 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	}))
 	client := lclient.New(sess, &aws.Config{Region: aws.String("eu-central-1")})
 	payload := notifications.NotificationPayload{
-		Type: 2,
-		Msg:  "Подобни известия ще ти напомнят за началото на учебния ден",
+		Type:   2,
+		Msg:    "Подобни известия ще ти напомнят за началото на учебния ден",
+		UserID: p.ID,
 	}
 	bytes, err := json.Marshal(payload)
 	if err != nil {

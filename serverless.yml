@@ -196,7 +196,13 @@ functions:
           method: post
           cors: true
 
-          
+  getDailySchedule:
+    handler: bin/getDailySchedule
+    events:
+      - http:
+          path: getDailySchedule
+          method: post
+          cors: true 
   getSchedule:
     handler: bin/getSchedule
     events:

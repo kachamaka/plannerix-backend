@@ -174,6 +174,13 @@ func (s *Schedule) MergeSubjects(subjects []Subject) {
 	}
 }
 
+func (ds *DailySchedule) MergeSubjects(subjects []Subject) {
+	for i := range ds.Lessons {
+		index := searchSubjectsById(ds.Lessons[i].SubjectID, subjects)
+		ds.Lessons[i].Subject = &subjects[index]
+	}
+}
+
 type DailySchedule struct {
 	Lessons []Lesson `json:"allLessons"`
 }
@@ -186,7 +193,7 @@ type Lesson struct {
 }
 
 func GetFirstLessonForDay(userID string, day time.Weekday, conn *dynamodb.DynamoDB) (Lesson, error) {
-	todaysShcedule, err := getTodaysSchedule(userID, day, conn)
+	todaysShcedule, err := GetTodaysSchedule(userID, day, conn)
 	if err != nil {
 		return Lesson{}, err
 	}
@@ -202,7 +209,7 @@ func GetFirstLessonForDay(userID string, day time.Weekday, conn *dynamodb.Dynamo
 	return firstLesson, nil
 }
 
-func getTodaysSchedule(userID string, day time.Weekday, conn *dynamodb.DynamoDB) (DailySchedule, error) {
+func GetTodaysSchedule(userID string, day time.Weekday, conn *dynamodb.DynamoDB) (DailySchedule, error) {
 	getInput := dynamodb.GetItemInput{
 		TableName: aws.String("plannerix-schedule"),
 		Key: map[string]*dynamodb.AttributeValue{
@@ -218,9 +225,10 @@ func getTodaysSchedule(userID string, day time.Weekday, conn *dynamodb.DynamoDB)
 	if err != nil {
 		return DailySchedule{}, err
 	}
-	todaysSchedule := DailySchedule{}
-	err = dynamodbattribute.UnmarshalMap(out.Item, &todaysSchedule)
-	return todaysSchedule, err
+	qOut := QueryOut{}
+	err = dynamodbattribute.UnmarshalMap(out.Item, &qOut)
+
+	return qOut.DailySchedule, err
 }
 
 func getFirstLesson(ds DailySchedule) (Lesson, error) {
