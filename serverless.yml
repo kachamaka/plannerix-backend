@@ -319,8 +319,16 @@ functions:
     handler: bin/scheduler
     events: 
       - schedule: rate(5 minutes)
-  nitficationPusher:
-    handler: bin/notificationsPusher
+  notificationPusher:
+    handler: bin/notificationPusher
+  updateSubscription:
+    handler: bin/updateSubscription
+    events:
+      - http:
+          path: updateSubscription
+          method: post
+          cors: true
+  
 
 resources:
   - ${file(resources/dynamodb.yml)}

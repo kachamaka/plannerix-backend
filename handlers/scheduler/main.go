@@ -44,7 +44,7 @@ func InvokeLambda(firstLesson notifications.FirstLessonNotificationItem, client 
 		fmt.Println("Error marshalling firstLesson request", err)
 		return
 	}
-	_, err = client.Invoke(&lclient.InvokeInput{FunctionName: aws.String("aws-go-dev-world"), Payload: payload})
+	_, err = client.Invoke(&lclient.InvokeInput{FunctionName: aws.String("plannerix-dev-notificationPusher"), Payload: payload})
 	if err != nil {
 		fmt.Println("Error calling Notification", err)
 		return
