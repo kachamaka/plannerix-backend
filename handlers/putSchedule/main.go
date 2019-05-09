@@ -4,6 +4,8 @@ import (
 	"context"
 	"log"
 
+	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/notifications"
+
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/kinghunter58/jwe"
@@ -61,6 +63,20 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	err = sch.InsertItem()
 	if err != nil {
 		return qs.NewError(err.Error(), 8)
+	}
+
+	for _, v := range sch.Schedule {
+		if len(v.Lessons) == 0 {
+			continue
+		}
+		item, err := schedule.CreateFirstLessonItem(v, p.ID)
+		if err != nil {
+			return qs.NewError(err.Error(), 9)
+		}
+		err = notifications.AddUserNotificationItem(item, conn)
+		if err != nil {
+			return qs.NewError(err.Error(), 10)
+		}
 	}
 
 	res := Response{
