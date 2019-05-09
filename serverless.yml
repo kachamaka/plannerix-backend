@@ -320,6 +320,14 @@ functions:
           path: deleteGroupEvent
           method: post
           cors: true
+  leaveGroup:
+    handler: bin/leaveGroup
+    memorySize: 1024
+    events:
+      - http:
+          path: leaveGroup
+          method: post
+          cors: true
           
   scheduler:
     handler: bin/scheduler
