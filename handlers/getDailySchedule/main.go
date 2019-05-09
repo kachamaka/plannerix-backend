@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"time"
 
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/schedule"
 
@@ -46,9 +47,9 @@ func handler(ctx context.Context, req interface{}) (qs.Response, error) {
 	p := profile.Payload{}
 	jwe.ParseEncryptedToken(body.Token, key, &p)
 	database.SetConn(&conn)
-	// location, _ := time.LoadLocation("Europe/Sofia")
-	// currentTime := time.Now().In(location)
-	ds, err := schedule.GetTodaysSchedule(p.ID, 1, conn)
+	location, _ := time.LoadLocation("Europe/Sofia")
+	currentTime := time.Now().In(location)
+	ds, err := schedule.GetTodaysSchedule(p.ID, currentTime.Weekday(), conn)
 	if err != nil {
 		return qs.NewError(err.Error(), 110) //fix
 	}
