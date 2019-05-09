@@ -28,7 +28,7 @@ func TestHandler(t *testing.T) {
 		"description": "Тест",
 		"subjectType": 0,
 		// "timestamp":   1557735600,
-		"timestamp": 1558310400,
+		"timestamp": 1557792000,
 	}
 	req, err := lambdat.ReadBody(body)
 	if err != nil {

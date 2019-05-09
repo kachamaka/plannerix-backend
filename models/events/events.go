@@ -85,11 +85,14 @@ func GetWeeklyEvents(id string, conn *dynamodb.DynamoDB) ([]Event, error) {
 	// nowAfterTwoWeeks := time.Now().AddDate(0, 0, 7).Unix()
 	nowAfterTwoWeeksTime := time.Date(now.Year(), now.Month(), now.Day()+7, 23, 59, 59, 0, location)
 
-	filt := expression.Name("timestamp").GreaterThanEqual(expression.Value(nowTime.Unix())).
-		And(expression.Name("timestamp").LessThan(expression.Value(nowAfterTwoWeeksTime.Unix()))).
+	log.Println(id)
+	log.Println(nowTime.Unix())
+	log.Println(nowAfterTwoWeeksTime.Unix())
+	filt := expression.Name("eventTime").GreaterThanEqual(expression.Value(nowTime.Unix())).
+		And(expression.Name("eventTime").LessThan(expression.Value(nowAfterTwoWeeksTime.Unix()))).
 		And(expression.Name("id").Equal(expression.Value(id)))
 
-	proj := expression.NamesList(expression.Name("timestamp"), expression.Name("subject"), expression.Name("subjectType"), expression.Name("description"))
+	proj := expression.NamesList(expression.Name("eventTime"), expression.Name("subject"), expression.Name("subjectType"), expression.Name("description"))
 
 	expr, err := expression.NewBuilder().WithFilter(filt).WithProjection(proj).Build()
 
@@ -111,6 +114,7 @@ func GetWeeklyEvents(id string, conn *dynamodb.DynamoDB) ([]Event, error) {
 		log.Println("line 92 error with output")
 		return nil, errors.OutputError
 	}
+	log.Println(output)
 
 	weeklyEvents := []Event{}
 	err = dynamodbattribute.UnmarshalListOfMaps(output.Items, &weeklyEvents)
