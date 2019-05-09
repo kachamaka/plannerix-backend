@@ -127,6 +127,9 @@ func GetWeeklyEvents(id string, conn *dynamodb.DynamoDB) ([]Event, error) {
 }
 
 func EditEvent(event_id string, id string, subject string, subjectType int, description string, timestamp int64, conn *dynamodb.DynamoDB) error {
+	if description == "" {
+		description = " "
+	}
 	updateItemInput := &dynamodb.UpdateItemInput{
 		TableName: aws.String("plannerix-events"),
 		Key: map[string]*dynamodb.AttributeValue{
