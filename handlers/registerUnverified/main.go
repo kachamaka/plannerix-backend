@@ -89,12 +89,12 @@ func sendVerificationKeyEmail(email string, verificationKey string) error {
 	// Create an instance of the Mailgun Client
 
 	from := mail.NewEmail("Plannerix Support", "support@plannerix.eu")
-	subject := "Plannerix Account Activation"
+	subject := "Plannerix - Активация на акаунт"
 	to := mail.NewEmail("", email)
 	plainTextContent := "Hello world"
+	// htmlContent := "<strong>You can verify your Plannerix account by clicking the following link: https://plannerix.eu/link?verificationKey=" + verificationKey + "</strong>"
 	// htmlContent := "<strong>You can verify your Plannerix account by clicking the following link: https://plannerix.eu/</strong>"
-	// htmlContent := "<strong>You can verify your Plannerix account by clicking the following link: https://plannerix.eu/</strong>"
-	htmlContent := "Hello from Sendgrid Go!<br>" + "You can verify your Plannerix account " + "<a href='https://plannerix.eu/link?verificationKey=" + verificationKey + "'>here.</a>"
+	htmlContent := "Можете да потвърдите своя Plannerix акаунт " + "<a href='https://plannerix.eu/link?verificationKey=" + verificationKey + "'>тук.</a>"
 
 	message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
 	client := sendgrid.NewSendClient("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")
@@ -102,11 +102,10 @@ func sendVerificationKeyEmail(email string, verificationKey string) error {
 	if err != nil {
 		log.Println(err)
 		return err
-	} else {
-		fmt.Println(response.StatusCode)
-		fmt.Println(response.Body)
-		fmt.Println(response.Headers)
 	}
+	fmt.Println(response.StatusCode)
+	fmt.Println(response.Body)
+	fmt.Println(response.Headers)
 
 	return nil
 }
