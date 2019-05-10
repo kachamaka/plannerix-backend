@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"time"
 
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/database"
@@ -75,12 +76,14 @@ func main() {
 }
 
 func sendNotification(bytes []byte, s *webpush.Subscription) error {
-	_, err := webpush.SendNotification(bytes, s, &webpush.Options{
+	res, err := webpush.SendNotification(bytes, s, &webpush.Options{
 		VAPIDPrivateKey: privateKey,
 		VAPIDPublicKey:  publicKey,
 		TTL:             30,
 		Subscriber:      "traqn02@gmail.com",
 	})
+	b, err := ioutil.ReadAll(res.Body)
+	fmt.Println(res.StatusCode, string(b), err)
 	return err
 }
 

@@ -1,15 +1,23 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"testing"
+
+	webpush "github.com/SherClockHolmes/webpush-go"
+	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/profile"
 
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/database"
 
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/notifications"
 
 	lambdat "gitlab.com/zapochvam-ei-sq/plannerix-backend/models/lambda-testing"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	lclient "github.com/aws/aws-sdk-go/service/lambda"
 )
 
 func TestHandler(t *testing.T) {
@@ -39,4 +47,61 @@ func TestGetFisrtLessonOfUser(t *testing.T) {
 		t.Error(err)
 	}
 	fmt.Println(lesson)
+}
+
+func TestNotification(t *testing.T) {
+	id := "ba5ead1c255abc2c"
+	conn := database.GetProductionConn()
+	sub, err := profile.GetSubscription(id, conn)
+	if err != nil {
+		t.Error(err)
+		fmt.Print("  ")
+	}
+	s := &webpush.Subscription{}
+
+	err = json.Unmarshal([]byte(sub), s)
+	if err != nil {
+		t.Error(err)
+	}
+	fmt.Println(s)
+
+	lesson, err := getFirstLessonOfUser(id, conn)
+	if err != nil {
+		t.Error(err)
+	}
+
+	bytes, err := json.Marshal(lesson)
+	if err != nil {
+		t.Error(err)
+	}
+	fmt.Println(string(bytes))
+	//[]byte(`{"lesson": {"start": 845, "duration": 45, "subject":{"name": "math"}}}`
+	err = sendNotification(bytes, s)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestLambdaFunction(t *testing.T) {
+	id := "ba5ead1c255abc2c"
+
+	sess := session.Must(session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+	}))
+	client := lclient.New(sess, &aws.Config{Region: aws.String("eu-central-1")})
+
+	p := notifications.NotificationPayload{
+		UserID: id,
+		Type:   1,
+	}
+
+	payload, err := json.Marshal(p)
+	if err != nil {
+		t.Error(err)
+	}
+
+	_, err = notifications.InvokeNotificationFunction(client, payload)
+	if err != nil {
+		t.Error(err)
+	}
 }

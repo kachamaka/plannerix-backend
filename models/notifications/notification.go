@@ -1,6 +1,7 @@
 package notifications
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 
@@ -16,6 +17,7 @@ import (
 const RANGE = 5
 
 func InvokeNotificationFunction(client *lclient.Lambda, payload []byte) (*lclient.InvokeOutput, error) {
+	fmt.Println("Payload for notification lambda function", string(payload))
 	response, err := client.Invoke(&lclient.InvokeInput{FunctionName: aws.String("plannerix-dev-notificationPusher"), Payload: payload})
 	return response, err
 }
