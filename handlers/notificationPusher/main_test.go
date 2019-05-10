@@ -50,7 +50,7 @@ func TestGetFisrtLessonOfUser(t *testing.T) {
 }
 
 func TestNotification(t *testing.T) {
-	id := "ba5ead1c255abc2c"
+	id := "77a4adf388f60b4f"
 	conn := database.GetProductionConn()
 	sub, err := profile.GetSubscription(id, conn)
 	if err != nil {
@@ -82,8 +82,14 @@ func TestNotification(t *testing.T) {
 	}
 }
 
+func TestSpam(t *testing.T) {
+	for i := 0; i < 10; i++ {
+		TestLambdaFunction(t)
+	}
+}
+
 func TestLambdaFunction(t *testing.T) {
-	id := "ba5ead1c255abc2c"
+	id := "77a4adf388f60b4f"
 
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
