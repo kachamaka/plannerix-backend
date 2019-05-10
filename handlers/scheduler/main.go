@@ -27,6 +27,8 @@ func handler(ctx context.Context) {
 		return
 	}
 
+	fmt.Println("Scheduler gets time", tc.GetTimeInMinutes(), "first lesson notification slice", firstLessonSlice)
+
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 	}))

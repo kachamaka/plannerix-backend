@@ -43,3 +43,12 @@ func SetConn(conn **dynamodb.DynamoDB) {
 		*conn = svc
 	}
 }
+
+func GetProductionConn() *dynamodb.DynamoDB {
+	config := &aws.Config{
+		Region: aws.String("eu-central-1"),
+	}
+	s := session.Must(session.NewSession(config))
+	svc := dynamodb.New(s)
+	return svc
+}

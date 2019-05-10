@@ -1,8 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"testing"
+
+	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/database"
 
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/notifications"
 
@@ -26,4 +29,14 @@ func TestHandler(t *testing.T) {
 		t.Error(err)
 	}
 	t.Log(res)
+}
+
+func TestGetFisrtLessonOfUser(t *testing.T) {
+	svc := database.GetProductionConn()
+
+	lesson, err := getFirstLessonOfUser("77a4adf388f60b4f", svc)
+	if err != nil {
+		t.Error(err)
+	}
+	fmt.Println(lesson)
 }

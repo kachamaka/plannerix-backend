@@ -43,9 +43,7 @@ func handler(ctx context.Context, req notifications.NotificationPayload) {
 	switch req.Type {
 	case 1:
 		// notification for startLesson
-		location, _ := time.LoadLocation("Europe/Sofia")
-		currentTime := time.Now().In(location)
-		lesson, err := schedule.GetFirstLessonForDay(id, currentTime.Weekday(), conn)
+		lesson, err := getFirstLessonOfUser(id, conn)
 		if err != nil {
 			fmt.Println("UserID", id, "Error:", err)
 			return
@@ -84,4 +82,11 @@ func sendNotification(bytes []byte, s *webpush.Subscription) error {
 		Subscriber:      "traqn02@gmail.com",
 	})
 	return err
+}
+
+func getFirstLessonOfUser(id string, conn *dynamodb.DynamoDB) (schedule.Lesson, error) {
+	location, _ := time.LoadLocation("Europe/Sofia")
+	currentTime := time.Now().In(location)
+	lesson, err := schedule.GetFirstLessonForDay(id, currentTime.Weekday(), conn)
+	return lesson, err
 }
