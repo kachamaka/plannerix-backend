@@ -1,8 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"testing"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	lclient "github.com/aws/aws-sdk-go/service/lambda"
+	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/database"
 
 	"gitlab.com/zapochvam-ei-sq/plannerix-backend/models/notifications"
 
@@ -25,4 +31,24 @@ func TestHandler(t *testing.T) {
 		t.Error(err)
 	}
 	t.Log(res)
+}
+
+func TestGetUsersInRange(t *testing.T) {
+	conn := database.GetProductionConn()
+	tc := notifications.NewTimeConverter()
+	firstLessonSlice, err := notifications.GetUsersInRange(tc.GetTimeInMinutes(), conn)
+	if err != nil {
+		t.Error(err)
+	}
+	fmt.Println(firstLessonSlice)
+
+	sess := session.Must(session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+	}))
+	client := lclient.New(sess, &aws.Config{Region: aws.String("eu-central-1")})
+
+	for _, fl := range firstLessonSlice {
+		fmt.Println(fl)
+		go InvokeLambda(fl, client)
+	}
 }

@@ -34,3 +34,8 @@ func (tc TimeConverter) getCurrentMinutesInDay() int {
 	minutes := tc.currentTime.Minute()
 	return hours*minutesInAnHour + minutes
 }
+
+func (tc TimeConverter) AddDatToMinutes(minutes int) int {
+	day := tc.getCurrentDay()
+	return (day-1)*minutesInADay + minutes
+}

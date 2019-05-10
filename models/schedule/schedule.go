@@ -243,8 +243,11 @@ func CreateFirstLessonItem(ds DailySchedule, userId string) (notifications.First
 	if err != nil {
 		return notifications.FirstLessonNotificationItem{}, err
 	}
+
+	tc := notifications.NewTimeConverter()
+
 	return notifications.FirstLessonNotificationItem{
-		Minutes: fl.Start - timeBeforeFirstLesson,
+		Minutes: tc.AddDatToMinutes(fl.Start - timeBeforeFirstLesson),
 		UserID:  userId,
 	}, nil
 }
